@@ -4,6 +4,7 @@
   , "CXX": ["c++"]
   , "CFLAGS": []
   , "CXXFLAGS": []
+  , "LDFLAGS": []
   , "AR": ["ar"]
   , "PATH": ["/bin", "/usr/bin"]
   }

@@ -82,6 +82,21 @@
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
   }
+, "default-LDFLAGS":
+  { "vars": ["defaults-transition"]
+  , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["fieldname", "defaults"]
+      , ["provider", "LDFLAGS"]
+      , [ "transition"
+        , {"type": "var", "name": "defaults-transition", "default": null}
+        ]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+    }
+  }
 , "default-ENV":
   { "vars": ["defaults-transition"]
   , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
@@ -667,8 +682,10 @@
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
+    , "LDFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
     , "ENV"
     , "name"
     , "pure C"
@@ -686,6 +703,7 @@
     , "flags": "flags"
     , "objects": "objects"
     , "default-ENV": "default-ENV"
+    , "default-LDFLAGS": "default-LDFLAGS"
     }
   , "expression":
     { "type": "let*"
@@ -696,6 +714,18 @@
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "flags"}
             , {"type": "var", "name": "compile-args"}
+            ]
+          }
+        ]
+      , [ "LDFLAGS"
+        , { "type": "++"
+          , "$1":
+            [ { "type": "var"
+              , "name": "LDFLAGS"
+              , "default":
+                {"type": "CALL_EXPRESSION", "name": "default-LDFLAGS"}
+              }
+            , {"type": "var", "name": "ADD_LDFLAGS", "default": []}
             ]
           }
         ]
@@ -759,6 +789,7 @@
                 , {"type": "var", "name": "binpath"}
                 ]
               , {"type": "var", "name": "COMPILE_FLAGS"}
+              , {"type": "var", "name": "LDFLAGS"}
               , {"type": "var", "name": "link-args"}
               ]
             }
@@ -776,8 +807,10 @@
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
+    , "LDFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
     , "ENV"
     , "name"
     , "pure C"

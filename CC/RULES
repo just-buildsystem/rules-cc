@@ -12,8 +12,10 @@
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
+    , "LDFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
     , "AR"
     , "PATH"
     ]
@@ -25,6 +27,7 @@
       , ["CXX", {"type": "FIELD", "name": "CXX"}]
       , ["CFLAGS", {"type": "FIELD", "name": "CFLAGS"}]
       , ["CXXFLAGS", {"type": "FIELD", "name": "CXXFLAGS"}]
+      , ["LDFLAGS", {"type": "FIELD", "name": "LDFLAGS"}]
       , ["AR", {"type": "FIELD", "name": "AR"}]
       , ["PATH", {"type": "FIELD", "name": "PATH"}]
       , ["provider", "CC"]
@@ -99,12 +102,20 @@
             ]
           }
         ]
+      , [ "LDFLAGS"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "LDFLAGS"}
+            , {"type": "FIELD", "name": "ADD_LDFLAGS"}
+            ]
+          }
+        ]
       ]
     , "body":
       { "type": "RESULT"
       , "provides":
         { "type": "env"
-        , "vars": ["CC", "CXX", "CFLAGS", "CXXFLAGS", "AR", "ENV"]
+        , "vars": ["CC", "CXX", "CFLAGS", "CXXFLAGS", "LDFLAGS", "AR", "ENV"]
         }
       }
     }
@@ -336,7 +347,16 @@
     , "private-ldflags"
     ]
   , "config_vars":
-    ["CC", "CXX", "CFLAGS", "CXXFLAGS", "ADD_CFLAGS", "ADD_CXXFLAGS", "ENV"]
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    ]
   , "implicit": {"defaults": ["defaults"]}
   , "field_doc":
     { "name": ["The name of the binary"]
@@ -383,12 +403,20 @@
       [ "The flags for CXX to be used instead of the default ones"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
+    , "LDFLAGS":
+      [ "The linker flags do be used instead of the default ones"
+      , "taken from the [\"CC\", \"defaults\"] target"
+      ]
     , "ADD_CFLAGS":
       [ "The flags to add to the default ones for CC"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
     , "ADD_CXXFLAGS":
       [ "The flags to add to the default ones for CXX"
+      , "taken from the [\"CC\", \"defaults\"] target"
+      ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
     , "ENV": ["The environment for any action generated."]

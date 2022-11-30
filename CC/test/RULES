@@ -18,8 +18,10 @@
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
+    , "LDFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
     , "ENV"
     , "TEST_ENV"
     , "CC_TEST_LAUNCHER"
@@ -65,12 +67,20 @@
       [ "The flags for CXX to be used instead of the default ones"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
+    , "LDFLAGS":
+      [ "The linker flags do be used instead of the default ones"
+      , "taken from the [\"CC\", \"defaults\"] target"
+      ]
     , "ADD_CFLAGS":
       [ "The flags to add to the default ones for CC"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
     , "ADD_CXXFLAGS":
       [ "The flags to add to the default ones for CXX"
+      , "taken from the [\"CC\", \"defaults\"] target"
+      ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
     , "ENV": ["The environment for any action generated."]
