@@ -1,0 +1,91 @@
+{ "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "shared": ["yes"]
+  , "name": ["foo"]
+  , "soversion": ["1", "2", "3"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "stage": ["foo"]
+  }
+, "foo_s":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "stage": ["foo"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "shared": ["yes"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "stage": ["bar"]
+  , "private-deps": ["foo"]
+  }
+, "bar_s":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "stage": ["bar"]
+  , "private-deps": ["foo"]
+  }
+, "baz":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["baz"]
+  , "shared": ["yes"]
+  , "hdrs": ["baz.hpp"]
+  , "srcs": ["baz.cpp"]
+  , "stage": ["baz"]
+  , "private-deps": ["foo_s"]
+  }
+, "main_uses_foo":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main_uses_foo"]
+  , "srcs": ["main_uses_foo.cpp"]
+  , "private-deps": ["foo"]
+  }
+, "test_uses_foo":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_foo"]
+  , "srcs": ["test_uses_foo.cpp"]
+  , "private-deps": ["foo"]
+  }
+, "main_uses_bar":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main_uses_bar"]
+  , "srcs": ["main_uses_bar.cpp"]
+  , "private-deps": ["bar"]
+  }
+, "test_uses_bar":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_bar"]
+  , "srcs": ["test_uses_bar.cpp"]
+  , "private-deps": ["bar"]
+  }
+, "test_uses_bar_s":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_bar_s"]
+  , "srcs": ["test_uses_bar.cpp"]
+  , "private-deps": ["bar_s"]
+  }
+, "test_uses_baz":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_baz"]
+  , "srcs": ["test_uses_baz.cpp"]
+  , "private-deps": ["baz"]
+  }
+, "test_uses_main":
+  { "type": ["@", "rules", "shell/test", "script"]
+  , "name": ["test_uses_main"]
+  , "test": ["test_uses_main.sh"]
+  , "deps": ["main_uses_bar"]
+  }
+, "test_diamond":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_diamond"]
+  , "srcs": ["test_diamond.cpp"]
+  , "private-deps": ["foo_s", "baz"]
+  }
+}

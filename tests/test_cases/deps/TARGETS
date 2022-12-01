@@ -29,6 +29,33 @@
     ]
   , "data": [["TREE", null, "public"]]
   }
+, "shared":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_shared"]
+  , "targets":
+    [ "+foo"
+    , "+bar"
+    , "+main_uses_foo"
+    , "+test_uses_foo"
+    , "+main_uses_bar"
+    , "+test_uses_bar"
+    , "+test_uses_bar_s"
+    , "+test_uses_baz"
+    , "+test_uses_main"
+    , "+test_diamond"
+    ]
+  , "asserts":
+    [ "test -f foo/libfoo.so.1.2.3"
+    , "test -f foo/foo/foo.hpp"
+    , "test -f bar/libbar.so"
+    , "test -f bar/bar/bar.hpp"
+    , "! test -f bar/foo/foo.hpp"
+    ]
+  , "data": [["TREE", null, "shared"]]
+  }
 , "ALL":
-  {"type": "install", "deps": ["private", "public"], "tainted": ["test"]}
+  { "type": "install"
+  , "deps": ["private", "public", "shared"]
+  , "tainted": ["test"]
+  }
 }
