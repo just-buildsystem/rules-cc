@@ -123,7 +123,14 @@
 , "library":
   { "doc": ["A C++ library"]
   , "target_fields":
-    ["srcs", "hdrs", "private-hdrs", "deps", "private-deps", "proto"]
+    [ "srcs"
+    , "hdrs"
+    , "private-hdrs"
+    , "deps"
+    , "private-deps"
+    , "proto"
+    , "private-proto"
+    ]
   , "string_fields":
     [ "name"
     , "stage"
@@ -198,6 +205,13 @@
       ]
     , "proto":
       [ "Any [\"proto\", \"library\"] this target depends upon directly."
+      , "The creation of C++ bindings for this proto library as well as of"
+      , "its dependencies will be taken care of (as anonymous targets, so no"
+      , "duplicate work will be carried out, even if the same proto library"
+      , "is used at various places)."
+      ]
+    , "private-proto":
+      [ "Any [\"proto\", \"library\"] this target depends upon privately."
       , "The creation of C++ bindings for this proto library as well as of"
       , "its dependencies will be taken care of (as anonymous targets, so no"
       , "duplicate work will be carried out, even if the same proto library"
@@ -287,6 +301,14 @@
         , "service library": ["./", "proto", "service library"]
         }
       }
+    , "private-proto-deps":
+      { "target": "private-proto"
+      , "provider": "proto"
+      , "rule_map":
+        { "library": ["./", "proto", "library"]
+        , "service library": ["./", "proto", "service library"]
+        }
+      }
     }
   , "imports":
     { "artifacts": ["./", "..", "field_artifacts"]
@@ -298,6 +320,8 @@
     { "deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
     , "private-deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
     , "proto-deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
+    , "private-proto-deps":
+      [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
     }
   , "expression":
     { "type": "let*"
@@ -373,7 +397,9 @@
         , {"type": "CALL_EXPRESSION", "name": "fPIC transition"}
         ]
       , ["public-fieldnames", ["deps", "proto-deps"]]
-      , ["private-fieldnames", ["deps", "private-deps", "proto-deps"]]
+      , [ "private-fieldnames"
+        , ["deps", "private-deps", "proto-deps", "private-proto-deps"]
+        ]
       ]
     , "body":
       { "type": "if"
