@@ -681,6 +681,7 @@
     , "private-hdrs"
     , "cflags"
     , "private-cflags"
+    , "ldflags"
     , "private-ldflags"
     , "stage"
     , "extra-provides"
@@ -721,6 +722,7 @@
             { "type": "++"
             , "$1":
               [ {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+              , {"type": "var", "name": "ldflags", "default": []}
               , {"type": "var", "name": "private-ldflags", "default": []}
               , {"type": "CALL_EXPRESSION", "name": "link-args-deps"}
               ]
@@ -936,6 +938,7 @@
     , "private-hdrs"
     , "cflags"
     , "private-cflags"
+    , "ldflags"
     , "private-ldflags"
     , "soversion"
     , "extra-provides"
@@ -977,7 +980,8 @@
           , "$1":
             { "type": "++"
             , "$1":
-              [ {"type": "var", "name": "private-ldflags", "default": []}
+              [ {"type": "var", "name": "ldflags", "default": []}
+              , {"type": "var", "name": "private-ldflags", "default": []}
               , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
               ]
             }
@@ -1008,7 +1012,16 @@
           }
         ]
       , [ "run-libs-args"
-        , {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+              , {"type": "var", "name": "ldflags", "default": []}
+              , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
+              ]
+            }
+          }
         ]
       ]
     , "body":
