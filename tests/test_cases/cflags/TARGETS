@@ -1,0 +1,19 @@
+{ "public":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["cflags_public"]
+  , "targets":
+    [ "+main_use_half3"
+    , "+test_use_half3"
+    , "+main_use_half3f"
+    , "+test_use_half3f"
+    ]
+  , "asserts":
+    [ "./main_use_half3/main_use_half3 | grep 1.5"
+    , "[ \"$(cat ./test_use_half3/result)\" = \"PASS\" ]"
+    , "./main_use_half3f/main_use_half3f | grep 1.5"
+    , "[ \"$(cat ./test_use_half3f/result)\" = \"PASS\" ]"
+    ]
+  , "data": [["TREE", null, "public"]]
+  }
+, "ALL": {"type": "install", "deps": ["public"], "tainted": ["test"]}
+}

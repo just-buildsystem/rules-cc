@@ -1,0 +1,34 @@
+{ "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "stage": ["foo"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "private-deps": ["foo"]
+  , "stage": ["bar"]
+  }
+, "main_includes_foo":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main_includes_foo.cpp"]
+  , "private-deps": ["bar"]
+  }
+, "main_links_foo":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main_links_foo.cpp"]
+  , "private-deps": ["bar"]
+  }
+, "main_links_bar_foo":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main_links_bar_foo.cpp"]
+  , "private-deps": ["bar"]
+  }
+}

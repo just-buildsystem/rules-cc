@@ -1,0 +1,19 @@
+{ "main": "rules"
+, "repositories":
+  { "rules":
+    { "repository": {"type": "file", "path": "rules"}
+    , "bindings":
+      {"protoc": "just/protobuf", "grpc": "just/com_github_grpc_grpc"}
+    }
+  , "tests":
+    { "repository": {"type": "file", "path": "tests"}
+    , "bindings": {"test-just": "just", "test-rules": "test-rules"}
+    }
+  , "imports": {"repository": {"type": "file", "path": "etc/imports"}}
+  , "test-rules":
+    { "repository": {"type": "file", "path": "rules"}
+    , "target_root": "imports"
+    , "target_file_name": "rules.TARGETS"
+    }
+  }
+}

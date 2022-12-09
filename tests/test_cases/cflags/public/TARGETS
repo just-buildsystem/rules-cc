@@ -1,0 +1,49 @@
+{ "half":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["half"]
+  , "hdrs": ["half.hpp"]
+  , "srcs": ["half.cpp"]
+  , "cflags": ["-DHALF_PRECISION_DOUBLE"]
+  , "stage": ["half"]
+  }
+, "half3":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["half3"]
+  , "hdrs": ["half3.hpp"]
+  , "srcs": ["half3.cpp"]
+  , "deps": ["half"]
+  , "stage": ["half3"]
+  }
+, "half3f":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["half3f"]
+  , "hdrs": ["half3f.hpp"]
+  , "srcs": ["half3f.cpp"]
+  , "private-deps": ["half3"]
+  , "stage": ["half3f"]
+  }
+, "main_use_half3":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main_use_half3"]
+  , "srcs": ["main_use_half3.cpp"]
+  , "private-deps": ["half3"]
+  }
+, "test_use_half3":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_use_half3"]
+  , "srcs": ["test_use_half3.cpp"]
+  , "private-deps": ["half3"]
+  }
+, "main_use_half3f":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main_use_half3f"]
+  , "srcs": ["main_use_half3f.cpp"]
+  , "private-deps": ["half3f"]
+  }
+, "test_use_half3f":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_use_half3f"]
+  , "srcs": ["test_use_half3f.cpp"]
+  , "private-deps": ["half3f"]
+  }
+}

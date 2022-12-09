@@ -1,0 +1,34 @@
+{ "private":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_private"]
+  , "targets":
+    ["+foo", "-main_includes_foo", "+main_links_foo", "+main_links_bar_foo"]
+  , "asserts":
+    [ "test -f foo/foo/libfoo.a"
+    , "test -f foo/foo/foo.hpp"
+    , "! test -f foo/bar/bar.hpp"
+    , "./main_links_foo/main | grep foo"
+    , "./main_links_bar_foo/main | grep bar"
+    , "./main_links_bar_foo/main | grep foo"
+    ]
+  , "data": [["TREE", null, "private"]]
+  }
+, "public":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_public"]
+  , "targets":
+    ["+foo", "+main_includes_foo", "+main_links_foo", "+main_links_bar_foo"]
+  , "asserts":
+    [ "test -f foo/foo/libfoo.a"
+    , "test -f foo/foo/foo.hpp"
+    , "! test -f foo/bar/bar.hpp"
+    , "./main_includes_foo/main | grep main"
+    , "./main_links_foo/main | grep foo"
+    , "./main_links_bar_foo/main | grep bar"
+    , "./main_links_bar_foo/main | grep foo"
+    ]
+  , "data": [["TREE", null, "public"]]
+  }
+, "ALL":
+  {"type": "install", "deps": ["private", "public"], "tainted": ["test"]}
+}
