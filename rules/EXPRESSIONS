@@ -1,0 +1,227 @@
+{ "field_artifacts_list":
+  { "doc": ["Query list of artifacts from target_field's targets"]
+  , "vars": ["fieldname", "transition"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "transition": ["The optional configuration transition for the targets."]
+    }
+  , "expression":
+    { "type": "foreach"
+    , "var": "x"
+    , "range": {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+    , "body":
+      { "type": "DEP_ARTIFACTS"
+      , "dep": {"type": "var", "name": "x"}
+      , "transition":
+        {"type": "var", "name": "transition", "default": {"type": "empty_map"}}
+      }
+    }
+  }
+, "field_artifacts":
+  { "doc": ["Query and merge artifacts from target_field's targets"]
+  , "vars": ["fieldname", "transition"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "transition": ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"artifacts_list": "field_artifacts_list"}
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "msg": "artifacts must not overlap"
+    , "$1": {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+    }
+  }
+, "field_runfiles_list":
+  { "doc": ["Query list of runfiles from target_field's targets"]
+  , "vars": ["fieldname", "transition"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "transition": ["The optional configuration transition for the targets."]
+    }
+  , "expression":
+    { "type": "foreach"
+    , "var": "x"
+    , "range": {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+    , "body":
+      { "type": "DEP_RUNFILES"
+      , "dep": {"type": "var", "name": "x"}
+      , "transition":
+        {"type": "var", "name": "transition", "default": {"type": "empty_map"}}
+      }
+    }
+  }
+, "field_runfiles":
+  { "doc": ["Query and merge runfiles from target_field's targets"]
+  , "vars": ["fieldname", "transition"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "transition": ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"runfiles_list": "field_runfiles_list"}
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "msg": "runfiles must not overlap"
+    , "$1": {"type": "CALL_EXPRESSION", "name": "runfiles_list"}
+    }
+  }
+, "field_provider_list":
+  { "doc": ["Query list of providers from targets' provides map"]
+  , "vars": ["fieldname", "provider", "transition", "default"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "provider": ["The name of the map provider in the provides map."]
+    , "transition": ["The optional configuration transition for the targets."]
+    , "default": ["The default if the provider was not found (default: [])."]
+    }
+  , "expression":
+    { "type": "foreach"
+    , "var": "x"
+    , "range": {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+    , "body":
+      { "type": "DEP_PROVIDES"
+      , "dep": {"type": "var", "name": "x"}
+      , "provider": {"type": "var", "name": "provider"}
+      , "transition":
+        {"type": "var", "name": "transition", "default": {"type": "empty_map"}}
+      , "default": {"type": "var", "name": "default", "default": []}
+      }
+    }
+  }
+, "field_map_provider":
+  { "doc": ["Query and merge map-providers from targets' provides map"]
+  , "vars": ["fieldname", "provider", "transition"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "provider": ["The name of the map provider in the provides map."]
+    , "transition": ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"provider_list": "field_provider_list"}
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "msg":
+      ["Overlapping entries in provider", {"type": "var", "name": "provider"}]
+    , "$1":
+      { "type": "let*"
+      , "bindings": [["default", {"type": "empty_map"}]]
+      , "body": {"type": "CALL_EXPRESSION", "name": "provider_list"}
+      }
+    }
+  }
+, "field_list_provider":
+  { "doc": ["Query and merge list-providers from targets' provides map"]
+  , "vars": ["fieldname", "provider", "transition"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "provider": ["The name of the list provider in the provides map."]
+    , "transition": ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"provider_list": "field_provider_list"}
+  , "expression":
+    {"type": "++", "$1": {"type": "CALL_EXPRESSION", "name": "provider_list"}}
+  }
+, "action_env":
+  { "vars": ["ENV"]
+  , "expression":
+    { "type": "map_union"
+    , "$1":
+      [ {"type": "singleton_map", "key": "PATH", "value": "/bin:/usr/bin"}
+      , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+      ]
+    }
+  }
+, "stage_singleton_field":
+  { "vars": ["fieldname", "transition", "location"]
+  , "expression":
+    { "type": "assert_non_empty"
+    , "msg":
+      ["No artifact specified in field", {"type": "var", "name": "fieldname"}]
+    , "$1":
+      { "type": "disjoint_map_union"
+      , "msg":
+        [ "Expecting (essentially) a single artifact in field"
+        , {"type": "var", "name": "fieldname"}
+        ]
+      , "$1":
+        { "type": "foreach"
+        , "var": "src"
+        , "range":
+          {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+        , "body":
+          { "type": "disjoint_map_union"
+          , "$1":
+            { "type": "foreach"
+            , "var": "artifact"
+            , "range":
+              { "type": "values"
+              , "$1":
+                { "type": "DEP_ARTIFACTS"
+                , "dep": {"type": "var", "name": "src"}
+                , "transition":
+                  { "type": "var"
+                  , "name": "transition"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              }
+            , "body":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "location"}
+              , "value": {"type": "var", "name": "artifact"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+, "stage_artifact_to_singleton_field":
+  { "vars": ["artifact", "fieldname", "transition"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "location"
+        , { "type": "++"
+          , "$1":
+            { "type": "foreach"
+            , "var": "src"
+            , "range":
+              {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+            , "body":
+              { "type": "keys"
+              , "$1":
+                { "type": "DEP_ARTIFACTS"
+                , "dep": {"type": "var", "name": "src"}
+                , "transition":
+                  { "type": "var"
+                  , "name": "transition"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              }
+            }
+          }
+        ]
+      , [ "staged_artifact"
+        , { "type": "foreach_map"
+          , "range": {"type": "var", "name": "artifact"}
+          , "var_val": "val"
+          , "body":
+            { "type": "foreach"
+            , "range": {"type": "var", "name": "location"}
+            , "var": "pos"
+            , "body":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "pos"}
+              , "value": {"type": "var", "name": "val"}
+              }
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "disjoint_map_union"
+      , "$1": {"type": "++", "$1": {"type": "var", "name": "staged_artifact"}}
+      }
+    }
+  }
+}

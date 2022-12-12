@@ -1,0 +1,100 @@
+{ "staged":
+  { "doc": ["Stage data to a logical subdirectory."]
+  , "target_fields": ["srcs", "deps"]
+  , "string_fields": ["stage"]
+  , "field_doc":
+    { "srcs": ["The files to be staged"]
+    , "stage":
+      [ "The logical directory to stage the files to."
+      , "Individual directory components are joined with \"/\"."
+      ]
+    , "deps":
+      [ "Targets of with their runfiles should be added as well."
+      , "Their staging is not changed."
+      ]
+    }
+  , "artifacts_doc":
+    [ "The runfiles of the \"srcs\" targets staged to the directory"
+    , "specified in \"stage\" together the runfiles of the targets"
+    , "specied in the field \"deps\" (in their original location)."
+    ]
+  , "runfiles_doc": ["Same as artifacts"]
+  , "imports": {"runfiles": ["./", "..", "field_runfiles"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "stage"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "FIELD", "name": "stage"}
+          }
+        ]
+      , [ "srcs"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "srcs"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "runfiles"}
+          }
+        ]
+      , [ "staged"
+        , { "type": "to_subdir"
+          , "subdir": {"type": "var", "name": "stage"}
+          , "$1": {"type": "var", "name": "srcs"}
+          }
+        ]
+      , [ "dep stage"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "deps"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "runfiles"}
+          }
+        ]
+      , [ "total"
+        , { "type": "disjoint_map_union"
+          , "msg": "Conflict between staged data and dependencies"
+          , "$1":
+            [ {"type": "var", "name": "dep stage"}
+            , {"type": "var", "name": "staged"}
+            ]
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts": {"type": "var", "name": "total"}
+      , "runfiles": {"type": "var", "name": "total"}
+      }
+    }
+  }
+, "overlay":
+  { "doc":
+    ["Overlay the artifacts of \"deps\" targets in a latest-wins fashion."]
+  , "target_fields": ["deps"]
+  , "field_doc": {"deps": ["The targets of which to overlay the artifacts"]}
+  , "artifacts_doc":
+    [ "Artifacts of the targets specified in \"deps\". For conflicting"
+    , "logical paths, the artifact is taken from the latest target (in"
+    , "the \"deps\" field) that defines that logical path"
+    ]
+  , "runfiles_doc": ["Same as artifacts"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "all"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "foreach"
+            , "var": "dep"
+            , "range": {"type": "FIELD", "name": "deps"}
+            , "body":
+              {"type": "DEP_ARTIFACTS", "dep": {"type": "var", "name": "dep"}}
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts": {"type": "var", "name": "all"}
+      , "runfiles": {"type": "var", "name": "all"}
+      }
+    }
+  }
+}

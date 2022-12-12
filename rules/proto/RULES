@@ -1,0 +1,99 @@
+{ "library":
+  { "doc":
+    [ "A proto library as abtract data structure."
+    , ""
+    , "Such a libray does not produce any artifacts itself, but it can be"
+    , "used as a dependency for various language-specific rules."
+    ]
+  , "target_fields": ["srcs", "deps"]
+  , "string_fields": ["stage", "name", "service"]
+  , "field_doc":
+    { "srcs": ["The proto files for this library"]
+    , "deps": ["Any other proto library this library depends on"]
+    , "stage":
+      [ "The directory to stage the source files to."
+      , "Directory components are joined by \"/\"."
+      ]
+    , "name": ["The name of the (abstract) library."]
+    , "service":
+      [ "If non empty, generate a service library (with acces sto \"rpc\""
+      , "definitions) instead of a regular one."
+      ]
+    }
+  , "artifacts_doc": ["None"]
+  , "runfiles_doc": ["None"]
+  , "provides_doc":
+    { "proto":
+      [ "A list containing a single target-graph node with the defintion of"
+      , "this proto library. The node types generated are \"library\" and"
+      , "\"service library\"."
+      ]
+    }
+  , "imports":
+    { "artifacts_list": ["./", "..", "field_artifacts_list"]
+    , "list_provider": ["./", "..", "field_list_provider"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "stage"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "FIELD", "name": "stage"}
+          }
+        ]
+      , [ "name"
+        , { "type": "assert_non_empty"
+          , "msg": "Have to provide a name, unique in the stage"
+          , "$1": {"type": "join", "$1": {"type": "FIELD", "name": "name"}}
+          }
+        ]
+      , [ "srcs"
+        , [ { "type": "VALUE_NODE"
+            , "$1":
+              { "type": "RESULT"
+              , "artifacts":
+                { "type": "to_subdir"
+                , "subdir": {"type": "var", "name": "stage"}
+                , "$1":
+                  { "type": "disjoint_map_union"
+                  , "msg": "Sources have to be conflict free"
+                  , "$1":
+                    { "type": "let*"
+                    , "bindings": [["fieldname", "srcs"]]
+                    , "body":
+                      {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        ]
+      , [ "deps"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "deps"], ["provider", "proto"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          }
+        ]
+      , ["name", [{"type": "var", "name": "name"}]]
+      , ["stage", [{"type": "var", "name": "stage"}]]
+      , [ "proto"
+        , [ { "type": "ABSTRACT_NODE"
+            , "node_type":
+              { "type": "if"
+              , "cond": {"type": "FIELD", "name": "service"}
+              , "then": "service library"
+              , "else": "library"
+              }
+            , "target_fields": {"type": "env", "vars": ["srcs", "deps"]}
+            , "string_fields": {"type": "env", "vars": ["name", "stage"]}
+            }
+          ]
+        ]
+      ]
+    , "body":
+      {"type": "RESULT", "provides": {"type": "env", "vars": ["proto"]}}
+    }
+  }
+}

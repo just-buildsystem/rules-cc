@@ -1,0 +1,308 @@
+{ "protoc-deps":
+  { "imports": {"map_provider": ["./", "../..", "field_map_provider"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings": [["fieldname", "deps"], ["provider", "protoc-deps"]]
+    , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+    }
+  }
+, "protoc-compile":
+  { "vars":
+    [ "CXX"
+    , "CXXFLAGS"
+    , "ADD_CXXFLAGS"
+    , "AR"
+    , "ENV"
+    , "name"
+    , "stage"
+    , "service support"
+    , "deps-transition"
+    , "public-fieldnames"
+    , "private-fieldnames"
+    ]
+  , "imports":
+    { "stage": ["", "stage_singleton_field"]
+    , "result": ["./", "..", "lib result"]
+    , "artifacts": ["./", "../..", "field_artifacts"]
+    , "artifacts_list": ["./", "../..", "field_artifacts_list"]
+    , "protoc-deps": "protoc-deps"
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["pure C", false]
+      , [ "protoc"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "protoc"]
+            , ["transition", {"type": "var", "name": "deps-transition"}]
+            , ["location", "protoc"]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage"}
+          }
+        ]
+      , [ "grpc_cpp_plugin"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "service support"}
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ ["fieldname", "grpc_cpp_plugin"]
+              , ["transition", {"type": "var", "name": "deps-transition"}]
+              , ["location", "grpc_cpp_plugin"]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "stage"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
+      , ["protoc-deps", {"type": "CALL_EXPRESSION", "name": "protoc-deps"}]
+      , [ "proto deps"
+        , { "type": "to_subdir"
+          , "subdir": "work"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["fieldname", "well_known_protos"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "artifacts"}
+            }
+          }
+        ]
+      , [ "proto srcs"
+        , { "type": "disjoint_map_union"
+          , "msg": "Sources may not conflict"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["fieldname", "srcs"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+            }
+          }
+        ]
+      , [ "all proto srcs"
+        , { "type": "disjoint_map_union"
+          , "msg": "Conflict with proto files of dependencies"
+          , "$1":
+            [ {"type": "var", "name": "protoc-deps"}
+            , {"type": "var", "name": "proto srcs"}
+            ]
+          }
+        ]
+      , [ "staged srcs"
+        , { "type": "to_subdir"
+          , "subdir": "work"
+          , "$1": {"type": "var", "name": "proto srcs"}
+          }
+        ]
+      , [ "staged all proto srcs"
+        , { "type": "to_subdir"
+          , "subdir": "work"
+          , "$1": {"type": "var", "name": "all proto srcs"}
+          }
+        ]
+      , [ "outs"
+        , { "type": "++"
+          , "$1":
+            { "type": "foreach"
+            , "var": "f"
+            , "range":
+              {"type": "keys", "$1": {"type": "var", "name": "staged srcs"}}
+            , "body":
+              { "type": "++"
+              , "$1":
+                [ [ { "type": "change_ending"
+                    , "$1": {"type": "var", "name": "f"}
+                    , "ending": ".pb.h"
+                    }
+                  , { "type": "change_ending"
+                    , "$1": {"type": "var", "name": "f"}
+                    , "ending": ".pb.cc"
+                    }
+                  ]
+                , { "type": "if"
+                  , "cond": {"type": "var", "name": "service support"}
+                  , "then":
+                    [ { "type": "change_ending"
+                      , "$1": {"type": "var", "name": "f"}
+                      , "ending": ".grpc.pb.h"
+                      }
+                    , { "type": "change_ending"
+                      , "$1": {"type": "var", "name": "f"}
+                      , "ending": ".grpc.pb.cc"
+                      }
+                    ]
+                  , "else": []
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      , [ "cmd"
+        , { "type": "++"
+          , "$1":
+            [ ["./protoc", "--proto_path=work", "--cpp_out=work"]
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "service support"}
+              , "then":
+                [ "--grpc_out=work"
+                , "--plugin=protoc-gen-grpc=./grpc_cpp_plugin"
+                ]
+              , "else": []
+              }
+            , {"type": "keys", "$1": {"type": "var", "name": "staged srcs"}}
+            ]
+          }
+        ]
+      , [ "generated"
+        , { "type": "ACTION"
+          , "inputs":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "staged all proto srcs"}
+              , {"type": "var", "name": "protoc"}
+              , {"type": "var", "name": "grpc_cpp_plugin"}
+              , {"type": "var", "name": "proto deps"}
+              ]
+            }
+          , "outs": {"type": "var", "name": "outs"}
+          , "cmd": {"type": "var", "name": "cmd"}
+          }
+        ]
+      , [ "srcs"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "foreach"
+            , "var": "name"
+            , "range":
+              {"type": "keys", "$1": {"type": "var", "name": "proto srcs"}}
+            , "body":
+              { "type": "map_union"
+              , "$1":
+                [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "change_ending"
+                    , "$1": {"type": "var", "name": "name"}
+                    , "ending": ".pb.cc"
+                    }
+                  , "value":
+                    { "type": "lookup"
+                    , "map": {"type": "var", "name": "generated"}
+                    , "key":
+                      { "type": "join"
+                      , "$1":
+                        [ "work/"
+                        , { "type": "change_ending"
+                          , "$1": {"type": "var", "name": "name"}
+                          , "ending": ".pb.cc"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                , { "type": "if"
+                  , "cond": {"type": "var", "name": "service support"}
+                  , "then":
+                    { "type": "singleton_map"
+                    , "key":
+                      { "type": "change_ending"
+                      , "$1": {"type": "var", "name": "name"}
+                      , "ending": ".grpc.pb.cc"
+                      }
+                    , "value":
+                      { "type": "lookup"
+                      , "map": {"type": "var", "name": "generated"}
+                      , "key":
+                        { "type": "join"
+                        , "$1":
+                          [ "work/"
+                          , { "type": "change_ending"
+                            , "$1": {"type": "var", "name": "name"}
+                            , "ending": ".grpc.pb.cc"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  , "else": {"type": "empty_map"}
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      , [ "hdrs"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "foreach"
+            , "var": "name"
+            , "range":
+              {"type": "keys", "$1": {"type": "var", "name": "proto srcs"}}
+            , "body":
+              { "type": "map_union"
+              , "$1":
+                [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "change_ending"
+                    , "$1": {"type": "var", "name": "name"}
+                    , "ending": ".pb.h"
+                    }
+                  , "value":
+                    { "type": "lookup"
+                    , "map": {"type": "var", "name": "generated"}
+                    , "key":
+                      { "type": "join"
+                      , "$1":
+                        [ "work/"
+                        , { "type": "change_ending"
+                          , "$1": {"type": "var", "name": "name"}
+                          , "ending": ".pb.h"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                , { "type": "if"
+                  , "cond": {"type": "var", "name": "service support"}
+                  , "then":
+                    { "type": "singleton_map"
+                    , "key":
+                      { "type": "change_ending"
+                      , "$1": {"type": "var", "name": "name"}
+                      , "ending": ".grpc.pb.h"
+                      }
+                    , "value":
+                      { "type": "lookup"
+                      , "map": {"type": "var", "name": "generated"}
+                      , "key":
+                        { "type": "join"
+                        , "$1":
+                          [ "work/"
+                          , { "type": "change_ending"
+                            , "$1": {"type": "var", "name": "name"}
+                            , "ending": ".grpc.pb.h"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  , "else": {"type": "empty_map"}
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      , ["private-hdrs", {"type": "empty_map"}]
+      , [ "extra-provides"
+        , { "type": "singleton_map"
+          , "key": "protoc-deps"
+          , "value": {"type": "var", "name": "all proto srcs"}
+          }
+        ]
+      , ["cflags", []]
+      , ["private-cflags", ["-Wno-sign-conversion", "-Wno-unused-function"]]
+      , ["private-ldflags", []]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "result"}
+    }
+  }
+}
