@@ -25,6 +25,7 @@ echo UNKNOWN > time-stop
 mkdir scratch
 export TEST_TMPDIR=$(realpath scratch)
 export TMPDIR="${TEST_TMPDIR}"
+export LD_LIBRARY_PATH=$(realpath ./libs):$LD_LIBRARY_PATH
 
 # Change to the working directory; note: while unlikely, the test
 # might not have test data, so we have to ensure the presence of

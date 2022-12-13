@@ -133,16 +133,21 @@
     , "cflags"
     , "private-cflags"
     , "private-ldflags"
+    , "soversion"
     ]
+  , "config_fields": ["shared"]
   , "config_vars":
     [ "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
+    , "LDFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
     , "AR"
     , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
     ]
   , "implicit": {"defaults": ["defaults"]}
   , "field_doc":
@@ -192,6 +197,11 @@
       , "duplicate work will be carried out, even if the same proto library"
       , "is used at various places)."
       ]
+    , "shared": ["If non-empty, produce a shared instead of a static library."]
+    , "soversion":
+      [ "The SOVERSION for shared libraries. Individual version components are"
+      , "joined with \".\"."
+      ]
     }
   , "config_doc":
     { "CC":
@@ -214,6 +224,12 @@
       , "adapting the default target [\"CC\", \"defaults\"] is the better"
       , "choice."
       ]
+    , "LDFLAGS":
+      [ "The linker flags to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
     , "ADD_CFLAGS":
       [ "The flags to add to the default ones for CC."
       , "For libraries that should be built in a non-standard way; usually"
@@ -226,11 +242,18 @@
       , "adapting the default target [\"CC\", \"defaults\"] is the better"
       , "choice."
       ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
     , "AR":
       [ "The archive tool to used for creating the library"
       , "If None, the respective value from [\"CC\", \"defaults\"] will be taken."
       ]
     , "ENV": ["The environment for any action generated."]
+    , "BUILD_POSITION_INDEPENDENT": ["Build with -fPIC."]
     }
   , "artifacts_doc":
     ["The actual library (libname.a) staged in the specified directory"]
@@ -260,7 +283,16 @@
       }
     }
   , "imports":
-    {"artifacts": ["./", "..", "field_artifacts"], "result": "lib result"}
+    { "artifacts": ["./", "..", "field_artifacts"]
+    , "static result": "lib result"
+    , "shared result": "shared result"
+    , "fPIC transition": ["transitions", "with fPIC"]
+    }
+  , "config_transitions":
+    { "deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
+    , "private-deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
+    , "proto-deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
+    }
   , "expression":
     { "type": "let*"
     , "bindings":
@@ -329,10 +361,19 @@
           }
         ]
       , ["private-ldflags", {"type": "FIELD", "name": "private-ldflags"}]
+      , ["soversion", {"type": "FIELD", "name": "soversion"}]
+      , [ "deps-transition"
+        , {"type": "CALL_EXPRESSION", "name": "fPIC transition"}
+        ]
       , ["public-fieldnames", ["deps", "proto-deps"]]
       , ["private-fieldnames", ["deps", "private-deps", "proto-deps"]]
       ]
-    , "body": {"type": "CALL_EXPRESSION", "name": "result"}
+    , "body":
+      { "type": "if"
+      , "cond": {"type": "FIELD", "name": "shared"}
+      , "then": {"type": "CALL_EXPRESSION", "name": "shared result"}
+      , "else": {"type": "CALL_EXPRESSION", "name": "static result"}
+      }
     }
   }
 , "binary":
@@ -356,6 +397,7 @@
     , "ADD_CXXFLAGS"
     , "ADD_LDFLAGS"
     , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
     ]
   , "implicit": {"defaults": ["defaults"]}
   , "field_doc":
@@ -420,6 +462,7 @@
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
     , "ENV": ["The environment for any action generated."]
+    , "BUILD_POSITION_INDEPENDENT": ["Build with -fPIC."]
     }
   , "artifacts_doc": ["The final binary, staged to the given directory"]
   , "runfiles_doc": ["None"]

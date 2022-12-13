@@ -12,6 +12,7 @@
   , "imports":
     { "artifacts_list": ["./", "../..", "field_artifacts_list"]
     , "runfiles_list": ["./", "../..", "field_runfiles_list"]
+    , "map_provider": ["./", "../..", "field_map_provider"]
     }
   , "expression":
     { "type": "let*"
@@ -66,6 +67,19 @@
             }
           }
         ]
+      , [ "run-libs"
+        , { "type": "TREE"
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [ ["fieldname", {"type": "var", "name": "deps-fieldname"}]
+              , ["provider", "run-libs"]
+              , ["transition", {"type": "var", "name": "deps-transition"}]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+            }
+          }
+        ]
       , [ "attempt marker"
         , { "type": "if"
           , "cond":
@@ -103,6 +117,10 @@
             [ { "type": "singleton_map"
               , "key": "work"
               , "value": {"type": "var", "name": "deps"}
+              }
+            , { "type": "singleton_map"
+              , "key": "libs"
+              , "value": {"type": "var", "name": "run-libs"}
               }
             , {"type": "var", "name": "runner"}
             , {"type": "var", "name": "test.sh"}
