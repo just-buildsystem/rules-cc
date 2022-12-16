@@ -11,6 +11,7 @@ A C++ library
 | `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
 | `"cflags"` | List of compile flags set for this target and its consumers. |
 | `"private-cflags"` | List of compile flags set for source files local to this target. |
+| `"ldflags"` | Additional linker flags for linking external libraries for this target and its consumers (not built by this tool, typically system libraries). |
 | `"private-ldflags"` | Additional linker flags for linking external libraries (not built by this tool, typically system libraries). |
 | `"soversion"` | The SOVERSION for shared libraries. Individual version components are joined with `"."`. |
 | `"srcs"` | The source files of the library. |
@@ -19,6 +20,7 @@ A C++ library
 | `"deps"` | Any other libraries this library depends upon. |
 | `"private-deps"` | Any other libraries this library depends upon but does not include in its public headers. |
 | `"proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
+| `"private-proto"` | Any `["proto", "library"]` this target depends upon privately. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 | `"shared"` | If non-empty, produce a shared instead of a static library. |
 
 ## Rule `["CC", "binary"]`
