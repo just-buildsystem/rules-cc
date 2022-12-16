@@ -18,9 +18,12 @@
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
+    , "LDFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
     , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
     , "TEST_ENV"
     , "CC_TEST_LAUNCHER"
     ]
@@ -65,6 +68,10 @@
       [ "The flags for CXX to be used instead of the default ones"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
+    , "LDFLAGS":
+      [ "The linker flags do be used instead of the default ones"
+      , "taken from the [\"CC\", \"defaults\"] target"
+      ]
     , "ADD_CFLAGS":
       [ "The flags to add to the default ones for CC"
       , "taken from the [\"CC\", \"defaults\"] target"
@@ -73,7 +80,12 @@
       [ "The flags to add to the default ones for CXX"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones"
+      , "taken from the [\"CC\", \"defaults\"] target"
+      ]
     , "ENV": ["The environment for any action generated."]
+    , "BUILD_POSITION_INDEPENDENT": ["Build with -fPIC."]
     , "TEST_ENV": ["The environment for executing the test runner."]
     , "CC_TEST_LAUNCHER":
       [ "List of strings representing the launcher that is prepend to the"
@@ -101,6 +113,8 @@
     , "compile-args-deps": ["./", "..", "compile-args-deps"]
     , "link-deps": ["./", "..", "link-deps"]
     , "link-args-deps": ["./", "..", "link-args-deps"]
+    , "run-libs-deps": ["./", "..", "run-libs-deps"]
+    , "run-libs-args-deps": ["./", "..", "run-libs-args-deps"]
     , "binary": ["./", "..", "bin artifact"]
     , "host transition": ["transitions", "for host"]
     }
@@ -172,6 +186,10 @@
             , {"type": "FIELD", "name": "private-ldflags"}
             ]
           }
+        ]
+      , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
+      , [ "run-libs-args"
+        , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
         ]
       , ["binary", {"type": "CALL_EXPRESSION", "name": "binary"}]
       , [ "staged test binary"
@@ -277,6 +295,7 @@
               , {"type": "var", "name": "test-args"}
               , {"type": "var", "name": "test-launcher"}
               , {"type": "var", "name": "staged test binary"}
+              , {"type": "var", "name": "run-libs"}
               ]
             }
           , "cmd": ["./runner"]

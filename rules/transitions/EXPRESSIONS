@@ -10,4 +10,20 @@
       }
     }
   }
+, "with fPIC":
+  { "doc":
+    [ "Transition that enables BUILD_POSITION_INDEPENDENT if config_field"
+    , "\"shared\" is not empty."
+    ]
+  , "expression":
+    { "type": "if"
+    , "cond": {"type": "FIELD", "name": "shared"}
+    , "then":
+      { "type": "singleton_map"
+      , "key": "BUILD_POSITION_INDEPENDENT"
+      , "value": true
+      }
+    , "else": {"type": "empty_map"}
+    }
+  }
 }

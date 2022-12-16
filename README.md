@@ -12,12 +12,14 @@ A C++ library
 | `"cflags"` | List of compile flags set for this target and its consumers. |
 | `"private-cflags"` | List of compile flags set for source files local to this target. |
 | `"private-ldflags"` | Additional linker flags for linking external libraries (not built by this tool, typically system libraries). |
+| `"soversion"` | The SOVERSION for shared libraries. Individual version components are joined with `"."`. |
 | `"srcs"` | The source files of the library. |
 | `"hdrs"` | Any public header files of the library. |
 | `"private-hdrs"` | Any header files that only need to be present when compiling the source files, but are not needed for any consumer of the library. |
 | `"deps"` | Any other libraries this library depends upon. |
 | `"private-deps"` | Any other libraries this library depends upon but does not include in its public headers. |
 | `"proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
+| `"shared"` | If non-empty, produce a shared instead of a static library. |
 
 ## Rule `["CC", "binary"]`
 
