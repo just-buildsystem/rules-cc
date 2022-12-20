@@ -88,4 +88,12 @@
   , "srcs": ["test_diamond.cpp"]
   , "private-deps": ["foo_s", "baz"]
   }
+, "install_bar_s":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["bar_s"]}
+, "install_baz":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["baz"]}
+, "install_main":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["main_uses_bar"]
+  }
 }

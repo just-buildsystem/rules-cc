@@ -31,4 +31,6 @@
   , "srcs": ["main_links_bar_foo.cpp"]
   , "private-deps": ["bar"]
   }
+, "install_bar":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["bar"]}
 }
