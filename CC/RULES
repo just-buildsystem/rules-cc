@@ -566,4 +566,153 @@
     , "body": {"type": "CALL_EXPRESSION", "name": "bin result"}
     }
   }
+, "install-with-deps":
+  { "doc":
+    [ "Install target's artifacts with transitive dependencies. Depending on"
+    , "the target, artifacts and dependencies will be installed to"
+    , "subdirectories \"bin\", \"include\", and \"lib\"."
+    ]
+  , "target_fields": ["targets"]
+  , "string_fields": ["flat-libs"]
+  , "imports":
+    { "compile-deps": "compile-deps"
+    , "compile-args-deps": "compile-args-deps"
+    , "link-deps": "link-deps"
+    , "link-args-deps": "link-args-deps"
+    , "run-libs-deps": "run-libs-deps"
+    , "run-libs-args-deps": "run-libs-args-deps"
+    }
+  , "field_doc":
+    { "targets": ["Targets to install artifacts from."]
+    , "flat-libs":
+      [ "Install libraries flat to the \"lib\" subdirectory. Be aware that"
+      , "conflicts may occur if any of the (transitive) libraries happen to"
+      , "have the same base name."
+      ]
+    }
+  , "artifacts_doc":
+    ["Installed artifacts in subdirectories (\"bin\"/\"include\"/\"lib\")."]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "install-stage"
+        , { "type": "disjoint_map_union"
+          , "msg": "install stages may not overlap"
+          , "$1":
+            { "type": "foreach"
+            , "var": "target"
+            , "range": {"type": "FIELD", "name": "targets"}
+            , "body":
+              { "type": "let*"
+              , "bindings":
+                [ [ "artifacts"
+                  , { "type": "DEP_ARTIFACTS"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "runfiles"
+                  , { "type": "DEP_RUNFILES"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "compile-deps"
+                  , { "type": "DEP_PROVIDES"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "provider": "compile-deps"
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "link-deps"
+                  , { "type": "DEP_PROVIDES"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "provider": "link-deps"
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "run-libs"
+                  , { "type": "DEP_PROVIDES"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "provider": "run-libs"
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "package"
+                  , { "type": "DEP_PROVIDES"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "provider": "package"
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "to_bin"
+                  , { "type": "lookup"
+                    , "key": "to_bin"
+                    , "map": {"type": "var", "name": "package"}
+                    }
+                  ]
+                , [ "binaries"
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "to_bin"}
+                    , "then": {"type": "var", "name": "artifacts"}
+                    , "else": {"type": "empty_map"}
+                    }
+                  ]
+                , [ "headers"
+                  , { "type": "disjoint_map_union"
+                    , "msg": "headers may not overlap"
+                    , "$1":
+                      [ {"type": "var", "name": "runfiles"}
+                      , {"type": "var", "name": "compile-deps"}
+                      ]
+                    }
+                  ]
+                , [ "libraries"
+                  , { "type": "disjoint_map_union"
+                    , "msg": "libraries may not overlap"
+                    , "$1":
+                      { "type": "++"
+                      , "$1":
+                        [ { "type": "if"
+                          , "cond": {"type": "var", "name": "to_bin"}
+                          , "then": []
+                          , "else": [{"type": "var", "name": "artifacts"}]
+                          }
+                        , [{"type": "var", "name": "link-deps"}]
+                        , [{"type": "var", "name": "run-libs"}]
+                        ]
+                      }
+                    }
+                  ]
+                ]
+              , "body":
+                { "type": "map_union"
+                , "$1":
+                  [ { "type": "to_subdir"
+                    , "subdir": "bin"
+                    , "flat": true
+                    , "msg": "install binaries may not overlap"
+                    , "$1": {"type": "var", "name": "binaries"}
+                    }
+                  , { "type": "to_subdir"
+                    , "subdir": "include"
+                    , "$1": {"type": "var", "name": "headers"}
+                    }
+                  , { "type": "to_subdir"
+                    , "subdir": "lib"
+                    , "flat": {"type": "FIELD", "name": "flat-libs"}
+                    , "msg": "install libraries may not overlap"
+                    , "$1": {"type": "var", "name": "libraries"}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      ]
+    , "body":
+      {"type": "RESULT", "artifacts": {"type": "var", "name": "install-stage"}}
+    }
+  }
 }
