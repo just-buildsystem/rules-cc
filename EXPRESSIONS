@@ -226,4 +226,20 @@
       }
     }
   }
+, "contains":
+  { "vars": ["list", "item"]
+  , "expression":
+    { "type": "or"
+    , "$1":
+      { "type": "foreach"
+      , "var": "entry"
+      , "range": {"type": "var", "name": "list"}
+      , "body":
+        { "type": "=="
+        , "$1": {"type": "var", "name": "entry"}
+        , "$2": {"type": "var", "name": "item"}
+        }
+      }
+    }
+  }
 }
