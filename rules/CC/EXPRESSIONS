@@ -1242,11 +1242,12 @@
       , [ "run-libs-args"
         , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
         ]
+      , ["package", {"type": "singleton_map", "key": "to_bin", "value": true}]
       ]
     , "body":
       { "type": "RESULT"
       , "artifacts": {"type": "CALL_EXPRESSION", "name": "binary"}
-      , "provides": {"type": "env", "vars": ["run-libs"]}
+      , "provides": {"type": "env", "vars": ["run-libs", "package"]}
       }
     }
   }
