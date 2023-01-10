@@ -14,6 +14,7 @@ A C++ library
 | `"ldflags"` | Additional linker flags for linking external libraries for this target and its consumers (not built by this tool, typically system libraries). |
 | `"private-ldflags"` | Additional linker flags for linking external libraries (not built by this tool, typically system libraries). |
 | `"soversion"` | The SOVERSION for shared libraries. Individual version components are joined with `"."`. |
+| `"pkg-name"` | Name to use for pkg-config files. If this field is empty, the field `"name"` is used instead. |
 | `"srcs"` | The source files of the library. |
 | `"hdrs"` | Any public header files of the library. |
 | `"private-hdrs"` | Any header files that only need to be present when compiling the source files, but are not needed for any consumer of the library. |
@@ -39,6 +40,16 @@ A binary written in C++
 | `"private-hdrs"` | Any header files that need to be present when compiling the source files. |
 | `"private-deps"` | Any other libraries this binary depends upon. |
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of is dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
+
+## Rule `["CC", "install-with-deps"]`
+
+Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"share/pkgconfig"`.
+
+| Field | Description |
+| ----- | ----------- |
+| `"flat-libs"` | Install libraries flat to the `"lib"` subdirectory. Be aware that conflicts may occur if any of the (transitive) libraries happen to have the same base name. |
+| `"prefix"` | The prefix used for pkg-config files. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
+| `"targets"` | Targets to install artifacts from. |
 
 ## Rule `["CC/test", "test"]`
 

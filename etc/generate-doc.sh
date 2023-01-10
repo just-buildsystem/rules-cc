@@ -45,6 +45,7 @@ doc2md() {
 rm -f "$OUTFILE"
 ( doc2md rules CC library
   doc2md rules CC binary
+  doc2md rules CC install-with-deps
   doc2md rules CC/test test
   doc2md rules shell/test script
   doc2md rules proto library
