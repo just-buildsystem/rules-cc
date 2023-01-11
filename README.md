@@ -1,3 +1,20 @@
+## Rule `["CC", "binary"]`
+
+A binary written in C++
+
+| Field | Description |
+| ----- | ----------- |
+| `"name"` | The name of the binary |
+| `"stage"` | The logical location of all header and source files, as well as the resulting binary file. Individual directory components are joined with `"/"`. |
+| `"pure C"` | If non-empty, compile as C sources rathter than C++ sources. In particular, CC is used to compile rather than CXX |
+| `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
+| `"private-cflags"` | List of compile flags set for source files local to this target. |
+| `"private-ldflags"` | Additional linker flags for linking external libraries. |
+| `"srcs"` | The source files of the library. |
+| `"private-hdrs"` | Any header files that need to be present when compiling the source files. |
+| `"private-deps"` | Any other libraries this binary depends upon. |
+| `"private-proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of is dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
+
 ## Rule `["CC", "library"]`
 
 A C++ library
@@ -24,22 +41,22 @@ A C++ library
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon privately. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 | `"shared"` | If non-empty, produce a shared instead of a static library. |
 
-## Rule `["CC", "binary"]`
+## Rule `["CC/prebuilt", "library"]`
 
-A binary written in C++
+A prebuilt C++ library
 
 | Field | Description |
 | ----- | ----------- |
-| `"name"` | The name of the binary |
-| `"stage"` | The logical location of all header and source files, as well as the resulting binary file. Individual directory components are joined with `"/"`. |
-| `"pure C"` | If non-empty, compile as C sources rathter than C++ sources. In particular, CC is used to compile rather than CXX |
-| `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
-| `"private-cflags"` | List of compile flags set for source files local to this target. |
-| `"private-ldflags"` | Additional linker flags for linking external libraries. |
-| `"srcs"` | The source files of the library. |
-| `"private-hdrs"` | Any header files that need to be present when compiling the source files. |
-| `"private-deps"` | Any other libraries this binary depends upon. |
-| `"private-proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of is dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
+| `"name"` | The name of the library (without leading `"lib"` or trailing file name extension), also used as name for pkg-config files. |
+| `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
+| `"stage"` | The logical location of all header and source files, as well as the resulting library file. Individual directory components are joined with `"/"`. |
+| `"defines"` | List of defines set for this target and its consumers. Each list entry will be prepended by `"-D"`. |
+| `"cflags"` | List of compile flags set for this target and its consumers. |
+| `"ldflags"` | Additional linker flags (typically for linking system libraries). |
+| `"lib"` | The actual prebuilt library. If multiple libraries are specified (e.g., one depends on the other), the order matters. Library types cannot be mixed. All of them have to be either static or shared. |
+| `"hdrs"` | Any public header files of the library. |
+| `"deps"` | Any other libraries this library depends upon. |
+| `"pkg-config"` | Pkg-config file for optional infer of public cflags and ldflags. If multiple files are specified (e.g., one depends on the other), the first one is used as entry. Note that if this field is non-empty the tool `"pkg-config"` must be available in `"PATH"`, which is taken from `["CC", "defaults"]` or the `"ENV"` variable. |
 
 ## Rule `["CC", "install-with-deps"]`
 
