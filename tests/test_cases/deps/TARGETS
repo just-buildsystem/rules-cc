@@ -96,9 +96,44 @@
     ]
   , "data": [["TREE", null, "shared"]]
   }
+, "prebuilt_tests":
+  { "type": "tree"
+  , "deps": [["test_cases/deps/prebuilt", "TARGETS"], ["TREE", null, "shared"]]
+  }
+, "prebuilt":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_prebuilt"]
+  , "targets":
+    [ "+foo"
+    , "+bar"
+    , "+main_uses_foo"
+    , "+test_uses_foo"
+    , "+main_uses_bar"
+    , "+test_uses_bar"
+    , "+test_uses_bar_s"
+    , "+test_uses_main"
+    , "+install_main"
+    , "+test_uses_foobar"
+    , "+test_uses_foobar_s"
+    , "+install_foobar"
+    ]
+  , "asserts":
+    [ "test -f foo/libfoo.so.1.2.3"
+    , "test -f foo/foo/foo.hpp"
+    , "test -f bar/libbar.so"
+    , "test -f bar/bar/bar.hpp"
+    , "./install_main/bin/main_uses_bar | grep main"
+    , "./install_main/bin/main_uses_bar | grep bar"
+    , "./install_main/bin/main_uses_bar | grep foo"
+    , "test -f install_foobar/lib/libfoo.so.1.2.3"
+    , "test -f install_foobar/lib/libbar.so"
+    , "test -f install_foobar/share/pkgconfig/foobar.pc"
+    ]
+  , "data": ["prebuilt_tests"]
+  }
 , "ALL":
   { "type": "install"
-  , "deps": ["private", "public", "shared"]
+  , "deps": ["private", "public", "shared", "prebuilt"]
   , "tainted": ["test"]
   }
 }

@@ -1,0 +1,101 @@
+{ "foo":
+  { "type": ["@", "rules", "CC/prebuilt", "library"]
+  , "name": ["foo"]
+  , "version": ["1", "2", "3"]
+  , "hdrs": [["shared", "foo.hpp"]]
+  , "lib": [["shared", "foo"]]
+  , "stage": ["foo"]
+  }
+, "foo_s":
+  { "type": ["@", "rules", "CC/prebuilt", "library"]
+  , "name": ["foo"]
+  , "version": ["1", "2", "3"]
+  , "hdrs": [["shared", "foo.hpp"]]
+  , "lib": [["shared", "foo_s"]]
+  , "stage": ["foo"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC/prebuilt", "library"]
+  , "name": ["bar"]
+  , "hdrs": [["shared", "bar.hpp"]]
+  , "lib": [["shared", "bar"]]
+  , "stage": ["bar"]
+  , "deps": ["foo"]
+  }
+, "bar_s":
+  { "type": ["@", "rules", "CC/prebuilt", "library"]
+  , "name": ["bar"]
+  , "hdrs": [["shared", "bar.hpp"]]
+  , "lib": [["shared", "bar_s"]]
+  , "stage": ["bar"]
+  , "deps": ["foo"]
+  }
+, "main_uses_foo":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main_uses_foo"]
+  , "srcs": [["shared", "main_uses_foo.cpp"]]
+  , "private-deps": ["foo"]
+  }
+, "test_uses_foo":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_foo"]
+  , "srcs": [["shared", "test_uses_foo.cpp"]]
+  , "private-deps": ["foo"]
+  }
+, "main_uses_bar":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main_uses_bar"]
+  , "srcs": [["shared", "main_uses_bar.cpp"]]
+  , "private-deps": ["bar"]
+  }
+, "test_uses_bar":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_bar"]
+  , "srcs": [["shared", "test_uses_bar.cpp"]]
+  , "private-deps": ["bar"]
+  }
+, "test_uses_bar_s":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_bar"]
+  , "srcs": [["shared", "test_uses_bar.cpp"]]
+  , "private-deps": ["bar_s"]
+  }
+, "test_uses_main":
+  { "type": ["@", "rules", "shell/test", "script"]
+  , "name": ["test_uses_main"]
+  , "test": [["shared", "test_uses_main.sh"]]
+  , "deps": ["main_uses_bar"]
+  }
+, "install_main":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["main_uses_bar"]
+  }
+, "foobar":
+  { "type": ["@", "rules", "CC/prebuilt", "library"]
+  , "name": ["foobar"]
+  , "hdrs": [["shared", "bar.hpp"]]
+  , "lib": [["shared", "bar"], ["shared", "foo"]]
+  , "stage": ["bar"]
+  }
+, "foobar_s":
+  { "type": ["@", "rules", "CC/prebuilt", "library"]
+  , "name": ["foobar"]
+  , "hdrs": [["shared", "bar.hpp"]]
+  , "lib": [["shared", "bar_s"], ["shared", "foo_s"]]
+  , "stage": ["bar"]
+  }
+, "test_uses_foobar":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_bar"]
+  , "srcs": [["shared", "test_uses_bar.cpp"]]
+  , "private-deps": ["foobar"]
+  }
+, "test_uses_foobar_s":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test_uses_bar"]
+  , "srcs": [["shared", "test_uses_bar.cpp"]]
+  , "private-deps": ["foobar_s"]
+  }
+, "install_foobar":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["foobar"]}
+}
