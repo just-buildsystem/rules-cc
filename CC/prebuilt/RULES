@@ -1,8 +1,13 @@
 { "library":
   { "doc": ["A prebuilt C++ library"]
-  , "target_fields": ["lib", "hdrs", "deps"]
+  , "target_fields": ["lib", "hdrs", "deps", "pkg-config"]
   , "string_fields":
     ["name", "version", "stage", "defines", "cflags", "ldflags"]
+  , "implicit":
+    { "defaults": [["./", "..", "defaults"]]
+    , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
+    }
+  , "config_vars": ["ENV"]
   , "field_doc":
     { "name":
       [ "The name of the library (without leading \"lib\" or trailing file name"
@@ -32,6 +37,13 @@
       ["List of compile flags set for this target and its consumers."]
     , "ldflags":
       ["Additional linker flags (typically for linking system libraries)."]
+    , "pkg-config":
+      [ "Pkg-config file for optional infer of public cflags and ldflags. If"
+      , "multiple files are specified (e.g., one depends on the other), the"
+      , "first one is used as entry. Note that if this field is non-empty the"
+      , "tool \"pkg-config\" must be available in \"PATH\", which is taken"
+      , "from [\"CC\", \"defaults\"] or the \"ENV\" variable."
+      ]
     }
   , "artifacts_doc":
     [ "The actual library (libname.a or libname.so). Only static libraries are"
@@ -67,7 +79,9 @@
       ]
     }
   , "imports":
-    { "artifacts_list": ["./", "../..", "field_artifacts_list"]
+    { "artifacts": ["./", "../..", "field_artifacts"]
+    , "artifacts_list": ["./", "../..", "field_artifacts_list"]
+    , "stage_field": ["", "stage_singleton_field"]
     , "prebuilt result": "prebuilt result"
     }
   , "expression":
@@ -109,6 +123,19 @@
       , [ "hdrs"
         , { "type": "let*"
           , "bindings": [["fieldname", "hdrs"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+          }
+        ]
+      , [ "config_reader"
+        , { "type": "let*"
+          , "bindings":
+            [["fieldname", "config_reader"], ["location", "config_reader"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "pkg-configs"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "pkg-config"]]
           , "body": {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
           }
         ]
