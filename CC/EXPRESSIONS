@@ -333,6 +333,77 @@
       }
     }
   }
+, "pkg-map-provider-deps":
+  { "doc": ["Collect maps from provider \"package\" for given target_fields"]
+  , "vars": ["pkg-key", "deps-fieldnames", "deps-transition"]
+  , "vars_doc":
+    { "pkg-key": ["Key to lookup in provider \"package\"."]
+    , "deps-fieldnames": ["List of target_field names to collect maps from."]
+    , "deps-transition":
+      ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "$1":
+      { "type": "++"
+      , "$1":
+        { "type": "foreach"
+        , "var": "fieldname"
+        , "range": {"type": "var", "name": "deps-fieldnames"}
+        , "body":
+          { "type": "let*"
+          , "bindings":
+            [ ["provider", "package"]
+            , ["default", {"type": "empty_map"}]
+            , ["transition", {"type": "var", "name": "deps-transition"}]
+            ]
+          , "body":
+            { "type": "foreach"
+            , "range": {"type": "CALL_EXPRESSION", "name": "provider_list"}
+            , "var": "map"
+            , "body":
+              { "type": "lookup"
+              , "key": {"type": "var", "name": "pkg-key"}
+              , "map": {"type": "var", "name": "map"}
+              , "default": {"type": "empty_map"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+, "cflags-files-deps":
+  { "doc": ["Collect cflags files from target_fields"]
+  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars_doc":
+    { "deps-fieldnames": ["List of target_field names to collect files from."]
+    , "deps-transition":
+      ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"pkg-provider": "pkg-map-provider-deps"}
+  , "expression":
+    { "type": "let*"
+    , "bindings": [["pkg-key", "cflags-files"]]
+    , "body": {"type": "CALL_EXPRESSION", "name": "pkg-provider"}
+    }
+  }
+, "ldflags-files-deps":
+  { "doc": ["Collect cflags files from target_fields"]
+  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars_doc":
+    { "deps-fieldnames": ["List of target_field names to collect files from."]
+    , "deps-transition":
+      ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"pkg-provider": "pkg-map-provider-deps"}
+  , "expression":
+    { "type": "let*"
+    , "bindings": [["pkg-key", "ldflags-files"]]
+    , "body": {"type": "CALL_EXPRESSION", "name": "pkg-provider"}
+    }
+  }
 , "pkg-prefix-lib-paths":
   { "doc": ["Detect ldflags referring to local libs and prefix them."]
   , "vars": ["pkg-ldflags", "pkg-libs", "flat-libs", "lib-prefix"]
