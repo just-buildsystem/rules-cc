@@ -440,6 +440,44 @@
       }
     }
   }
+, "pkg-prefix-flag-paths":
+  { "doc": ["Detect flags referring to local flag files and prefix them."]
+  , "vars": ["flags", "pkg-flag-files", "flag-prefix"]
+  , "imports": {"contains": ["", "contains"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "list"
+        , {"type": "keys", "$1": {"type": "var", "name": "pkg-flag-files"}}
+        ]
+      , ["list_prefix", "@"]
+      ]
+    , "body":
+      { "type": "foreach"
+      , "var": "item"
+      , "range": {"type": "var", "name": "flags"}
+      , "body":
+        { "type": "let*"
+        , "bindings":
+          [["flag-file", {"type": "CALL_EXPRESSION", "name": "contains"}]]
+        , "body":
+          { "type": "if"
+          , "cond": {"type": "var", "name": "flag-file"}
+          , "then":
+            { "type": "join"
+            , "$1":
+              [ "@"
+              , {"type": "var", "name": "flag-prefix"}
+              , "/"
+              , {"type": "var", "name": "flag-file"}
+              ]
+            }
+          , "else": {"type": "var", "name": "item"}
+          }
+        }
+      }
+    }
+  }
 , "pkg-config":
   { "vars":
     [ "pkg-name"
@@ -447,16 +485,34 @@
     , "pkg-version"
     , "pkg-cflags"
     , "pkg-ldflags"
+    , "pkg-flag-files"
     , "pkg-libs"
     , "flat-libs"
+    , "pc-install-dir"
     ]
-  , "imports": {"pkg-prefix-lib-paths": "pkg-prefix-lib-paths"}
+  , "imports":
+    { "pkg-prefix-lib-paths": "pkg-prefix-lib-paths"
+    , "pkg-prefix-flag-paths": "pkg-prefix-flag-paths"
+    }
   , "expression":
     { "type": "let*"
     , "bindings":
       [ ["lib-prefix", "${libdir}"]
       , [ "pkg-ldflags"
         , {"type": "CALL_EXPRESSION", "name": "pkg-prefix-lib-paths"}
+        ]
+      , [ "flag-prefix"
+        , { "type": "join"
+          , "$1": ["${prefix}/", {"type": "var", "name": "pc-install-dir"}]
+          }
+        ]
+      , ["flags", {"type": "var", "name": "pkg-cflags"}]
+      , [ "pkg-cflags"
+        , {"type": "CALL_EXPRESSION", "name": "pkg-prefix-flag-paths"}
+        ]
+      , ["flags", {"type": "var", "name": "pkg-ldflags"}]
+      , [ "pkg-ldflags"
+        , {"type": "CALL_EXPRESSION", "name": "pkg-prefix-flag-paths"}
         ]
       ]
     , "body":
@@ -533,6 +589,7 @@
     , "hdrs"
     , "private-hdrs"
     , "compile-deps"
+    , "cflags-files"
     ]
   , "expression":
     { "type": "let*"
@@ -585,6 +642,10 @@
                   , { "type": "singleton_map"
                     , "key": {"type": "var", "name": "work src_name"}
                     , "value": {"type": "var", "name": "src_val"}
+                    }
+                  , { "type": "var"
+                    , "name": "cflags-files"
+                    , "default": {"type": "empty_map"}
                     }
                   ]
                 }
@@ -754,6 +815,7 @@
     , "stage"
     , "compile-deps"
     , "compile-args"
+    , "cflags-files"
     , "defaults-transition"
     ]
   , "imports":
@@ -887,6 +949,8 @@
     , "link-args-deps": "link-args-deps"
     , "run-libs-deps": "run-libs-deps"
     , "run-libs-args-deps": "run-libs-args-deps"
+    , "cflags-files-deps": "cflags-files-deps"
+    , "ldflags-files-deps": "ldflags-files-deps"
     , "lib artifact": "lib artifact"
     }
   , "expression":
@@ -905,6 +969,9 @@
               ]
             }
           }
+        ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
       , ["lib", {"type": "CALL_EXPRESSION", "name": "lib artifact"}]
@@ -927,6 +994,9 @@
           , "$1": {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
           }
         ]
+      , [ "ldflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
+        ]
       , ["deps-fieldnames", {"type": "var", "name": "public-fieldnames"}]
       , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
       , [ "compile-args"
@@ -940,10 +1010,14 @@
             }
           }
         ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
+        ]
       , [ "package"
-        , { "type": "singleton_map"
-          , "key": "name"
-          , "value": {"type": "var", "name": "pkg-name"}
+        , { "type": "let*"
+          , "bindings": [["name", {"type": "var", "name": "pkg-name"}]]
+          , "body":
+            {"type": "env", "vars": ["name", "cflags-files", "ldflags-files"]}
           }
         ]
       ]
@@ -997,6 +1071,8 @@
     , "link-args"
     , "run-libs"
     , "run-libs-args"
+    , "cflags-files"
+    , "ldflags-files"
     , "defaults-transition"
     ]
   , "imports":
@@ -1088,6 +1164,14 @@
                 [ {"type": "var", "name": "objects"}
                 , {"type": "var", "name": "link-deps"}
                 , {"type": "var", "name": "run-libs"}
+                , { "type": "var"
+                  , "name": "cflags-files"
+                  , "default": {"type": "empty_map"}
+                  }
+                , { "type": "var"
+                  , "name": "ldflags-files"
+                  , "default": {"type": "empty_map"}
+                  }
                 ]
               }
             , "env":
@@ -1153,6 +1237,8 @@
     , "link-args-deps": "link-args-deps"
     , "run-libs-deps": "run-libs-deps"
     , "run-libs-args-deps": "run-libs-args-deps"
+    , "cflags-files-deps": "cflags-files-deps"
+    , "ldflags-files-deps": "ldflags-files-deps"
     , "shared artifact": "shared artifact"
     }
   , "expression":
@@ -1172,6 +1258,9 @@
             }
           }
         ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
+        ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
       , ["link-args", {"type": "CALL_EXPRESSION", "name": "link-args-deps"}]
       , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
@@ -1187,6 +1276,9 @@
             }
           }
         ]
+      , [ "ldflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
+        ]
       , ["lib", {"type": "CALL_EXPRESSION", "name": "shared artifact"}]
       , ["deps-fieldnames", {"type": "var", "name": "public-fieldnames"}]
       , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
@@ -1200,6 +1292,9 @@
               ]
             }
           }
+        ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
       , ["link-args", {"type": "CALL_EXPRESSION", "name": "link-args-deps"}]
@@ -1223,6 +1318,9 @@
             }
           }
         ]
+      , [ "ldflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
+        ]
       , [ "package"
         , { "type": "let*"
           , "bindings":
@@ -1239,7 +1337,10 @@
                 }
               ]
             ]
-          , "body": {"type": "env", "vars": ["name", "version"]}
+          , "body":
+            { "type": "env"
+            , "vars": ["name", "version", "cflags-files", "ldflags-files"]
+            }
           }
         ]
       ]
@@ -1294,6 +1395,8 @@
     , "link-args"
     , "run-libs"
     , "run-libs-args"
+    , "cflags-files"
+    , "ldflags-files"
     , "defaults-transition"
     ]
   , "imports":
@@ -1378,6 +1481,14 @@
               [ {"type": "var", "name": "objects"}
               , {"type": "var", "name": "link-deps"}
               , {"type": "var", "name": "run-libs"}
+              , { "type": "var"
+                , "name": "cflags-files"
+                , "default": {"type": "empty_map"}
+                }
+              , { "type": "var"
+                , "name": "ldflags-files"
+                , "default": {"type": "empty_map"}
+                }
               ]
             }
           , "cmd":
@@ -1431,6 +1542,8 @@
     , "link-args-deps": "link-args-deps"
     , "run-libs-deps": "run-libs-deps"
     , "run-libs-args-deps": "run-libs-args-deps"
+    , "cflags-files-deps": "cflags-files-deps"
+    , "ldflags-files-deps": "ldflags-files-deps"
     , "binary": "bin artifact"
     }
   , "expression":
@@ -1461,6 +1574,12 @@
       , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
       , [ "run-libs-args"
         , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
+        ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
+        ]
+      , [ "ldflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
         ]
       , ["package", {"type": "singleton_map", "key": "to_bin", "value": true}]
       ]

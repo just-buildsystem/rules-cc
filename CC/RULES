@@ -624,7 +624,8 @@
   , "expression":
     { "type": "let*"
     , "bindings":
-      [ [ "install-stage"
+      [ ["pc-install-dir", "share/pkgconfig"]
+      , [ "install-stage"
         , { "type": "disjoint_map_union"
           , "msg": "install stages may not overlap"
           , "$1":
@@ -770,11 +771,32 @@
                               ]
                             }
                           ]
+                        , [ "pkg-flag-files"
+                          , { "type": "map_union"
+                            , "$1":
+                              [ { "type": "lookup"
+                                , "key": "cflags-files"
+                                , "map": {"type": "var", "name": "package"}
+                                , "default": {"type": "empty_map"}
+                                }
+                              , { "type": "lookup"
+                                , "key": "ldflags-files"
+                                , "map": {"type": "var", "name": "package"}
+                                , "default": {"type": "empty_map"}
+                                }
+                              ]
+                            }
+                          ]
                         , ["pkg-libs", {"type": "var", "name": "libraries"}]
                         , ["flat-libs", {"type": "FIELD", "name": "flat-libs"}]
                         ]
                       , "body":
-                        {"type": "CALL_EXPRESSION", "name": "pkg-config"}
+                        { "type": "map_union"
+                        , "$1":
+                          [ {"type": "CALL_EXPRESSION", "name": "pkg-config"}
+                          , {"type": "var", "name": "pkg-flag-files"}
+                          ]
+                        }
                       }
                     , "else": {"type": "empty_map"}
                     }
@@ -800,7 +822,7 @@
                     , "$1": {"type": "var", "name": "libraries"}
                     }
                   , { "type": "to_subdir"
-                    , "subdir": "share/pkgconfig"
+                    , "subdir": {"type": "var", "name": "pc-install-dir"}
                     , "$1": {"type": "var", "name": "pkg-config"}
                     }
                   ]
