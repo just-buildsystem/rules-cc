@@ -1,32 +1,68 @@
-{ "foo":
+{ "foo.pc":
+  { "type": "file_gen"
+  , "name": "foo.pc"
+  , "data":
+    { "type": "join"
+    , "separator": "\n"
+    , "$1":
+      [ "Name: foo"
+      , "Version: 1.2.3"
+      , "Description: test prebuilt foo"
+      , "URL: unknown"
+      , "Cflags: -I/usr/include -DUSE_FOO=1"
+      , "Libs: -L/usr/lib -lfoo -lpthread"
+      ]
+    }
+  }
+, "foo":
   { "type": ["@", "rules", "CC/prebuilt", "library"]
   , "name": ["foo"]
   , "version": ["1", "2", "3"]
-  , "hdrs": [["shared", "foo.hpp"]]
+  , "hdrs": ["foo.hpp"]
   , "lib": [["shared", "foo"]]
+  , "pkg-config": ["foo.pc"]
   , "stage": ["foo"]
   }
 , "foo_s":
   { "type": ["@", "rules", "CC/prebuilt", "library"]
   , "name": ["foo"]
   , "version": ["1", "2", "3"]
-  , "hdrs": [["shared", "foo.hpp"]]
+  , "hdrs": ["foo.hpp"]
   , "lib": [["shared", "foo_s"]]
+  , "pkg-config": ["foo.pc"]
   , "stage": ["foo"]
+  }
+, "bar.pc":
+  { "type": "file_gen"
+  , "name": "bar.pc"
+  , "data":
+    { "type": "join"
+    , "separator": "\n"
+    , "$1":
+      [ "Name: bar"
+      , "Version: unknown"
+      , "Description: test prebuilt bar"
+      , "URL: unknown"
+      , "Cflags: -I/usr/include -DUSE_BAR=1"
+      , "Libs: -L/usr/lib -lbar -lpthread -lm"
+      ]
+    }
   }
 , "bar":
   { "type": ["@", "rules", "CC/prebuilt", "library"]
   , "name": ["bar"]
-  , "hdrs": [["shared", "bar.hpp"]]
+  , "hdrs": ["bar.hpp"]
   , "lib": [["shared", "bar"]]
+  , "pkg-config": ["bar.pc"]
   , "stage": ["bar"]
   , "deps": ["foo"]
   }
 , "bar_s":
   { "type": ["@", "rules", "CC/prebuilt", "library"]
   , "name": ["bar"]
-  , "hdrs": [["shared", "bar.hpp"]]
+  , "hdrs": ["bar.hpp"]
   , "lib": [["shared", "bar_s"]]
+  , "pkg-config": ["bar.pc"]
   , "stage": ["bar"]
   , "deps": ["foo"]
   }
@@ -66,22 +102,43 @@
   , "test": [["shared", "test_uses_main.sh"]]
   , "deps": ["main_uses_bar"]
   }
+, "install_foo":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["foo"]}
+, "install_bar":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["bar"]}
 , "install_main":
   { "type": ["@", "rules", "CC", "install-with-deps"]
   , "targets": ["main_uses_bar"]
   }
+, "foobar.pc":
+  { "type": "file_gen"
+  , "name": "foobar.pc"
+  , "data":
+    { "type": "join"
+    , "separator": "\n"
+    , "$1":
+      [ "Name: foobar"
+      , "Version: unknown"
+      , "Description: test compound prebuilt foobar"
+      , "URL: unknown"
+      , "Requires: bar, foo >= 1.2.3"
+      ]
+    }
+  }
 , "foobar":
   { "type": ["@", "rules", "CC/prebuilt", "library"]
   , "name": ["foobar"]
-  , "hdrs": [["shared", "bar.hpp"]]
+  , "hdrs": ["bar.hpp"]
   , "lib": [["shared", "bar"], ["shared", "foo"]]
+  , "pkg-config": ["foobar.pc", "foo.pc", "bar.pc"]
   , "stage": ["bar"]
   }
 , "foobar_s":
   { "type": ["@", "rules", "CC/prebuilt", "library"]
   , "name": ["foobar"]
-  , "hdrs": [["shared", "bar.hpp"]]
+  , "hdrs": ["bar.hpp"]
   , "lib": [["shared", "bar_s"], ["shared", "foo_s"]]
+  , "pkg-config": ["foobar.pc", "foo.pc", "bar.pc"]
   , "stage": ["bar"]
   }
 , "test_uses_foobar":

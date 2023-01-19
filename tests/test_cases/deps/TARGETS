@@ -98,7 +98,12 @@
   }
 , "prebuilt_tests":
   { "type": "tree"
-  , "deps": [["test_cases/deps/prebuilt", "TARGETS"], ["TREE", null, "shared"]]
+  , "deps":
+    [ ["test_cases/deps/prebuilt", "foo.hpp"]
+    , ["test_cases/deps/prebuilt", "bar.hpp"]
+    , ["test_cases/deps/prebuilt", "TARGETS"]
+    , ["TREE", null, "shared"]
+    ]
   }
 , "prebuilt":
   { "type": ["test_rules", "test_case"]
@@ -112,6 +117,8 @@
     , "+test_uses_bar"
     , "+test_uses_bar_s"
     , "+test_uses_main"
+    , "+install_foo"
+    , "+install_bar"
     , "+install_main"
     , "+test_uses_foobar"
     , "+test_uses_foobar_s"
@@ -122,12 +129,22 @@
     , "test -f foo/foo/foo.hpp"
     , "test -f bar/libbar.so"
     , "test -f bar/bar/bar.hpp"
+    , "test -f install_foo/share/pkgconfig/foo/foo.cflags"
+    , "test -f install_foo/share/pkgconfig/foo/foo.ldflags"
+    , "test -f install_bar/share/pkgconfig/foo/foo.cflags"
+    , "test -f install_bar/share/pkgconfig/foo/foo.ldflags"
+    , "test -f install_bar/share/pkgconfig/bar/bar.cflags"
+    , "test -f install_bar/share/pkgconfig/bar/bar.ldflags"
     , "./install_main/bin/main_uses_bar | grep main"
     , "./install_main/bin/main_uses_bar | grep bar"
     , "./install_main/bin/main_uses_bar | grep foo"
     , "test -f install_foobar/lib/libfoo.so.1.2.3"
     , "test -f install_foobar/lib/libbar.so"
     , "test -f install_foobar/share/pkgconfig/foobar.pc"
+    , "grep 'Cflags:.*@${prefix}/share/pkgconfig/bar/foobar.cflags' install_foobar/share/pkgconfig/foobar.pc"
+    , "grep -- '-DUSE_BAR=1 -DUSE_FOO=1' install_foobar/share/pkgconfig/bar/foobar.cflags"
+    , "grep 'Libs:.*@${prefix}/share/pkgconfig/bar/foobar.ldflags' install_foobar/share/pkgconfig/foobar.pc"
+    , "grep -- '-lm -lpthread' install_foobar/share/pkgconfig/bar/foobar.ldflags"
     ]
   , "data": ["prebuilt_tests"]
   }
