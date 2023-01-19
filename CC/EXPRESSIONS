@@ -1145,9 +1145,14 @@
           , "bindings":
             [ ["name", {"type": "var", "name": "pkg-name"}]
             , [ "version"
-              , { "type": "join"
-                , "separator": "."
-                , "$1": {"type": "var", "name": "soversion"}
+              , { "type": "if"
+                , "cond": {"type": "var", "name": "soversion"}
+                , "then":
+                  { "type": "join"
+                  , "separator": "."
+                  , "$1": {"type": "var", "name": "soversion"}
+                  }
+                , "else": null
                 }
               ]
             ]
