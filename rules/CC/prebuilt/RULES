@@ -1,0 +1,120 @@
+{ "library":
+  { "doc": ["A prebuilt C++ library"]
+  , "target_fields": ["lib", "hdrs", "deps"]
+  , "string_fields":
+    ["name", "version", "stage", "defines", "cflags", "ldflags"]
+  , "field_doc":
+    { "name":
+      [ "The name of the library (without leading \"lib\" or trailing file name"
+      , "extension), also used as name for pkg-config files."
+      ]
+    , "version":
+      [ "The library version, used for pkg-config files. Individual version"
+      , "components are joined with \".\"."
+      ]
+    , "lib":
+      [ "The actual prebuilt library. If multiple libraries are specified"
+      , "(e.g., one depends on the other), the order matters. Library types"
+      , "cannot be mixed. All of them have to be either static or shared."
+      ]
+    , "hdrs": ["Any public header files of the library."]
+    , "deps": ["Any other libraries this library depends upon."]
+    , "stage":
+      [ "The logical location of all header and source files, as well as the"
+      , "resulting library file. Individual directory components are joined"
+      , "with \"/\"."
+      ]
+    , "defines":
+      [ "List of defines set for this target and its consumers."
+      , "Each list entry will be prepended by \"-D\"."
+      ]
+    , "cflags":
+      ["List of compile flags set for this target and its consumers."]
+    , "ldflags":
+      ["Additional linker flags (typically for linking system libraries)."]
+    }
+  , "artifacts_doc":
+    [ "The actual library (libname.a or libname.so). Only static libraries are"
+    , "staged in the specified directory."
+    ]
+  , "runfiles_doc": ["The public headers staged to the specified directory."]
+  , "provides_doc":
+    { "compile-deps":
+      [ "Map of artifacts specifying any additional files that, besides the"
+      , "runfiles have to be present in compile actions of targets depending on"
+      , "this library."
+      ]
+    , "link-deps":
+      [ "Map of artifacts specifying any additional files that, besides the artifacts,"
+      , "have to be present in a link actions of targets depending on this library"
+      ]
+    , "run-libs":
+      [ "Map of artifacts specifying all files, including the artifacts of this"
+      , "library if shared, that have to be present in link actions of targets"
+      , "depending on this library."
+      ]
+    , "link-args":
+      [ "List of strings that have to be added to the command line for linking"
+      , "actions in targets depending on this library."
+      ]
+    , "run-libs-args":
+      [ "List of strings that have to be added to the command line for linking"
+      , "runtime libraries in targets depending on this library."
+      ]
+    , "compile-args":
+      [ "List of strings that have to be added to the command line for compile"
+      , "actions in targets depending on this library."
+      ]
+    }
+  , "imports":
+    { "artifacts_list": ["./", "../..", "field_artifacts_list"]
+    , "prebuilt result": "prebuilt result"
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "name"
+        , { "type": "assert_non_empty"
+          , "msg": "name is required for prebuilt library"
+          , "$1": {"type": "join", "$1": {"type": "FIELD", "name": "name"}}
+          }
+        ]
+      , ["version", {"type": "FIELD", "name": "version"}]
+      , [ "stage"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "FIELD", "name": "stage"}
+          }
+        ]
+      , [ "cflags"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "FIELD", "name": "cflags"}
+            , { "type": "foreach"
+              , "var": "def"
+              , "range": {"type": "FIELD", "name": "defines"}
+              , "body":
+                {"type": "join", "$1": ["-D", {"type": "var", "name": "def"}]}
+              }
+            ]
+          }
+        ]
+      , ["ldflags", {"type": "FIELD", "name": "ldflags"}]
+      , [ "libs"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "lib"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+          }
+        ]
+      , [ "hdrs"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "hdrs"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+          }
+        ]
+      , ["deps-fieldnames", ["deps"]]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "prebuilt result"}
+    }
+  }
+}

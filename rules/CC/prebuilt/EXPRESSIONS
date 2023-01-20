@@ -1,0 +1,271 @@
+{ "check-file-ending":
+  { "doc": ["Returns true if all file names end with the given ending."]
+  , "vars": ["files", "ending", "invert"]
+  , "vars_doc":
+    { "files": ["Artifact map that contains the files."]
+    , "ending": ["The ending to check for (without \".\")."]
+    , "invert": ["Invert condition to file name not ending with \"ending\"."]
+    }
+  , "expression":
+    { "type": "and"
+    , "$1":
+      { "type": "foreach"
+      , "var": "file"
+      , "range": {"type": "keys", "$1": {"type": "var", "name": "files"}}
+      , "body":
+        { "type": "let*"
+        , "bindings":
+          [ [ "is-equal"
+            , { "type": "=="
+              , "$1": {"type": "var", "name": "file"}
+              , "$2":
+                { "type": "change_ending"
+                , "$1": {"type": "var", "name": "file"}
+                , "ending":
+                  { "type": "join"
+                  , "$1": [".", {"type": "var", "name": "ending"}]
+                  }
+                }
+              }
+            ]
+          ]
+        , "body":
+          { "type": "if"
+          , "cond": {"type": "var", "name": "invert", "default": false}
+          , "then":
+            { "type": "if"
+            , "cond": {"type": "var", "name": "is-equal"}
+            , "then": false
+            , "else": true
+            }
+          , "else": {"type": "var", "name": "is-equal"}
+          }
+        }
+      }
+    }
+  }
+, "check-libs-non-static":
+  { "doc":
+    [ "Returns true if all libs are non-static libraries or false otherwise."
+    , "Throws if static and non-static libraries are mixed."
+    ]
+  , "vars": ["libs"]
+  , "vars_doc": {"libs": ["List of artifact maps that contain the libraries."]}
+  , "imports": {"check-file-ending": "check-file-ending"}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["files", {"type": "map_union", "$1": {"type": "var", "name": "libs"}}]
+      , [ "static"
+        , { "type": "let*"
+          , "bindings": [["ending", "a"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "check-file-ending"}
+          }
+        ]
+      , [ "shared"
+        , { "type": "let*"
+          , "bindings": [["ending", "a"], ["invert", true]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "check-file-ending"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "if"
+      , "cond":
+        { "type": "or"
+        , "$1":
+          [ {"type": "var", "name": "static"}
+          , {"type": "var", "name": "shared"}
+          ]
+        }
+      , "then": {"type": "var", "name": "shared"}
+      , "else":
+        { "type": "fail"
+        , "msg": "Prebuilt library types (static/shared) may not be mixed."
+        }
+      }
+    }
+  }
+, "prebuilt result":
+  { "vars":
+    [ "name"
+    , "version"
+    , "stage"
+    , "cflags"
+    , "ldflags"
+    , "libs"
+    , "hdrs"
+    , "deps-fieldnames"
+    ]
+  , "imports":
+    { "check-libs-non-static": "check-libs-non-static"
+    , "compile-deps": ["./", "..", "compile-deps"]
+    , "compile-args-deps": ["./", "..", "compile-args-deps"]
+    , "link-deps": ["./", "..", "link-deps"]
+    , "link-args-deps": ["./", "..", "link-args-deps"]
+    , "run-libs-deps": ["./", "..", "run-libs-deps"]
+    , "run-libs-args-deps": ["./", "..", "run-libs-args-deps"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "shared"
+        , {"type": "CALL_EXPRESSION", "name": "check-libs-non-static"}
+        ]
+      , [ "lib-stage"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "shared"}
+          , "then": "."
+          , "else": {"type": "var", "name": "stage"}
+          }
+        ]
+      , [ "staged-libs"
+        , { "type": "foreach"
+          , "var": "lib"
+          , "range": {"type": "var", "name": "libs"}
+          , "body":
+            { "type": "to_subdir"
+            , "subdir": {"type": "var", "name": "lib-stage"}
+            , "flat": true
+            , "msg": "prebuilt libraries may not overlap"
+            , "$1": {"type": "var", "name": "lib"}
+            }
+          }
+        ]
+      , [ "link-args"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "shared"}
+          , "then": []
+          , "else":
+            { "type": "foreach"
+            , "var": "lib"
+            , "range": {"type": "var", "name": "staged-libs"}
+            , "body":
+              { "type": "join"
+              , "$1": {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+              }
+            }
+          }
+        ]
+      , [ "run-libs-args"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "shared"}
+          , "then":
+            { "type": "foreach"
+            , "var": "lib"
+            , "range": {"type": "var", "name": "staged-libs"}
+            , "body":
+              { "type": "join"
+              , "$1": {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+              }
+            }
+          }
+        ]
+      , [ "libs"
+        , { "type": "disjoint_map_union"
+          , "msg": "prebuilt libraries may not overlap"
+          , "$1": {"type": "var", "name": "staged-libs"}
+          }
+        ]
+      , [ "hdrs"
+        , { "type": "to_subdir"
+          , "subdir": {"type": "var", "name": "stage"}
+          , "$1":
+            { "type": "disjoint_map_union"
+            , "msg": "prebuilt headers may not overlap"
+            , "$1": {"type": "var", "name": "hdrs"}
+            }
+          }
+        ]
+      , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
+      , [ "compile-args"
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "cflags"}
+              , {"type": "CALL_EXPRESSION", "name": "compile-args-deps"}
+              ]
+            }
+          }
+        ]
+      , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
+      , [ "link-args"
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "link-args"}
+              , {"type": "CALL_EXPRESSION", "name": "link-args-deps"}
+              ]
+            }
+          }
+        ]
+      , [ "run-libs"
+        , { "type": "map_union"
+          , "$1":
+            [ { "type": "if"
+              , "cond": {"type": "var", "name": "shared"}
+              , "then": {"type": "var", "name": "libs"}
+              , "else": {"type": "empty_map"}
+              }
+            , {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}
+            ]
+          }
+        ]
+      , [ "run-libs-args"
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "run-libs-args"}
+              , {"type": "var", "name": "ldflags"}
+              , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
+              ]
+            }
+          }
+        ]
+      , [ "package"
+        , { "type": "let*"
+          , "bindings":
+            [ ["name", {"type": "var", "name": "name"}]
+            , [ "version"
+              , { "type": "if"
+                , "cond": {"type": "var", "name": "version"}
+                , "then":
+                  { "type": "join"
+                  , "separator": "."
+                  , "$1": {"type": "var", "name": "version"}
+                  }
+                , "else": null
+                }
+              ]
+            ]
+          , "body": {"type": "env", "vars": ["name", "version"]}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts": {"type": "var", "name": "libs"}
+      , "runfiles": {"type": "var", "name": "hdrs"}
+      , "provides":
+        { "type": "map_union"
+        , "$1":
+          [ { "type": "env"
+            , "vars":
+              [ "compile-deps"
+              , "compile-args"
+              , "link-deps"
+              , "link-args"
+              , "run-libs"
+              , "run-libs-args"
+              , "package"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
