@@ -95,6 +95,41 @@ Shell test, given by a test script
 | `"deps"` | Any targets that should be staged (with artifacts and runfiles) into the tests working directory |
 | `"test"` | The shell script for the test, launched with sh.  An empty directory is created to store any temporary files needed by the test, and it is made available in the environment variable TEST_TMPDIR. The test should not assume write permissions outside the working directory and the TEST_TMPDIR. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR. |
 
+## Rule `["CC/foreign/cmake", "library"]`
+
+Library produced by CMake configure, build, and install.
+
+| Field | Description |
+| ----- | ----------- |
+| `"name"` | The name of the library (without leading `"lib"` or trailing file name extension), also used as name for pkg-config files. |
+| `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
+| `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
+| `"options"` | CMake options for the configuration phase. (e.g., `["-GNinja", "-Ax64"]`) |
+| `"defines"` | CMake defines for the configuration phase. (e.g., `["CMAKE_BUILD_TYPE=Release"]`) |
+| `"out_hdrs"` | Paths to produced public header files. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
+| `"out_hdr_dirs"` | Paths to produced public header directories. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
+| `"out_libs"` | Paths to produced library files. The path is considered relative to the library directory, which be set via `"lib_prefix"`. Order matters in the case of one library depending on another. |
+| `"cflags"` | List of compile flags set for this target and its consumers. |
+| `"ldflags"` | Additional linker flags that are required for the consumer of the produced libraries. |
+| `"pkg-config"` | Pkg-config file for optional infer of public cflags and ldflags. If multiple files are specified (e.g., one depends on the other), the first one is used as entry. Note that if this field is non-empty the tool `"pkg-config"` must be available in `"PATH"`, which is taken from `["CC", "defaults"]` or the `"ENV"` variable. |
+| `"hdr_prefix"` | Prefix where headers will be installed by CMake. Individual directory components are joined with `"/"`. Defaults to `"include"` if not set. |
+| `"lib_prefix"` | Prefix where libraries will be installed by CMake. Individual directory components are joined with `"/"`. Defaults to `"lib"` if not set. |
+| `"pc_prefix"` | Prefix where pkg-config files will be installed by CMake. Individual directory components are joined with `"/"`. Defaults to `"lib/pkgconfig"` if not set. |
+| `"project"` | The CMake project directory. It should contain a single tree artifact |
+| `"deps"` | Public dependency on other CC libraries. |
+
+## Rule `["CC/foreign/cmake", "data"]`
+
+Data produced by CMake configure, build, and install.
+
+| Field | Description |
+| ----- | ----------- |
+| `"options"` | CMake options for the configuration phase. (e.g., `["-GNinja", "-Ax64"]`) |
+| `"defines"` | CMake defines for the configuration phase. (e.g., `["CMAKE_BUILD_TYPE=Release"]`) |
+| `"out_files"` | Paths to the produced output files. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
+| `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
+| `"project"` | The CMake project directory. It should contain a single tree artifact |
+
 ## Rule `["proto", "library"]`
 
 A proto library as abtract data structure. 
