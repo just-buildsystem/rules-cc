@@ -148,9 +148,48 @@
     ]
   , "data": ["prebuilt_tests"]
   }
+, "cmake":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_cmake"]
+  , "libs": ["googletest"]
+  , "targets":
+    [ "+gtest"
+    , "+test"
+    , "+gtest_main"
+    , "+testbin"
+    , "+shell_test"
+    , "+install_gtest"
+    , "+install_gtest_main"
+    , "+install_testbin"
+    ]
+  , "asserts":
+    [ "test -f gtest/libgtest.a"
+    , "test -f gtest/gtest/gtest.h"
+    , "grep 'PASSED.*1 test' test/stdout"
+    , "test -f gtest_main/libgtest.so.1.13.0"
+    , "test -f gtest_main/libgtest_main.so.1.13.0"
+    , "test -f gtest_main/gtest/gtest.h"
+    , "test -f ./testbin/test"
+    , "grep 'PASSED.*1 test' shell_test/stdout"
+    , "test -f install_gtest/lib/libgtest.a"
+    , "test -f install_gtest/include/gtest/gtest.h"
+    , "grep 'Cflags.*share/pkgconfig/gtest.cflags' install_gtest/share/pkgconfig/gtest.pc"
+    , "grep 'Libs.*libgtest.a' install_gtest/share/pkgconfig/gtest.pc"
+    , "grep 'Libs.*share/pkgconfig/gtest.ldflags' install_gtest/share/pkgconfig/gtest.pc"
+    , "test -f install_gtest_main/lib/libgtest.so.1.13.0"
+    , "test -f install_gtest_main/lib/libgtest_main.so.1.13.0"
+    , "test -f install_gtest_main/include/gtest/gtest.h"
+    , "grep 'Cflags.*share/pkgconfig/gtest_main.cflags' install_gtest_main/share/pkgconfig/gtest_main.pc"
+    , "grep 'Libs.*libgtest.so.1.13.0' install_gtest_main/share/pkgconfig/gtest_main.pc"
+    , "grep 'Libs.*libgtest_main.so.1.13.0' install_gtest_main/share/pkgconfig/gtest_main.pc"
+    , "grep 'Libs.*share/pkgconfig/gtest_main.ldflags' install_gtest_main/share/pkgconfig/gtest_main.pc"
+    , "./install_testbin/bin/test | grep 'PASSED.*1 test'"
+    ]
+  , "data": [["TREE", null, "cmake"]]
+  }
 , "ALL":
   { "type": "install"
-  , "deps": ["private", "public", "shared", "prebuilt"]
+  , "deps": ["private", "public", "shared", "prebuilt", "cmake"]
   , "tainted": ["test"]
   }
 }

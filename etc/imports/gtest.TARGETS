@@ -1,0 +1,6 @@
+{ "tree":
+  { "type": "install"
+  , "dirs": [[["TREE", null, "."], "googletest"]]
+  , "tainted": ["test"]
+  }
+}

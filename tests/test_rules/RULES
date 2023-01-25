@@ -1,9 +1,14 @@
 { "test_case":
   { "doc": ["Define a test case for rule tests."]
-  , "string_fields": ["name", "targets", "asserts"]
+  , "string_fields": ["name", "libs", "targets", "asserts"]
   , "target_fields": ["data"]
   , "field_doc":
     { "name": ["Name of the test (multiple entries are joined)."]
+    , "libs":
+      [ "Paths to external libraries' trees provided by the \"test-libs\""
+      , "repository. From within a test cases, the library's tree can be"
+      , "accessed via [\"@\", \"<libpath>\", \"\", \"tree\"]."
+      ]
     , "targets":
       [ "Target names to build and install. Each target name is prefixed by"
       , "\"+\" or \"-\", indicating if the build should fail or not."
@@ -23,6 +28,7 @@
     { "runner": ["test_runner.py"]
     , "rules": [["@", "test-rules", "", "tree"]]
     , "just": [["@", "test-just", "", ""]]
+    , "libs_tree": [["@", "test-libs", "", "tree"]]
     }
   , "imports": {"stage_artifact": "stage_singleton_field"}
   , "expression":
@@ -35,6 +41,18 @@
       , ["fieldname", "rules"]
       , ["location", "rules"]
       , ["rules", {"type": "CALL_EXPRESSION", "name": "stage_artifact"}]
+      , [ "imports"
+        , { "type": "singleton_map"
+          , "key": "imports/TARGETS"
+          , "value":
+            { "type": "BLOB"
+            , "data": "{\"tree\":{\"type\":\"install\",\"dirs\":[[[\"TREE\",null,\".\"],\".\"]]}}"
+            }
+          }
+        ]
+      , ["fieldname", "libs_tree"]
+      , ["location", "libs"]
+      , ["libs", {"type": "CALL_EXPRESSION", "name": "stage_artifact"}]
       , ["fieldname", "data"]
       , ["location", "work"]
       , ["work", {"type": "CALL_EXPRESSION", "name": "stage_artifact"}]
@@ -43,6 +61,67 @@
       , ["runner", {"type": "CALL_EXPRESSION", "name": "stage_artifact"}]
       , ["targets", {"type": "FIELD", "name": "targets"}]
       , ["asserts", {"type": "FIELD", "name": "asserts"}]
+      , [ "work_bindings"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ [{"type": "singleton_map", "key": "rules", "value": "rules"}]
+              , { "type": "foreach"
+                , "range": {"type": "FIELD", "name": "libs"}
+                , "var": "libpath"
+                , "body":
+                  { "type": "singleton_map"
+                  , "key": {"type": "var", "name": "libpath"}
+                  , "value": {"type": "var", "name": "libpath"}
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      , [ "work_deps"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ [ { "type": "let*"
+                  , "bindings":
+                    [ ["workspace_root", ["file", "rules"]]
+                    , ["rules", {"type": "env", "vars": ["workspace_root"]}]
+                    ]
+                  , "body": {"type": "env", "vars": ["rules"]}
+                  }
+                ]
+              , { "type": "foreach"
+                , "range": {"type": "FIELD", "name": "libs"}
+                , "var": "libpath"
+                , "body":
+                  { "type": "let*"
+                  , "bindings":
+                    [ [ "workspace_root"
+                      , [ "file"
+                        , { "type": "join"
+                          , "$1": ["libs/", {"type": "var", "name": "libpath"}]
+                          }
+                        ]
+                      ]
+                    , ["target_root", ["file", "imports"]]
+                    ]
+                  , "body":
+                    { "type": "singleton_map"
+                    , "key": {"type": "var", "name": "libpath"}
+                    , "value":
+                      { "type": "env"
+                      , "vars": ["workspace_root", "target_root"]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
       , [ "repos"
         , { "type": "singleton_map"
           , "key": "repos.json"
@@ -54,15 +133,17 @@
                 { "type": "let*"
                 , "bindings":
                   [ ["workspace_root", ["file", "work"]]
-                  , ["rules", "rules"]
-                  , ["bindings", {"type": "env", "vars": ["rules"]}]
+                  , ["bindings", {"type": "var", "name": "work_bindings"}]
                   , [ "work"
                     , {"type": "env", "vars": ["workspace_root", "bindings"]}
                     ]
-                  , ["workspace_root", ["file", "rules"]]
-                  , ["rules", {"type": "env", "vars": ["workspace_root"]}]
                   , [ "repositories"
-                    , {"type": "env", "vars": ["rules", "work"]}
+                    , { "type": "map_union"
+                      , "$1":
+                        [ {"type": "env", "vars": ["work"]}
+                        , {"type": "var", "name": "work_deps"}
+                        ]
+                      }
                     ]
                   , ["main", "work"]
                   ]
@@ -92,6 +173,8 @@
               [ {"type": "var", "name": "runner"}
               , {"type": "var", "name": "rules"}
               , {"type": "var", "name": "just"}
+              , {"type": "var", "name": "imports"}
+              , {"type": "var", "name": "libs"}
               , {"type": "var", "name": "repos"}
               , {"type": "var", "name": "work"}
               , {"type": "var", "name": "config"}

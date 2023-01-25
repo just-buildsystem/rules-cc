@@ -7,13 +7,33 @@
     }
   , "tests":
     { "repository": {"type": "file", "path": "tests"}
-    , "bindings": {"test-just": "just", "test-rules": "test-rules"}
+    , "bindings":
+      { "test-just": "just"
+      , "test-rules": "test-rules"
+      , "test-libs": "test-libs"
+      }
     }
   , "imports": {"repository": {"type": "file", "path": "etc/imports"}}
   , "test-rules":
     { "repository": {"type": "file", "path": "rules"}
     , "target_root": "imports"
     , "target_file_name": "rules.TARGETS"
+    }
+  , "test-libs":
+    { "repository": "imports"
+    , "target_file_name": "libs.TARGETS"
+    , "bindings": {"gtest": "gtest"}
+    }
+  , "gtest":
+    { "repository":
+      { "type": "archive"
+      , "fetch": "https://github.com/google/googletest/archive/refs/tags/v1.13.0.tar.gz"
+      , "content": "cbd19f97df3ab86b174520cd850d238617c156e0"
+      , "sha256": "ad7fdba11ea011c1d925b3289cf4af2c66a352e18d4c7264392fead75e919363"
+      , "subdir": "googletest-1.13.0"
+      }
+    , "target_root": "imports"
+    , "target_file_name": "gtest.TARGETS"
     }
   }
 }

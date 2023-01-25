@@ -1,0 +1,52 @@
+{ "gtest":
+  { "type": ["@", "rules", "CC/foreign/cmake", "library"]
+  , "name": ["gtest"]
+  , "version": ["1", "13", "0"]
+  , "project": [["@", "googletest", "", "tree"]]
+  , "out_hdr_dirs": ["gtest"]
+  , "out_libs": ["libgtest.a"]
+  , "pkg-config": ["gtest.pc"]
+  }
+, "testlib":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["testlib"]
+  , "shared": ["yes"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["gtest"]
+  }
+, "test":
+  { "type": ["@", "rules", "CC/test", "test"]
+  , "name": ["test"]
+  , "private-deps": ["testlib", "gtest"]
+  }
+, "gtest_main":
+  { "type": ["@", "rules", "CC/foreign/cmake", "library"]
+  , "name": ["gtest_main"]
+  , "version": ["1", "13", "0"]
+  , "project": [["@", "googletest", "", "tree"]]
+  , "defines": ["BUILD_SHARED_LIBS=ON"]
+  , "out_hdr_dirs": ["gtest"]
+  , "out_libs": ["libgtest_main.so.1.13.0", "libgtest.so.1.13.0"]
+  , "pkg-config": ["gtest_main.pc", "gtest.pc"]
+  }
+, "testbin":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["test"]
+  , "srcs": ["test.cpp"]
+  , "private-deps": ["gtest_main"]
+  }
+, "shell_test":
+  { "type": ["@", "rules", "shell/test", "script"]
+  , "name": ["shell_test"]
+  , "test": ["test.sh"]
+  , "deps": ["testbin"]
+  }
+, "install_gtest":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["gtest"]}
+, "install_gtest_main":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["gtest_main"]
+  }
+, "install_testbin":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["testbin"]}
+}
