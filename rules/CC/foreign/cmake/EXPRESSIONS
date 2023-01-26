@@ -1,0 +1,149 @@
+{ "cmake-build":
+  { "vars":
+    [ "source_dir"
+    , "cmake_options"
+    , "cmake_defines"
+    , "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "AR"
+    , "BUILD_POSITION_INDEPENDENT"
+    ]
+  , "imports":
+    { "artifacts": ["", "field_artifacts"]
+    , "flags-cc": ["CC", "flags-cc"]
+    , "flags-cxx": ["CC", "flags-cxx"]
+    , "compiler-cc": ["CC", "compiler-cc"]
+    , "compiler-cxx": ["CC", "compiler-cxx"]
+    , "default-LDFLAGS": ["CC", "default-LDFLAGS"]
+    , "default-AR": ["CC", "default-AR"]
+    , "default-ENV": ["CC", "default-ENV"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "CMAKE_FLAGS"
+        , { "type": "++"
+          , "$1":
+            [ { "type": "foreach"
+              , "var": "define"
+              , "range": {"type": "var", "name": "cmake_defines"}
+              , "body":
+                { "type": "join"
+                , "$1": ["-D", {"type": "var", "name": "define"}]
+                }
+              }
+            , {"type": "var", "name": "cmake_options"}
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "BUILD_POSITION_INDEPENDENT"}
+              , "then": ["-DCMAKE_POSITION_INDEPENDENT_CODE=ON"]
+              }
+            , [{"type": "join", "$1": ["-DCMAKE_AR=/usr/bin/ar"]}]
+            ]
+          }
+        ]
+      , ["BUILD_POSITION_INDEPENDENT", null]
+      , ["CC", {"type": "CALL_EXPRESSION", "name": "compiler-cc"}]
+      , ["CXX", {"type": "CALL_EXPRESSION", "name": "compiler-cxx"}]
+      , [ "CFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1": {"type": "CALL_EXPRESSION", "name": "flags-cc"}
+          }
+        ]
+      , [ "CXXFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1": {"type": "CALL_EXPRESSION", "name": "flags-cxx"}
+          }
+        ]
+      , [ "LDFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "var"
+                , "name": "LDFLAGS"
+                , "default":
+                  {"type": "CALL_EXPRESSION", "name": "default-LDFLAGS"}
+                }
+              , {"type": "var", "name": "ldflags", "default": []}
+              ]
+            }
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
+              , [ { "type": "var"
+                  , "name": "ENV"
+                  , "default": {"type": "empty_map"}
+                  }
+                ]
+              , [ { "type": "env"
+                  , "vars": ["CC", "CXX", "CXXFLAGS", "CFLAGS", "LDFLAGS"]
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      , [ "AR"
+        , { "type": "var"
+          , "name": "AR"
+          , "default": {"type": "CALL_EXPRESSION", "name": "default-AR"}
+          }
+        ]
+      , [ "script"
+        , { "type": "singleton_map"
+          , "key": "run_cmake.sh"
+          , "value":
+            { "type": "BLOB"
+            , "data":
+              { "type": "join"
+              , "separator": "\n"
+              , "$1":
+                [ "set -eu"
+                , "readonly CMAKE_AR=$(which $1)"
+                , "shift"
+                , "cmake \"$@\" -Ssource -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log || (cat configure.log && exit 1)"
+                , "cmake --build build --target install >build.log || (cat configure.log build.log && exit 1)"
+                , "find ./install -type l -delete"
+                ]
+              }
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "ACTION"
+      , "inputs":
+        { "type": "map_union"
+        , "$1":
+          [ {"type": "var", "name": "source_dir"}
+          , {"type": "var", "name": "script"}
+          ]
+        }
+      , "cmd":
+        { "type": "++"
+        , "$1":
+          [ ["/bin/sh", "run_cmake.sh", {"type": "var", "name": "AR"}]
+          , {"type": "var", "name": "CMAKE_FLAGS"}
+          ]
+        }
+      , "out_dirs": ["install"]
+      , "env": {"type": "var", "name": "ENV"}
+      }
+    }
+  }
+}

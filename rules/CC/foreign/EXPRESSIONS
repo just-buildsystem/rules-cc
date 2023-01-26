@@ -1,0 +1,34 @@
+{ "strip-prefix":
+  { "doc":
+    [ "Returns list of artifact maps (each map contains a single artifact)"
+    , "with the given prefix being stripped from their path."
+    ]
+  , "vars": ["artifacts", "paths", "prefix"]
+  , "vars_doc":
+    { "artifacts": ["A single map containing all artifacts."]
+    , "paths": ["List of (unprefixed) artifacts paths to consider."]
+    , "prefix": ["Prefix to strip from the artifact's path."]
+    }
+  , "expression":
+    { "type": "foreach"
+    , "var": "path"
+    , "range": {"type": "var", "name": "paths"}
+    , "body":
+      { "type": "singleton_map"
+      , "key": {"type": "var", "name": "path"}
+      , "value":
+        { "type": "lookup"
+        , "key":
+          { "type": "join"
+          , "separator": "/"
+          , "$1":
+            [ {"type": "var", "name": "prefix"}
+            , {"type": "var", "name": "path"}
+            ]
+          }
+        , "map": {"type": "var", "name": "artifacts"}
+        }
+      }
+    }
+  }
+}
