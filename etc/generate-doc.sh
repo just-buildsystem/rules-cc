@@ -28,7 +28,7 @@ doc2md() {
   local DOC="$(echo "$RULE_DOC" | jq -r '.doc')"
   local FIELD_DOC="$(echo "$RULE_DOC" | jq -r '.field_doc')"
 
-  echo "## Rule \`[\"$MODULE\", \"$RULE\"]\`"
+  echo "### Rule \`[\"$MODULE\", \"$RULE\"]\`"
   echo
   echo "$DOC" \
     | jq -r '[.[] as $v | if ($v == "") then "\n\n" else $v end] | join(" ")' \

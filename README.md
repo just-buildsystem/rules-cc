@@ -2,11 +2,40 @@
 
 A collection of rules for building C/C++ libraries and binaries.
 
+## How to use this Repository
+
+Either generate your `repos.json` from a template (`repos.template.json`) by
+importing the `rules-cc` repository with the tool `just-import-git`
+
+~~~sh
+$ just-import-git -C repos.template.json --as rules-cc -b master https://github.com/just-buildsystem/rules-cc > repos.json
+~~~
+
+or manually add the `rules-cc` repository to your `repos.json`.
+
+~~~json
+...
+, "rules-cc":
+    { "repository":
+      { "type": "git"
+      , "branch": "master"
+      , "commit": "7a90f68e5207d541dea937aaff5b6c4c499b8968"
+      , "repository": "https://github.com/just-buildsystem/rules-cc"
+      , "subdir": "rules"
+      }
+    }
+...
+~~~
+
+## Consume and being consumed by CMake Libraries
+
 For interoperability with CMake projects, see
+
 - [consume CMake libraries](./doc/consume-cmake-libraries.org)
 - [being consumed by CMake](./doc/being-consumed-by-cmake.org)
 
-## Rule `["CC", "binary"]`
+## Rule Documentation
+### Rule `["CC", "binary"]`
 
 A binary written in C++
 
@@ -23,7 +52,7 @@ A binary written in C++
 | `"private-deps"` | Any other libraries this binary depends upon. |
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of is dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 
-## Rule `["CC", "library"]`
+### Rule `["CC", "library"]`
 
 A C++ library
 
@@ -49,7 +78,7 @@ A C++ library
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon privately. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 | `"shared"` | If non-empty, produce a shared instead of a static library. |
 
-## Rule `["CC/prebuilt", "library"]`
+### Rule `["CC/prebuilt", "library"]`
 
 A prebuilt C++ library
 
@@ -66,7 +95,7 @@ A prebuilt C++ library
 | `"deps"` | Any other libraries this library depends upon. |
 | `"pkg-config"` | Pkg-config file for optional infer of public cflags and ldflags. If multiple files are specified (e.g., one depends on the other), the first one is used as entry. Note that if this field is non-empty the tool `"pkg-config"` must be available in `"PATH"`, which is taken from `["CC", "defaults"]` or the `"ENV"` variable. |
 
-## Rule `["CC", "install-with-deps"]`
+### Rule `["CC", "install-with-deps"]`
 
 Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"share/pkgconfig"`.
 
@@ -76,7 +105,7 @@ Install target's artifacts with transitive dependencies. Depending on the target
 | `"prefix"` | The prefix used for pkg-config files. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"targets"` | Targets to install artifacts from. |
 
-## Rule `["CC/test", "test"]`
+### Rule `["CC/test", "test"]`
 
 A test written in C++
 
@@ -92,7 +121,7 @@ A test written in C++
 | `"private-hdrs"` | Any additional header files that need to be present when compiling the test binary. |
 | `"data"` | Any files the test binary needs access to when running |
 
-## Rule `["shell/test", "script"]`
+### Rule `["shell/test", "script"]`
 
 Shell test, given by a test script
 
@@ -103,7 +132,7 @@ Shell test, given by a test script
 | `"deps"` | Any targets that should be staged (with artifacts and runfiles) into the tests working directory |
 | `"test"` | The shell script for the test, launched with sh.  An empty directory is created to store any temporary files needed by the test, and it is made available in the environment variable TEST_TMPDIR. The test should not assume write permissions outside the working directory and the TEST_TMPDIR. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR. |
 
-## Rule `["CC/foreign/cmake", "library"]`
+### Rule `["CC/foreign/cmake", "library"]`
 
 Library produced by CMake configure, build, and install.
 
@@ -126,7 +155,7 @@ Library produced by CMake configure, build, and install.
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
 | `"deps"` | Public dependency on other CC libraries. |
 
-## Rule `["CC/foreign/cmake", "data"]`
+### Rule `["CC/foreign/cmake", "data"]`
 
 Data produced by CMake configure, build, and install.
 
@@ -138,7 +167,7 @@ Data produced by CMake configure, build, and install.
 | `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
 
-## Rule `["proto", "library"]`
+### Rule `["proto", "library"]`
 
 A proto library as abtract data structure. 
 
@@ -152,7 +181,7 @@ A proto library as abtract data structure.
 | `"srcs"` | The proto files for this library |
 | `"deps"` | Any other proto library this library depends on |
 
-## Rule `["data", "staged"]`
+### Rule `["data", "staged"]`
 
 Stage data to a logical subdirectory.
 
@@ -162,7 +191,7 @@ Stage data to a logical subdirectory.
 | `"srcs"` | The files to be staged |
 | `"deps"` | Targets of with their runfiles should be added as well. Their staging is not changed. |
 
-## Rule `["patch", "file"]`
+### Rule `["patch", "file"]`
 
 Replace a file, logically in place, by a patched version
 
@@ -172,7 +201,7 @@ Replace a file, logically in place, by a patched version
 | `"src"` | The single source file to patch, typically an explict file reference. |
 | `"patch"` | The patch to apply. |
 
-## Rule `["CC/auto", "config"]`
+### Rule `["CC/auto", "config"]`
 
 Generate a C/C++ config header 
 
@@ -186,7 +215,7 @@ Generate a C/C++ config header
 | `"hdrs"` | Additional header files to be available in the include path. Useful for providing additional header files to values given in `"have_{cfile,cxxfile,ctype,cxxtype,csymbol,cxxsymbol}"`. |
 | `"deps"` | Additional public header files from targets to be available in the include path. Useful for providing additional header files to values given in `"have_{cfile,cxxfile,ctype,cxxtype,csymbol,cxxsymbol}"`. |
 
-## Rule `["CC/IDE", "headers"]`
+### Rule `["CC/IDE", "headers"]`
 
 Transitive public headers of C++ target
 
