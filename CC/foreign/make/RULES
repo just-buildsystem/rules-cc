@@ -1,0 +1,676 @@
+{ "data":
+  { "doc": ["Data produced by Make build and install."]
+  , "target_fields": ["project"]
+  , "string_fields":
+    [ "target"
+    , "prefix"
+    , "options"
+    , "jobs"
+    , "pre_cmds"
+    , "post_cmds"
+    , "out_files"
+    , "out_dirs"
+    , "var_cc"
+    , "var_cxx"
+    , "var_ccflags"
+    , "var_cxxflags"
+    , "var_ldflags"
+    , "var_ar"
+    , "var_prefix"
+    , "var_destdir"
+    ]
+  , "config_vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "AR"
+    , "PREFIX"
+    , "BUILD_POSITION_INDEPENDENT"
+    ]
+  , "implicit": {"defaults": [["CC", "defaults"]]}
+  , "field_doc":
+    { "project":
+      ["The Make project directory. It should contain a single tree artifact"]
+    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "prefix":
+      [ "The prefix used for the Make target. The path will be made absolute"
+      , "and individual directory components are joined with \"/\". If no"
+      , "prefix is specified, the value from the config variable \"PREFIX\" is"
+      , "taken, with the default value being \"/\"."
+      ]
+    , "options":
+      [ "Make options for the configuration phase."
+      , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
+      ]
+    , "jobs":
+      [ "Number of jobs to run simultaneously. If omitted, Make's default"
+      , "number is used."
+      ]
+    , "pre_cmds":
+      [ "List of commands executed in the project directory before calling"
+      , "Make. Useful for renaming files or directories. Note that data"
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
+      , "which is uniquely reserved for this action."
+      ]
+    , "post_cmds":
+      [ "List of commands executed in the install directory after successful"
+      , "installation but before the output files are collected. Useful for"
+      , "renaming files or directories. Note that data between \"pre_cmds\" and"
+      , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
+      , "for this action."
+      ]
+    , "out_files":
+      [ "Paths to the produced output files. The paths are considered relative"
+      , "to the install directory."
+      , "Note that \"out_files\" and \"out_dirs\" may not overlap."
+      ]
+    , "out_dirs":
+      [ "Paths to the produced output directories. The paths are considered"
+      , "relative to the install directory."
+      , "Note that \"out_files\" and \"out_dirs\" may not overlap."
+      ]
+    , "var_cc":
+      ["Variable name used to specify the C compiler (default: \"CC\")."]
+    , "var_cxx":
+      ["Variable name used to specify the C++ compiler (default: \"CXX\")."]
+    , "var_ccflags":
+      ["Variable name used to specify the C flags (default: \"CFLAGS\")."]
+    , "var_cxxflags":
+      ["Variable name used to specify the C++ flags (default: \"CXXFLAGS\")."]
+    , "var_ldflags":
+      ["Variable name used to specify the link flags (default: \"LDFLAGS\")."]
+    , "var_ar":
+      ["Variable name used to specify the archiver (default: \"AR\")."]
+    , "var_prefix":
+      ["Variable name used to specify the prefix (default: \"PREFIX\")."]
+    , "var_destdir":
+      ["Variable name used to specify the destdir (default: \"DESTDIR\")."]
+    }
+  , "config_doc":
+    { "CC":
+      [ "The name of the C compiler to be used."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "CXX":
+      [ "The name of the C++ compiler to be used."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "CFLAGS":
+      [ "The flags for CC to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice"
+      ]
+    , "CXXFLAGS":
+      [ "The flags for CXX to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "LDFLAGS":
+      [ "The linker flags to be used instead of the default ones."
+      , "For libraries that should be linked in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice"
+      ]
+    , "ADD_CFLAGS":
+      [ "The flags to add to the default ones for CC."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ADD_CXXFLAGS":
+      [ "The flags to add to the default ones for CXX."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones."
+      , "For libraries that should be linked in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ENV":
+      [ "The environment for any action generated."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "AR":
+      [ "The archive tool to used for creating the library."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "PREFIX":
+      [ "The absolute path that is used as prefix inside generated pkg-config"
+      , "files. The default value for this variable is \"/\". This variable"
+      , "is ignored if the field \"prefix\" is set."
+      ]
+    , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
+    }
+  , "imports":
+    { "stage_field": ["", "stage_singleton_field"]
+    , "make-build": "make-build"
+    , "strip-prefix": ["./", "..", "strip-prefix"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["install_prefix", "install"]
+      , [ "source_dir"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "project"], ["location", "source"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "installed_out_files"
+        , { "type": "foreach"
+          , "var": "file_path"
+          , "range": {"type": "FIELD", "name": "out_files"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "file_path"}
+              ]
+            }
+          }
+        ]
+      , [ "installed_out_dirs"
+        , { "type": "foreach"
+          , "var": "dir_path"
+          , "range": {"type": "FIELD", "name": "out_dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "dir_path"}
+              ]
+            }
+          }
+        ]
+      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
+      , ["make_options", {"type": "FIELD", "name": "options"}]
+      , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
+      , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
+      , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["var_cc", {"type": "FIELD", "name": "var_cc"}]
+      , ["var_cxx", {"type": "FIELD", "name": "var_cxx"}]
+      , ["var_ccflags", {"type": "FIELD", "name": "var_ccflags"}]
+      , ["var_cxxflags", {"type": "FIELD", "name": "var_cxxflags"}]
+      , ["var_ldflags", {"type": "FIELD", "name": "var_ldflags"}]
+      , ["var_ar", {"type": "FIELD", "name": "var_ar"}]
+      , ["var_prefix", {"type": "FIELD", "name": "var_prefix"}]
+      , ["var_destdir", {"type": "FIELD", "name": "var_destdir"}]
+      , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
+      , [ "install_dir"
+        , { "type": "ACTION"
+          , "inputs": {"type": "var", "name": "full_install_dir"}
+          , "cmd": ["/bin/sh", "-c", ":"]
+          , "outs": {"type": "var", "name": "installed_out_files"}
+          , "out_dirs": {"type": "var", "name": "installed_out_dirs"}
+          }
+        ]
+      , [ "out_files"
+        , { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "install_dir"}]
+            , ["paths", {"type": "FIELD", "name": "out_files"}]
+            , ["prefix", {"type": "var", "name": "install_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        ]
+      , [ "out_dirs"
+        , { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "install_dir"}]
+            , ["paths", {"type": "FIELD", "name": "out_dirs"}]
+            , ["prefix", {"type": "var", "name": "install_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts":
+        { "type": "map_union"
+        , "$1":
+          { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "out_files"}
+            , {"type": "var", "name": "out_dirs"}
+            ]
+          }
+        }
+      }
+    }
+  }
+, "library":
+  { "doc": ["Library produced by Make build and install."]
+  , "target_fields": ["project", "deps"]
+  , "string_fields":
+    [ "name"
+    , "version"
+    , "stage"
+    , "target"
+    , "prefix"
+    , "options"
+    , "jobs"
+    , "pre_cmds"
+    , "post_cmds"
+    , "out_hdrs"
+    , "out_hdr_dirs"
+    , "out_libs"
+    , "cflags"
+    , "ldflags"
+    , "pkg-config"
+    , "hdr_prefix"
+    , "lib_prefix"
+    , "pc_prefix"
+    , "var_cc"
+    , "var_cxx"
+    , "var_ccflags"
+    , "var_cxxflags"
+    , "var_ldflags"
+    , "var_ar"
+    , "var_prefix"
+    , "var_destdir"
+    ]
+  , "config_vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "AR"
+    , "PREFIX"
+    , "BUILD_POSITION_INDEPENDENT"
+    ]
+  , "implicit":
+    { "defaults": [["CC", "defaults"]]
+    , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
+    }
+  , "field_doc":
+    { "project":
+      ["The Make project directory. It should contain a single tree artifact"]
+    , "name":
+      [ "The name of the library (without leading \"lib\" or trailing file name"
+      , "extension), also used as name for pkg-config files."
+      ]
+    , "version":
+      [ "The library version, used for pkg-config files. Individual version"
+      , "components are joined with \".\"."
+      ]
+    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "prefix":
+      [ "The prefix used for the Make target. The path will be made absolute"
+      , "and individual directory components are joined with \"/\". If no"
+      , "prefix is specified, the value from the config variable \"PREFIX\" is"
+      , "taken, with the default value being \"/\"."
+      ]
+    , "options":
+      [ "Make options for the configuration phase."
+      , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
+      ]
+    , "jobs":
+      [ "Number of jobs to run simultaneously. If omitted, Make's default"
+      , "number is used."
+      ]
+    , "pre_cmds":
+      [ "List of commands executed in the project directory before calling"
+      , "Make. Useful for renaming files or directories. Note that data"
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
+      , "which is uniquely reserved for this action."
+      ]
+    , "post_cmds":
+      [ "List of commands executed in the install directory after successful"
+      , "installation but before the output files are collected. Useful for"
+      , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
+      , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "$TMPDIR, which is uniquely reserved for this action."
+      ]
+    , "out_hdrs":
+      [ "Paths to produced public header files. The path is considered"
+      , "relative to the include directory, which be set via \"hdr_prefix\"."
+      , "Note that \"out_hdrs\" and \"out_hdr_dirs\" may not overlap."
+      ]
+    , "out_hdr_dirs":
+      [ "Paths to produced public header directories. The path is considered"
+      , "relative to the include directory, which be set via \"hdr_prefix\"."
+      , "Note that \"out_hdrs\" and \"out_hdr_dirs\" may not overlap."
+      ]
+    , "out_libs":
+      [ "Paths to produced library files. The path is considered relative"
+      , "to the library directory, which be set via \"lib_prefix\"."
+      , "Order matters in the case of one library depending on another."
+      ]
+    , "cflags":
+      ["List of compile flags set for this target and its consumers."]
+    , "ldflags":
+      [ "Additional linker flags that are required for the consumer of the"
+      , "produced libraries."
+      ]
+    , "stage":
+      [ "The logical location of the public headers and library files."
+      , "Individual directory components are joined with \"/\"."
+      ]
+    , "deps": ["Public dependency on other CC libraries."]
+    , "pkg-config":
+      [ "Pkg-config file for optional infer of public cflags and ldflags. If"
+      , "multiple files are specified (e.g., one depends on the other), the"
+      , "first one is used as entry. Note that if this field is non-empty the"
+      , "tool \"pkg-config\" must be available in \"PATH\", which is taken"
+      , "from [\"CC\", \"defaults\"] or the \"ENV\" variable."
+      ]
+    , "hdr_prefix":
+      [ "Prefix where headers will be installed by Make. Individual directory"
+      , "components are joined with \"/\". Defaults to \"include\" if not set."
+      ]
+    , "lib_prefix":
+      [ "Prefix where libraries will be installed by Make. Individual"
+      , "directory components are joined with \"/\". Defaults to \"lib\" if"
+      , "not set."
+      ]
+    , "pc_prefix":
+      [ "Prefix where pkg-config files will be installed by Make. Individual"
+      , "directory components are joined with \"/\". Defaults to"
+      , "\"lib/pkgconfig\" if not set."
+      ]
+    , "var_cc":
+      ["Variable name used to specify the C compiler (default: \"CC\")."]
+    , "var_cxx":
+      ["Variable name used to specify the C++ compiler (default: \"CXX\")."]
+    , "var_ccflags":
+      ["Variable name used to specify the C flags (default: \"CFLAGS\")."]
+    , "var_cxxflags":
+      ["Variable name used to specify the C++ flags (default: \"CXXFLAGS\")."]
+    , "var_ldflags":
+      ["Variable name used to specify the link flags (default: \"LDFLAGS\")."]
+    , "var_ar":
+      ["Variable name used to specify the archiver (default: \"AR\")."]
+    , "var_prefix":
+      ["Variable name used to specify the prefix (default: \"PREFIX\")."]
+    , "var_destdir":
+      ["Variable name used to specify the destdir (default: \"DESTDIR\")."]
+    }
+  , "config_doc":
+    { "CC":
+      [ "The name of the C compiler to be used."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "CXX":
+      [ "The name of the C++ compiler to be used."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "CFLAGS":
+      [ "The flags for CC to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice"
+      ]
+    , "CXXFLAGS":
+      [ "The flags for CXX to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "LDFLAGS":
+      ["Global ld flags, for common link args,such as -Wl,-z,noexecstack"]
+    , "ADD_CFLAGS":
+      [ "The flags to add to the default ones for CC."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ADD_CXXFLAGS":
+      [ "The flags to add to the default ones for CXX."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones."
+      , "For libraries that should be linked in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ENV":
+      [ "The environment for any action generated."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "AR":
+      [ "The archive tool to used for creating the library"
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "PREFIX":
+      [ "The absolute path that is used as prefix inside generated pkg-config"
+      , "files. The default value for this variable is \"/\". This variable"
+      , "is ignored if the field \"prefix\" is set."
+      ]
+    , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
+    }
+  , "imports":
+    { "stage_field": ["", "stage_singleton_field"]
+    , "make-build": "make-build"
+    , "strip-prefix": ["./", "..", "strip-prefix"]
+    , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "hdr_prefix"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["install"]
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "hdr_prefix"}
+                , "then": {"type": "FIELD", "name": "hdr_prefix"}
+                , "else": ["include"]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "lib_prefix"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["install"]
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "lib_prefix"}
+                , "then": {"type": "FIELD", "name": "lib_prefix"}
+                , "else": ["lib"]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "pc_prefix"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["install"]
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "pc_prefix"}
+                , "then": {"type": "FIELD", "name": "pc_prefix"}
+                , "else": ["lib", "pkgconfig"]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "source_dir"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "project"], ["location", "source"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "installed_dirs"
+        , { "type": "foreach"
+          , "var": "dir_path"
+          , "range": {"type": "FIELD", "name": "out_hdr_dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "hdr_prefix"}
+              , {"type": "var", "name": "dir_path"}
+              ]
+            }
+          }
+        ]
+      , [ "installed_files"
+        , { "type": "++"
+          , "$1":
+            [ { "type": "foreach"
+              , "var": "lib_path"
+              , "range": {"type": "FIELD", "name": "out_libs"}
+              , "body":
+                { "type": "join"
+                , "separator": "/"
+                , "$1":
+                  [ {"type": "var", "name": "lib_prefix"}
+                  , {"type": "var", "name": "lib_path"}
+                  ]
+                }
+              }
+            , { "type": "foreach"
+              , "var": "hdr_path"
+              , "range": {"type": "FIELD", "name": "out_hdrs"}
+              , "body":
+                { "type": "join"
+                , "separator": "/"
+                , "$1":
+                  [ {"type": "var", "name": "hdr_prefix"}
+                  , {"type": "var", "name": "hdr_path"}
+                  ]
+                }
+              }
+            , { "type": "foreach"
+              , "var": "pc_path"
+              , "range": {"type": "FIELD", "name": "pkg-config"}
+              , "body":
+                { "type": "join"
+                , "separator": "/"
+                , "$1":
+                  [ {"type": "var", "name": "pc_prefix"}
+                  , {"type": "var", "name": "pc_path"}
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
+      , ["make_options", {"type": "FIELD", "name": "options"}]
+      , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
+      , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
+      , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["var_cc", {"type": "FIELD", "name": "var_cc"}]
+      , ["var_cxx", {"type": "FIELD", "name": "var_cxx"}]
+      , ["var_ccflags", {"type": "FIELD", "name": "var_ccflags"}]
+      , ["var_cxxflags", {"type": "FIELD", "name": "var_cxxflags"}]
+      , ["var_ldflags", {"type": "FIELD", "name": "var_ldflags"}]
+      , ["var_ar", {"type": "FIELD", "name": "var_ar"}]
+      , ["var_prefix", {"type": "FIELD", "name": "var_prefix"}]
+      , ["var_destdir", {"type": "FIELD", "name": "var_destdir"}]
+      , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
+      , [ "install_dir"
+        , { "type": "ACTION"
+          , "inputs": {"type": "var", "name": "full_install_dir"}
+          , "cmd": ["/bin/sh", "-c", ":"]
+          , "outs": {"type": "var", "name": "installed_files"}
+          , "out_dirs": {"type": "var", "name": "installed_dirs"}
+          }
+        ]
+      , [ "hdrs"
+        , { "type": "++"
+          , "$1":
+            [ { "type": "let*"
+              , "bindings":
+                [ ["artifacts", {"type": "var", "name": "install_dir"}]
+                , ["paths", {"type": "FIELD", "name": "out_hdrs"}]
+                , ["prefix", {"type": "var", "name": "hdr_prefix"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+              }
+            , { "type": "let*"
+              , "bindings":
+                [ ["artifacts", {"type": "var", "name": "install_dir"}]
+                , ["paths", {"type": "FIELD", "name": "out_hdr_dirs"}]
+                , ["prefix", {"type": "var", "name": "hdr_prefix"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+              }
+            ]
+          }
+        ]
+      , [ "libs"
+        , { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "install_dir"}]
+            , ["paths", {"type": "FIELD", "name": "out_libs"}]
+            , ["prefix", {"type": "var", "name": "lib_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        ]
+      , [ "config_reader"
+        , { "type": "let*"
+          , "bindings":
+            [["fieldname", "config_reader"], ["location", "config_reader"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "pkg-configs"
+        , { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "install_dir"}]
+            , ["paths", {"type": "FIELD", "name": "pkg-config"}]
+            , ["prefix", {"type": "var", "name": "pc_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        ]
+      , [ "name"
+        , { "type": "assert_non_empty"
+          , "msg": "name is required for make library"
+          , "$1": {"type": "join", "$1": {"type": "FIELD", "name": "name"}}
+          }
+        ]
+      , ["version", {"type": "FIELD", "name": "version"}]
+      , ["cflags", {"type": "FIELD", "name": "cflags"}]
+      , ["ldflags", {"type": "FIELD", "name": "ldflags"}]
+      , [ "stage"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "FIELD", "name": "stage"}
+          }
+        ]
+      , ["deps-fieldnames", ["deps"]]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "prebuilt result"}
+    }
+  }
+}

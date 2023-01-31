@@ -1,0 +1,284 @@
+{ "make-build":
+  { "vars":
+    [ "source_dir"
+    , "make_target"
+    , "make_prefix"
+    , "make_options"
+    , "make_jobs"
+    , "pre_cmds"
+    , "post_cmds"
+    , "var_cc"
+    , "var_cxx"
+    , "var_ccflags"
+    , "var_cxxflags"
+    , "var_ldflags"
+    , "var_ar"
+    , "var_prefix"
+    , "var_destdir"
+    , "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "AR"
+    , "PREFIX"
+    , "BUILD_POSITION_INDEPENDENT"
+    ]
+  , "imports":
+    { "artifacts": ["", "field_artifacts"]
+    , "flags-cc": ["CC", "flags-cc"]
+    , "flags-cxx": ["CC", "flags-cxx"]
+    , "compiler-cc": ["CC", "compiler-cc"]
+    , "compiler-cxx": ["CC", "compiler-cxx"]
+    , "default-LDFLAGS": ["CC", "default-LDFLAGS"]
+    , "default-AR": ["CC", "default-AR"]
+    , "default-ENV": ["CC", "default-ENV"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["CC", {"type": "CALL_EXPRESSION", "name": "compiler-cc"}]
+      , ["CXX", {"type": "CALL_EXPRESSION", "name": "compiler-cxx"}]
+      , [ "CFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1": {"type": "CALL_EXPRESSION", "name": "flags-cc"}
+          }
+        ]
+      , [ "CXXFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1": {"type": "CALL_EXPRESSION", "name": "flags-cxx"}
+          }
+        ]
+      , [ "LDFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "var"
+                , "name": "LDFLAGS"
+                , "default":
+                  {"type": "CALL_EXPRESSION", "name": "default-LDFLAGS"}
+                }
+              , {"type": "var", "name": "ldflags", "default": []}
+              ]
+            }
+          }
+        ]
+      , [ "AR"
+        , { "type": "var"
+          , "name": "AR"
+          , "default": {"type": "CALL_EXPRESSION", "name": "default-AR"}
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
+              , [ { "type": "var"
+                  , "name": "ENV"
+                  , "default": {"type": "empty_map"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_cc"}
+                    , "then":
+                      {"type": "join", "$1": {"type": "var", "name": "var_cc"}}
+                    , "else": "CC"
+                    }
+                  , "value": {"type": "var", "name": "CC"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_cxx"}
+                    , "then":
+                      { "type": "join"
+                      , "$1": {"type": "var", "name": "var_cxx"}
+                      }
+                    , "else": "CXX"
+                    }
+                  , "value": {"type": "var", "name": "CXX"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_ccflags"}
+                    , "then":
+                      { "type": "join"
+                      , "$1": {"type": "var", "name": "var_ccflags"}
+                      }
+                    , "else": "CFLAGS"
+                    }
+                  , "value": {"type": "var", "name": "CFLAGS"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_cxxflags"}
+                    , "then":
+                      { "type": "join"
+                      , "$1": {"type": "var", "name": "var_cxxflags"}
+                      }
+                    , "else": "CXXFLAGS"
+                    }
+                  , "value": {"type": "var", "name": "CXXFLAGS"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_ldflags"}
+                    , "then":
+                      { "type": "join"
+                      , "$1": {"type": "var", "name": "var_ldflags"}
+                      }
+                    , "else": "LDFLAGS"
+                    }
+                  , "value": {"type": "var", "name": "LDFLAGS"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_ar"}
+                    , "then":
+                      {"type": "join", "$1": {"type": "var", "name": "var_ar"}}
+                    , "else": "AR"
+                    }
+                  , "value": {"type": "var", "name": "AR"}
+                  }
+                ]
+              , [ { "type": "singleton_map"
+                  , "key":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "var_prefix"}
+                    , "then":
+                      { "type": "join"
+                      , "$1": {"type": "var", "name": "var_prefix"}
+                      }
+                    , "else": "PREFIX"
+                    }
+                  , "value":
+                    { "type": "if"
+                    , "cond": {"type": "var", "name": "make_prefix"}
+                    , "then":
+                      { "type": "join"
+                      , "separator": "/"
+                      , "$1":
+                        { "type": "++"
+                        , "$1": [[""], {"type": "var", "name": "make_prefix"}]
+                        }
+                      }
+                    , "else": {"type": "var", "name": "PREFIX", "default": "/"}
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      , [ "script"
+        , { "type": "singleton_map"
+          , "key": "run_make.sh"
+          , "value":
+            { "type": "BLOB"
+            , "data":
+              { "type": "join"
+              , "separator": "\n"
+              , "$1":
+                { "type": "++"
+                , "$1":
+                  [ [ "set -eu"
+                    , "mkdir scratch"
+                    , "readonly TMPDIR=\"$(pwd)/scratch\""
+                    ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "pre_cmds"}
+                    , "then":
+                      { "type": "++"
+                      , "$1":
+                        [ ["(", "set --", "cd ./source"]
+                        , {"type": "var", "name": "pre_cmds"}
+                        , [")"]
+                        ]
+                      }
+                    }
+                  , [ "readonly VAR_DESTDIR=$1"
+                    , "shift"
+                    , "make \"$@\" -C source ${VAR_DESTDIR}=$(pwd)/install >build.log || (cat build.log && exit 1)"
+                    , "find ./install -type l -delete"
+                    ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "post_cmds"}
+                    , "then":
+                      { "type": "++"
+                      , "$1":
+                        [ ["(", "set --", "cd ./install"]
+                        , {"type": "var", "name": "post_cmds"}
+                        , [")"]
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "ACTION"
+      , "inputs":
+        { "type": "map_union"
+        , "$1":
+          [ {"type": "var", "name": "source_dir"}
+          , {"type": "var", "name": "script"}
+          ]
+        }
+      , "cmd":
+        { "type": "++"
+        , "$1":
+          [ ["/bin/sh", "run_make.sh"]
+          , { "type": "if"
+            , "cond": {"type": "var", "name": "var_destdir"}
+            , "then":
+              [{"type": "join", "$1": {"type": "var", "name": "var_destdir"}}]
+            , "else": ["DESTDIR"]
+            }
+          , {"type": "var", "name": "make_options"}
+          , { "type": "if"
+            , "cond": {"type": "var", "name": "make_target"}
+            , "then":
+              [{"type": "join", "$1": {"type": "var", "name": "make_target"}}]
+            , "else": ["install"]
+            }
+          , [ { "type": "join"
+              , "$1":
+                { "type": "++"
+                , "$1":
+                  [["-j"], {"type": "var", "name": "make_jobs", "default": []}]
+                }
+              }
+            ]
+          ]
+        }
+      , "out_dirs": ["install"]
+      , "env": {"type": "var", "name": "ENV"}
+      }
+    }
+  }
+}
