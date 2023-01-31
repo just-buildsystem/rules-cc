@@ -173,8 +173,7 @@
     , "body":
       { "type": "RESULT"
       , "artifacts":
-        { "type": "var"
-        , "name": "map_union"
+        { "type": "map_union"
         , "$1":
           { "type": "++"
           , "$1":
