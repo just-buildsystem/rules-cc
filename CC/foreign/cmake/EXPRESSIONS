@@ -3,6 +3,7 @@
     [ "source_dir"
     , "cmake_options"
     , "cmake_defines"
+    , "cmake_jobs"
     , "pre_cmds"
     , "post_cmds"
     , "CC"
@@ -80,6 +81,11 @@
             }
           }
         ]
+      , [ "CMAKE_BUILD_PARALLEL_LEVEL"
+        , { "type": "join"
+          , "$1": {"type": "var", "name": "cmake_jobs", "default": []}
+          }
+        ]
       , [ "ENV"
         , { "type": "map_union"
           , "$1":
@@ -92,7 +98,14 @@
                   }
                 ]
               , [ { "type": "env"
-                  , "vars": ["CC", "CXX", "CXXFLAGS", "CFLAGS", "LDFLAGS"]
+                  , "vars":
+                    [ "CC"
+                    , "CXX"
+                    , "CXXFLAGS"
+                    , "CFLAGS"
+                    , "LDFLAGS"
+                    , "CMAKE_BUILD_PARALLEL_LEVEL"
+                    ]
                   }
                 ]
               ]

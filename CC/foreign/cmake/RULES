@@ -2,7 +2,14 @@
   { "doc": ["Data produced by CMake configure, build, and install."]
   , "target_fields": ["project"]
   , "string_fields":
-    ["options", "defines", "pre_cmds", "post_cmds", "out_files", "out_dirs"]
+    [ "options"
+    , "defines"
+    , "jobs"
+    , "pre_cmds"
+    , "post_cmds"
+    , "out_files"
+    , "out_dirs"
+    ]
   , "config_vars":
     [ "CC"
     , "CXX"
@@ -27,6 +34,10 @@
     , "defines":
       [ "CMake defines for the configuration phase."
       , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+      ]
+    , "jobs":
+      [ "Number of jobs to run simultaneously. If omitted, CMake's default"
+      , "number is used."
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
@@ -152,6 +163,7 @@
         ]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
+      , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
       , [ "full_install_dir"
@@ -210,6 +222,7 @@
     , "stage"
     , "options"
     , "defines"
+    , "jobs"
     , "pre_cmds"
     , "post_cmds"
     , "out_hdrs"
@@ -257,6 +270,10 @@
     , "defines":
       [ "CMake defines for the configuration phase."
       , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+      ]
+    , "jobs":
+      [ "Number of jobs to run simultaneously. If omitted, CMake's default"
+      , "number is used."
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
@@ -491,6 +508,7 @@
         ]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
+      , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
       , [ "full_install_dir"
