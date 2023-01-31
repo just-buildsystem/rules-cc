@@ -3,6 +3,9 @@
     [ "source_dir"
     , "cmake_options"
     , "cmake_defines"
+    , "cmake_jobs"
+    , "pre_cmds"
+    , "post_cmds"
     , "CC"
     , "CXX"
     , "CFLAGS"
@@ -44,7 +47,6 @@
               , "cond": {"type": "var", "name": "BUILD_POSITION_INDEPENDENT"}
               , "then": ["-DCMAKE_POSITION_INDEPENDENT_CODE=ON"]
               }
-            , [{"type": "join", "$1": ["-DCMAKE_AR=/usr/bin/ar"]}]
             ]
           }
         ]
@@ -79,6 +81,11 @@
             }
           }
         ]
+      , [ "CMAKE_BUILD_PARALLEL_LEVEL"
+        , { "type": "join"
+          , "$1": {"type": "var", "name": "cmake_jobs", "default": []}
+          }
+        ]
       , [ "ENV"
         , { "type": "map_union"
           , "$1":
@@ -91,7 +98,14 @@
                   }
                 ]
               , [ { "type": "env"
-                  , "vars": ["CC", "CXX", "CXXFLAGS", "CFLAGS", "LDFLAGS"]
+                  , "vars":
+                    [ "CC"
+                    , "CXX"
+                    , "CXXFLAGS"
+                    , "CFLAGS"
+                    , "LDFLAGS"
+                    , "CMAKE_BUILD_PARALLEL_LEVEL"
+                    ]
                   }
                 ]
               ]
@@ -113,13 +127,42 @@
               { "type": "join"
               , "separator": "\n"
               , "$1":
-                [ "set -eu"
-                , "readonly CMAKE_AR=$(which $1)"
-                , "shift"
-                , "cmake \"$@\" -Ssource -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log || (cat configure.log && exit 1)"
-                , "cmake --build build --target install >build.log || (cat configure.log build.log && exit 1)"
-                , "find ./install -type l -delete"
-                ]
+                { "type": "++"
+                , "$1":
+                  [ [ "set -eu"
+                    , "mkdir scratch"
+                    , "readonly TMPDIR=\"$(pwd)/scratch\""
+                    ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "pre_cmds"}
+                    , "then":
+                      { "type": "++"
+                      , "$1":
+                        [ ["(", "set --", "cd ./source"]
+                        , {"type": "var", "name": "pre_cmds"}
+                        , [")"]
+                        ]
+                      }
+                    }
+                  , [ "readonly CMAKE_AR=$(which $1)"
+                    , "shift"
+                    , "cmake \"$@\" -Ssource -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log || (cat configure.log && exit 1)"
+                    , "cmake --build build --target install >build.log || (cat configure.log build.log && exit 1)"
+                    , "find ./install -type l -delete"
+                    ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "post_cmds"}
+                    , "then":
+                      { "type": "++"
+                      , "$1":
+                        [ ["(", "set --", "cd ./install"]
+                        , {"type": "var", "name": "post_cmds"}
+                        , [")"]
+                        ]
+                      }
+                    }
+                  ]
+                }
               }
             }
           }

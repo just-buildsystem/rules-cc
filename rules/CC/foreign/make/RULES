@@ -1,14 +1,23 @@
 { "data":
-  { "doc": ["Data produced by CMake configure, build, and install."]
+  { "doc": ["Data produced by Make build and install."]
   , "target_fields": ["project"]
   , "string_fields":
-    [ "options"
-    , "defines"
+    [ "target"
+    , "prefix"
+    , "options"
     , "jobs"
     , "pre_cmds"
     , "post_cmds"
     , "out_files"
     , "out_dirs"
+    , "var_cc"
+    , "var_cxx"
+    , "var_ccflags"
+    , "var_cxxflags"
+    , "var_ldflags"
+    , "var_ar"
+    , "var_prefix"
+    , "var_destdir"
     ]
   , "config_vars":
     [ "CC"
@@ -21,27 +30,31 @@
     , "ADD_LDFLAGS"
     , "ENV"
     , "AR"
+    , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
     ]
   , "implicit": {"defaults": [["CC", "defaults"]]}
   , "field_doc":
     { "project":
-      ["The CMake project directory. It should contain a single tree artifact"]
-    , "options":
-      [ "CMake options for the configuration phase."
-      , "(e.g., [\"-GNinja\", \"-Ax64\"])"
+      ["The Make project directory. It should contain a single tree artifact"]
+    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "prefix":
+      [ "The prefix used for the Make target. The path will be made absolute"
+      , "and individual directory components are joined with \"/\". If no"
+      , "prefix is specified, the value from the config variable \"PREFIX\" is"
+      , "taken, with the default value being \"/\"."
       ]
-    , "defines":
-      [ "CMake defines for the configuration phase."
-      , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+    , "options":
+      [ "Make options for the configuration phase."
+      , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
       ]
     , "jobs":
-      [ "Number of jobs to run simultaneously. If omitted, CMake's default"
+      [ "Number of jobs to run simultaneously. If omitted, Make's default"
       , "number is used."
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
-      , "CMake. Useful for renaming files or directories. Note that data"
+      , "Make. Useful for renaming files or directories. Note that data"
       , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
       , "which is uniquely reserved for this action."
       ]
@@ -62,6 +75,22 @@
       , "relative to the install directory."
       , "Note that \"out_files\" and \"out_dirs\" may not overlap."
       ]
+    , "var_cc":
+      ["Variable name used to specify the C compiler (default: \"CC\")."]
+    , "var_cxx":
+      ["Variable name used to specify the C++ compiler (default: \"CXX\")."]
+    , "var_ccflags":
+      ["Variable name used to specify the C flags (default: \"CFLAGS\")."]
+    , "var_cxxflags":
+      ["Variable name used to specify the C++ flags (default: \"CXXFLAGS\")."]
+    , "var_ldflags":
+      ["Variable name used to specify the link flags (default: \"LDFLAGS\")."]
+    , "var_ar":
+      ["Variable name used to specify the archiver (default: \"AR\")."]
+    , "var_prefix":
+      ["Variable name used to specify the prefix (default: \"PREFIX\")."]
+    , "var_destdir":
+      ["Variable name used to specify the destdir (default: \"DESTDIR\")."]
     }
   , "config_doc":
     { "CC":
@@ -116,11 +145,16 @@
       [ "The archive tool to used for creating the library."
       , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
       ]
+    , "PREFIX":
+      [ "The absolute path that is used as prefix inside generated pkg-config"
+      , "files. The default value for this variable is \"/\". This variable"
+      , "is ignored if the field \"prefix\" is set."
+      ]
     , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
     }
   , "imports":
     { "stage_field": ["", "stage_singleton_field"]
-    , "cmake-build": "cmake-build"
+    , "make-build": "make-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
     }
   , "expression":
@@ -161,14 +195,21 @@
             }
           }
         ]
-      , ["cmake_options", {"type": "FIELD", "name": "options"}]
-      , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
-      , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
+      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
+      , ["make_options", {"type": "FIELD", "name": "options"}]
+      , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
-      , [ "full_install_dir"
-        , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
-        ]
+      , ["var_cc", {"type": "FIELD", "name": "var_cc"}]
+      , ["var_cxx", {"type": "FIELD", "name": "var_cxx"}]
+      , ["var_ccflags", {"type": "FIELD", "name": "var_ccflags"}]
+      , ["var_cxxflags", {"type": "FIELD", "name": "var_cxxflags"}]
+      , ["var_ldflags", {"type": "FIELD", "name": "var_ldflags"}]
+      , ["var_ar", {"type": "FIELD", "name": "var_ar"}]
+      , ["var_prefix", {"type": "FIELD", "name": "var_prefix"}]
+      , ["var_destdir", {"type": "FIELD", "name": "var_destdir"}]
+      , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
       , [ "install_dir"
         , { "type": "ACTION"
           , "inputs": {"type": "var", "name": "full_install_dir"}
@@ -214,14 +255,15 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by CMake configure, build, and install."]
+  { "doc": ["Library produced by Make build and install."]
   , "target_fields": ["project", "deps"]
   , "string_fields":
     [ "name"
     , "version"
     , "stage"
+    , "target"
+    , "prefix"
     , "options"
-    , "defines"
     , "jobs"
     , "pre_cmds"
     , "post_cmds"
@@ -234,6 +276,14 @@
     , "hdr_prefix"
     , "lib_prefix"
     , "pc_prefix"
+    , "var_cc"
+    , "var_cxx"
+    , "var_ccflags"
+    , "var_cxxflags"
+    , "var_ldflags"
+    , "var_ar"
+    , "var_prefix"
+    , "var_destdir"
     ]
   , "config_vars":
     [ "CC"
@@ -246,6 +296,7 @@
     , "ADD_LDFLAGS"
     , "ENV"
     , "AR"
+    , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
     ]
   , "implicit":
@@ -254,7 +305,7 @@
     }
   , "field_doc":
     { "project":
-      ["The CMake project directory. It should contain a single tree artifact"]
+      ["The Make project directory. It should contain a single tree artifact"]
     , "name":
       [ "The name of the library (without leading \"lib\" or trailing file name"
       , "extension), also used as name for pkg-config files."
@@ -263,21 +314,24 @@
       [ "The library version, used for pkg-config files. Individual version"
       , "components are joined with \".\"."
       ]
-    , "options":
-      [ "CMake options for the configuration phase."
-      , "(e.g., [\"-GNinja\", \"-Ax64\"])"
+    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "prefix":
+      [ "The prefix used for the Make target. The path will be made absolute"
+      , "and individual directory components are joined with \"/\". If no"
+      , "prefix is specified, the value from the config variable \"PREFIX\" is"
+      , "taken, with the default value being \"/\"."
       ]
-    , "defines":
-      [ "CMake defines for the configuration phase."
-      , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+    , "options":
+      [ "Make options for the configuration phase."
+      , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
       ]
     , "jobs":
-      [ "Number of jobs to run simultaneously. If omitted, CMake's default"
+      [ "Number of jobs to run simultaneously. If omitted, Make's default"
       , "number is used."
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
-      , "CMake. Useful for renaming files or directories. Note that data"
+      , "Make. Useful for renaming files or directories. Note that data"
       , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
       , "which is uniquely reserved for this action."
       ]
@@ -322,19 +376,35 @@
       , "from [\"CC\", \"defaults\"] or the \"ENV\" variable."
       ]
     , "hdr_prefix":
-      [ "Prefix where headers will be installed by CMake. Individual directory"
+      [ "Prefix where headers will be installed by Make. Individual directory"
       , "components are joined with \"/\". Defaults to \"include\" if not set."
       ]
     , "lib_prefix":
-      [ "Prefix where libraries will be installed by CMake. Individual"
+      [ "Prefix where libraries will be installed by Make. Individual"
       , "directory components are joined with \"/\". Defaults to \"lib\" if"
       , "not set."
       ]
     , "pc_prefix":
-      [ "Prefix where pkg-config files will be installed by CMake. Individual"
+      [ "Prefix where pkg-config files will be installed by Make. Individual"
       , "directory components are joined with \"/\". Defaults to"
       , "\"lib/pkgconfig\" if not set."
       ]
+    , "var_cc":
+      ["Variable name used to specify the C compiler (default: \"CC\")."]
+    , "var_cxx":
+      ["Variable name used to specify the C++ compiler (default: \"CXX\")."]
+    , "var_ccflags":
+      ["Variable name used to specify the C flags (default: \"CFLAGS\")."]
+    , "var_cxxflags":
+      ["Variable name used to specify the C++ flags (default: \"CXXFLAGS\")."]
+    , "var_ldflags":
+      ["Variable name used to specify the link flags (default: \"LDFLAGS\")."]
+    , "var_ar":
+      ["Variable name used to specify the archiver (default: \"AR\")."]
+    , "var_prefix":
+      ["Variable name used to specify the prefix (default: \"PREFIX\")."]
+    , "var_destdir":
+      ["Variable name used to specify the destdir (default: \"DESTDIR\")."]
     }
   , "config_doc":
     { "CC":
@@ -385,11 +455,16 @@
       [ "The archive tool to used for creating the library"
       , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
       ]
+    , "PREFIX":
+      [ "The absolute path that is used as prefix inside generated pkg-config"
+      , "files. The default value for this variable is \"/\". This variable"
+      , "is ignored if the field \"prefix\" is set."
+      ]
     , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
     }
   , "imports":
     { "stage_field": ["", "stage_singleton_field"]
-    , "cmake-build": "cmake-build"
+    , "make-build": "make-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
     , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
     }
@@ -506,14 +581,21 @@
             ]
           }
         ]
-      , ["cmake_options", {"type": "FIELD", "name": "options"}]
-      , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
-      , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
+      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
+      , ["make_options", {"type": "FIELD", "name": "options"}]
+      , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
-      , [ "full_install_dir"
-        , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
-        ]
+      , ["var_cc", {"type": "FIELD", "name": "var_cc"}]
+      , ["var_cxx", {"type": "FIELD", "name": "var_cxx"}]
+      , ["var_ccflags", {"type": "FIELD", "name": "var_ccflags"}]
+      , ["var_cxxflags", {"type": "FIELD", "name": "var_cxxflags"}]
+      , ["var_ldflags", {"type": "FIELD", "name": "var_ldflags"}]
+      , ["var_ar", {"type": "FIELD", "name": "var_ar"}]
+      , ["var_prefix", {"type": "FIELD", "name": "var_prefix"}]
+      , ["var_destdir", {"type": "FIELD", "name": "var_destdir"}]
+      , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
       , [ "install_dir"
         , { "type": "ACTION"
           , "inputs": {"type": "var", "name": "full_install_dir"}
@@ -573,7 +655,7 @@
         ]
       , [ "name"
         , { "type": "assert_non_empty"
-          , "msg": "name is required for cmake library"
+          , "msg": "name is required for make library"
           , "$1": {"type": "join", "$1": {"type": "FIELD", "name": "name"}}
           }
         ]
