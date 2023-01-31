@@ -1,7 +1,8 @@
 { "data":
   { "doc": ["Data produced by CMake configure, build, and install."]
   , "target_fields": ["project"]
-  , "string_fields": ["options", "defines", "out_files", "out_dirs"]
+  , "string_fields":
+    ["options", "defines", "pre_cmds", "post_cmds", "out_files", "out_dirs"]
   , "config_vars":
     [ "CC"
     , "CXX"
@@ -26,6 +27,19 @@
     , "defines":
       [ "CMake defines for the configuration phase."
       , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+      ]
+    , "pre_cmds":
+      [ "List of commands executed in the project directory before calling"
+      , "CMake. Useful for renaming files or directories. Note that data"
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
+      , "which is uniquely reserved for this action."
+      ]
+    , "post_cmds":
+      [ "List of commands executed in the install directory after successful"
+      , "installation but before the output files are collected. Useful for"
+      , "renaming files or directories. Note that data between \"pre_cmds\" and"
+      , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
+      , "for this action."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -138,6 +152,8 @@
         ]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
+      , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
+      , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
         ]
@@ -194,6 +210,8 @@
     , "stage"
     , "options"
     , "defines"
+    , "pre_cmds"
+    , "post_cmds"
     , "out_hdrs"
     , "out_hdr_dirs"
     , "out_libs"
@@ -239,6 +257,19 @@
     , "defines":
       [ "CMake defines for the configuration phase."
       , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+      ]
+    , "pre_cmds":
+      [ "List of commands executed in the project directory before calling"
+      , "CMake. Useful for renaming files or directories. Note that data"
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
+      , "which is uniquely reserved for this action."
+      ]
+    , "post_cmds":
+      [ "List of commands executed in the install directory after successful"
+      , "installation but before the output files are collected. Useful for"
+      , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
+      , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "$TMPDIR, which is uniquely reserved for this action."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"
@@ -460,6 +491,8 @@
         ]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
+      , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
+      , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
         ]
