@@ -15,7 +15,7 @@ or manually add the `rules-cc` repository to your `repos.json`.
 
 ~~~json
 ...
-, "rules-cc":
+  , "rules-cc":
     { "repository":
       { "type": "git"
       , "branch": "master"

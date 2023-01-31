@@ -52,6 +52,8 @@ rm -f "$OUTFILE"
   doc2md rules shell/test script
   doc2md rules CC/foreign/cmake library
   doc2md rules CC/foreign/cmake data
+  doc2md rules CC/foreign/make library
+  doc2md rules CC/foreign/make data
   doc2md rules proto library
   doc2md rules data staged
   doc2md rules patch file

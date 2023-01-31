@@ -15,7 +15,7 @@ or manually add the `rules-cc` repository to your `repos.json`.
 
 ~~~json
 ...
-, "rules-cc":
+  , "rules-cc":
     { "repository":
       { "type": "git"
       , "branch": "master"
@@ -143,6 +143,9 @@ Library produced by CMake configure, build, and install.
 | `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
 | `"options"` | CMake options for the configuration phase. (e.g., `["-GNinja", "-Ax64"]`) |
 | `"defines"` | CMake defines for the configuration phase. (e.g., `["CMAKE_BUILD_TYPE=Release"]`) |
+| `"jobs"` | Number of jobs to run simultaneously. If omitted, CMake's default number is used. |
+| `"pre_cmds"` | List of commands executed in the project directory before calling CMake. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
+| `"post_cmds"` | List of commands executed in the install directory after successful installation but before the output files are collected. Useful for renaming files or directories (e.g., in case of SONAME mismatch). Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
 | `"out_hdrs"` | Paths to produced public header files. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
 | `"out_hdr_dirs"` | Paths to produced public header directories. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
 | `"out_libs"` | Paths to produced library files. The path is considered relative to the library directory, which be set via `"lib_prefix"`. Order matters in the case of one library depending on another. |
@@ -163,9 +166,71 @@ Data produced by CMake configure, build, and install.
 | ----- | ----------- |
 | `"options"` | CMake options for the configuration phase. (e.g., `["-GNinja", "-Ax64"]`) |
 | `"defines"` | CMake defines for the configuration phase. (e.g., `["CMAKE_BUILD_TYPE=Release"]`) |
+| `"jobs"` | Number of jobs to run simultaneously. If omitted, CMake's default number is used. |
+| `"pre_cmds"` | List of commands executed in the project directory before calling CMake. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
+| `"post_cmds"` | List of commands executed in the install directory after successful installation but before the output files are collected. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
 | `"out_files"` | Paths to the produced output files. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
+
+### Rule `["CC/foreign/make", "library"]`
+
+Library produced by Make build and install.
+
+| Field | Description |
+| ----- | ----------- |
+| `"name"` | The name of the library (without leading `"lib"` or trailing file name extension), also used as name for pkg-config files. |
+| `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
+| `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
+| `"target"` | The Make target to build (default: `["install"]`). |
+| `"prefix"` | The prefix used for the Make target. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
+| `"options"` | Make options for the configuration phase. (e.g., `["-f", "Makefile", "ARCH=x86"]`) |
+| `"jobs"` | Number of jobs to run simultaneously. If omitted, Make's default number is used. |
+| `"pre_cmds"` | List of commands executed in the project directory before calling Make. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
+| `"post_cmds"` | List of commands executed in the install directory after successful installation but before the output files are collected. Useful for renaming files or directories (e.g., in case of SONAME mismatch). Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
+| `"out_hdrs"` | Paths to produced public header files. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
+| `"out_hdr_dirs"` | Paths to produced public header directories. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
+| `"out_libs"` | Paths to produced library files. The path is considered relative to the library directory, which be set via `"lib_prefix"`. Order matters in the case of one library depending on another. |
+| `"cflags"` | List of compile flags set for this target and its consumers. |
+| `"ldflags"` | Additional linker flags that are required for the consumer of the produced libraries. |
+| `"pkg-config"` | Pkg-config file for optional infer of public cflags and ldflags. If multiple files are specified (e.g., one depends on the other), the first one is used as entry. Note that if this field is non-empty the tool `"pkg-config"` must be available in `"PATH"`, which is taken from `["CC", "defaults"]` or the `"ENV"` variable. |
+| `"hdr_prefix"` | Prefix where headers will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"include"` if not set. |
+| `"lib_prefix"` | Prefix where libraries will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib"` if not set. |
+| `"pc_prefix"` | Prefix where pkg-config files will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib/pkgconfig"` if not set. |
+| `"var_cc"` | Variable name used to specify the C compiler (default: `"CC"`). |
+| `"var_cxx"` | Variable name used to specify the C++ compiler (default: `"CXX"`). |
+| `"var_ccflags"` | Variable name used to specify the C flags (default: `"CFLAGS"`). |
+| `"var_cxxflags"` | Variable name used to specify the C++ flags (default: `"CXXFLAGS"`). |
+| `"var_ldflags"` | Variable name used to specify the link flags (default: `"LDFLAGS"`). |
+| `"var_ar"` | Variable name used to specify the archiver (default: `"AR"`). |
+| `"var_prefix"` | Variable name used to specify the prefix (default: `"PREFIX"`). |
+| `"var_destdir"` | Variable name used to specify the destdir (default: `"DESTDIR"`). |
+| `"project"` | The Make project directory. It should contain a single tree artifact |
+| `"deps"` | Public dependency on other CC libraries. |
+
+### Rule `["CC/foreign/make", "data"]`
+
+Data produced by Make build and install.
+
+| Field | Description |
+| ----- | ----------- |
+| `"target"` | The Make target to build (default: `["install"]`). |
+| `"prefix"` | The prefix used for the Make target. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
+| `"options"` | Make options for the configuration phase. (e.g., `["-f", "Makefile", "ARCH=x86"]`) |
+| `"jobs"` | Number of jobs to run simultaneously. If omitted, Make's default number is used. |
+| `"pre_cmds"` | List of commands executed in the project directory before calling Make. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
+| `"post_cmds"` | List of commands executed in the install directory after successful installation but before the output files are collected. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via $TMPDIR, which is uniquely reserved for this action. |
+| `"out_files"` | Paths to the produced output files. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
+| `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
+| `"var_cc"` | Variable name used to specify the C compiler (default: `"CC"`). |
+| `"var_cxx"` | Variable name used to specify the C++ compiler (default: `"CXX"`). |
+| `"var_ccflags"` | Variable name used to specify the C flags (default: `"CFLAGS"`). |
+| `"var_cxxflags"` | Variable name used to specify the C++ flags (default: `"CXXFLAGS"`). |
+| `"var_ldflags"` | Variable name used to specify the link flags (default: `"LDFLAGS"`). |
+| `"var_ar"` | Variable name used to specify the archiver (default: `"AR"`). |
+| `"var_prefix"` | Variable name used to specify the prefix (default: `"PREFIX"`). |
+| `"var_destdir"` | Variable name used to specify the destdir (default: `"DESTDIR"`). |
+| `"project"` | The Make project directory. It should contain a single tree artifact |
 
 ### Rule `["proto", "library"]`
 
