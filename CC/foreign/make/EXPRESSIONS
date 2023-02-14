@@ -1,7 +1,7 @@
 { "make-build":
   { "vars":
     [ "source_dir"
-    , "make_target"
+    , "subdir"
     , "make_prefix"
     , "make_options"
     , "make_jobs"
@@ -203,6 +203,12 @@
             ]
           }
         ]
+      , [ "SUBDIR"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "var", "name": "subdir", "default": []}
+          }
+        ]
       , [ "script"
         , { "type": "singleton_map"
           , "key": "run_make.sh"
@@ -229,9 +235,11 @@
                         ]
                       }
                     }
-                  , [ "readonly VAR_DESTDIR=$1"
-                    , "shift"
-                    , "make \"$@\" -C source ${VAR_DESTDIR}=$(pwd)/install >build.log || (cat build.log && exit 1)"
+                  , [ "readonly SUBDIR=\"$1\""
+                    , "readonly VAR_DESTDIR=$2"
+                    , "shift 2"
+                    ]
+                  , [ "make \"$@\" -C \"source/${SUBDIR}\" ${VAR_DESTDIR}=$(pwd)/install >build.log || (cat build.log && exit 1)"
                     , "find ./install -type l -delete"
                     ]
                   , { "type": "if"
@@ -266,6 +274,7 @@
         { "type": "++"
         , "$1":
           [ ["/bin/sh", "run_make.sh"]
+          , [{"type": "var", "name": "SUBDIR"}]
           , { "type": "if"
             , "cond": {"type": "var", "name": "var_destdir"}
             , "then":

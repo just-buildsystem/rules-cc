@@ -2,7 +2,7 @@
   { "doc": ["Data produced by Make build and install."]
   , "target_fields": ["project"]
   , "string_fields":
-    [ "target"
+    [ "subdir"
     , "prefix"
     , "options"
     , "jobs"
@@ -37,7 +37,10 @@
   , "field_doc":
     { "project":
       ["The Make project directory. It should contain a single tree artifact"]
-    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "subdir":
+      [ "The subdirectory that contains the configure and Makefile. Individual"
+      , "directory components are joined with \"/\"."
+      ]
     , "prefix":
       [ "The prefix used for the Make target. The path will be made absolute"
       , "and individual directory components are joined with \"/\". If no"
@@ -195,7 +198,7 @@
             }
           }
         ]
-      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["subdir", {"type": "FIELD", "name": "subdir"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
@@ -258,7 +261,8 @@
   { "doc": ["Library produced by Make build and install."]
   , "target_fields": ["project", "deps"]
   , "string_fields":
-    [ "name"
+    [ "subdir"
+    , "name"
     , "version"
     , "stage"
     , "target"
@@ -306,6 +310,10 @@
   , "field_doc":
     { "project":
       ["The Make project directory. It should contain a single tree artifact"]
+    , "subdir":
+      [ "The subdirectory that contains the configure and Makefile. Individual"
+      , "directory components are joined with \"/\"."
+      ]
     , "name":
       [ "The name of the library (without leading \"lib\" or trailing file name"
       , "extension), also used as name for pkg-config files."
@@ -581,7 +589,7 @@
             ]
           }
         ]
-      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["subdir", {"type": "FIELD", "name": "subdir"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]

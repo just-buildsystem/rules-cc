@@ -1,6 +1,7 @@
 { "cmake-build":
   { "vars":
     [ "source_dir"
+    , "cmake_subdir"
     , "cmake_options"
     , "cmake_defines"
     , "cmake_jobs"
@@ -143,6 +144,12 @@
             ]
           }
         ]
+      , [ "CMAKE_SUBDIR"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "var", "name": "cmake_subdir", "default": []}
+          }
+        ]
       , [ "script"
         , { "type": "singleton_map"
           , "key": "run_cmake.sh"
@@ -169,9 +176,10 @@
                         ]
                       }
                     }
-                  , [ "readonly CMAKE_AR=$(which $1)"
-                    , "shift"
-                    , "cmake \"$@\" -Ssource -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log || (cat configure.log && exit 1)"
+                  , [ "readonly CMAKE_SUBDIR=\"$1\""
+                    , "readonly CMAKE_AR=$(which $2)"
+                    , "shift 2"
+                    , "cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log || (cat configure.log && exit 1)"
                     ]
                   , [ { "type": "join"
                       , "separator": " "
@@ -222,7 +230,11 @@
       , "cmd":
         { "type": "++"
         , "$1":
-          [ ["/bin/sh", "run_cmake.sh", {"type": "var", "name": "AR"}]
+          [ [ "/bin/sh"
+            , "run_cmake.sh"
+            , {"type": "var", "name": "CMAKE_SUBDIR"}
+            , {"type": "var", "name": "AR"}
+            ]
           , {"type": "var", "name": "CMAKE_FLAGS"}
           ]
         }
