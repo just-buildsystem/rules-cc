@@ -80,115 +80,97 @@
       , [ "ENV"
         , { "type": "map_union"
           , "$1":
-            { "type": "++"
-            , "$1":
-              [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
-              , [ { "type": "var"
-                  , "name": "ENV"
-                  , "default": {"type": "empty_map"}
+            [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
+            , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_cc"}
+                , "then":
+                  {"type": "join", "$1": {"type": "var", "name": "var_cc"}}
+                , "else": "CC"
+                }
+              , "value": {"type": "var", "name": "CC"}
+              }
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_cxx"}
+                , "then":
+                  {"type": "join", "$1": {"type": "var", "name": "var_cxx"}}
+                , "else": "CXX"
+                }
+              , "value": {"type": "var", "name": "CXX"}
+              }
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_ccflags"}
+                , "then":
+                  { "type": "join"
+                  , "$1": {"type": "var", "name": "var_ccflags"}
                   }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_cc"}
-                    , "then":
-                      {"type": "join", "$1": {"type": "var", "name": "var_cc"}}
-                    , "else": "CC"
-                    }
-                  , "value": {"type": "var", "name": "CC"}
+                , "else": "CFLAGS"
+                }
+              , "value": {"type": "var", "name": "CFLAGS"}
+              }
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_cxxflags"}
+                , "then":
+                  { "type": "join"
+                  , "$1": {"type": "var", "name": "var_cxxflags"}
                   }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_cxx"}
-                    , "then":
-                      { "type": "join"
-                      , "$1": {"type": "var", "name": "var_cxx"}
-                      }
-                    , "else": "CXX"
-                    }
-                  , "value": {"type": "var", "name": "CXX"}
+                , "else": "CXXFLAGS"
+                }
+              , "value": {"type": "var", "name": "CXXFLAGS"}
+              }
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_ldflags"}
+                , "then":
+                  { "type": "join"
+                  , "$1": {"type": "var", "name": "var_ldflags"}
                   }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_ccflags"}
-                    , "then":
-                      { "type": "join"
-                      , "$1": {"type": "var", "name": "var_ccflags"}
-                      }
-                    , "else": "CFLAGS"
-                    }
-                  , "value": {"type": "var", "name": "CFLAGS"}
-                  }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_cxxflags"}
-                    , "then":
-                      { "type": "join"
-                      , "$1": {"type": "var", "name": "var_cxxflags"}
-                      }
-                    , "else": "CXXFLAGS"
-                    }
-                  , "value": {"type": "var", "name": "CXXFLAGS"}
-                  }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_ldflags"}
-                    , "then":
-                      { "type": "join"
-                      , "$1": {"type": "var", "name": "var_ldflags"}
-                      }
-                    , "else": "LDFLAGS"
-                    }
-                  , "value": {"type": "var", "name": "LDFLAGS"}
-                  }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_ar"}
-                    , "then":
-                      {"type": "join", "$1": {"type": "var", "name": "var_ar"}}
-                    , "else": "AR"
-                    }
-                  , "value": {"type": "var", "name": "AR"}
-                  }
-                ]
-              , [ { "type": "singleton_map"
-                  , "key":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "var_prefix"}
-                    , "then":
-                      { "type": "join"
-                      , "$1": {"type": "var", "name": "var_prefix"}
-                      }
-                    , "else": "PREFIX"
-                    }
-                  , "value":
-                    { "type": "if"
-                    , "cond": {"type": "var", "name": "make_prefix"}
-                    , "then":
-                      { "type": "join"
-                      , "separator": "/"
-                      , "$1":
-                        { "type": "++"
-                        , "$1": [[""], {"type": "var", "name": "make_prefix"}]
-                        }
-                      }
-                    , "else": {"type": "var", "name": "PREFIX", "default": "/"}
+                , "else": "LDFLAGS"
+                }
+              , "value": {"type": "var", "name": "LDFLAGS"}
+              }
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_ar"}
+                , "then":
+                  {"type": "join", "$1": {"type": "var", "name": "var_ar"}}
+                , "else": "AR"
+                }
+              , "value": {"type": "var", "name": "AR"}
+              }
+            , { "type": "singleton_map"
+              , "key":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "var_prefix"}
+                , "then":
+                  {"type": "join", "$1": {"type": "var", "name": "var_prefix"}}
+                , "else": "PREFIX"
+                }
+              , "value":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "make_prefix"}
+                , "then":
+                  { "type": "join"
+                  , "separator": "/"
+                  , "$1":
+                    { "type": "++"
+                    , "$1": [[""], {"type": "var", "name": "make_prefix"}]
                     }
                   }
-                ]
-              ]
-            }
+                , "else": {"type": "var", "name": "PREFIX", "default": "/"}
+                }
+              }
+            ]
           }
         ]
       , [ "script"
