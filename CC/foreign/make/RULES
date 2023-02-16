@@ -3,6 +3,7 @@
   , "target_fields": ["project"]
   , "string_fields":
     [ "subdir"
+    , "targets"
     , "prefix"
     , "options"
     , "jobs"
@@ -40,6 +41,10 @@
     , "subdir":
       [ "The subdirectory that contains the configure and Makefile. Individual"
       , "directory components are joined with \"/\"."
+      ]
+    , "targets":
+      [ "The Make targets to build in the specified order"
+      , "(default: [\"install\"])."
       ]
     , "prefix":
       [ "The prefix used for the Make target. The path will be made absolute"
@@ -199,6 +204,7 @@
           }
         ]
       , ["subdir", {"type": "FIELD", "name": "subdir"}]
+      , ["make_targets", {"type": "FIELD", "name": "targets"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
@@ -265,7 +271,7 @@
     , "name"
     , "version"
     , "stage"
-    , "target"
+    , "targets"
     , "prefix"
     , "options"
     , "jobs"
@@ -322,7 +328,10 @@
       [ "The library version, used for pkg-config files. Individual version"
       , "components are joined with \".\"."
       ]
-    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "targets":
+      [ "The Make targets to build in the specified order"
+      , "(default: [\"install\"])."
+      ]
     , "prefix":
       [ "The prefix used for the Make target. The path will be made absolute"
       , "and individual directory components are joined with \"/\". If no"
@@ -590,6 +599,7 @@
           }
         ]
       , ["subdir", {"type": "FIELD", "name": "subdir"}]
+      , ["make_targets", {"type": "FIELD", "name": "targets"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]

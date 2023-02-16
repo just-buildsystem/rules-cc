@@ -2,6 +2,7 @@
   { "vars":
     [ "source_dir"
     , "subdir"
+    , "make_targets"
     , "make_prefix"
     , "make_options"
     , "make_jobs"
@@ -209,6 +210,13 @@
           , "$1": {"type": "var", "name": "subdir", "default": []}
           }
         ]
+      , [ "make_targets"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "make_targets"}
+          , "then": {"type": "var", "name": "make_targets"}
+          , "else": ["install"]
+          }
+        ]
       , [ "script"
         , { "type": "singleton_map"
           , "key": "run_make.sh"
@@ -239,9 +247,21 @@
                     , "readonly VAR_DESTDIR=$2"
                     , "shift 2"
                     ]
-                  , [ "make \"$@\" -C \"source/${SUBDIR}\" ${VAR_DESTDIR}=$(pwd)/install >build.log || (cat build.log && exit 1)"
-                    , "find ./install -type l -delete"
-                    ]
+                  , { "type": "foreach"
+                    , "range": {"type": "var", "name": "make_targets"}
+                    , "var": "target"
+                    , "body":
+                      { "type": "join"
+                      , "$1":
+                        [ "make \"$@\" -C \"source/${SUBDIR}\" ${VAR_DESTDIR}=$(pwd)/install "
+                        , { "type": "join_cmd"
+                          , "$1": [{"type": "var", "name": "target"}]
+                          }
+                        , " >>build.log || (cat build.log && exit 1)"
+                        ]
+                      }
+                    }
+                  , ["find ./install -type l -delete"]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "post_cmds"}
                     , "then":
@@ -282,12 +302,6 @@
             , "else": ["DESTDIR"]
             }
           , {"type": "var", "name": "make_options"}
-          , { "type": "if"
-            , "cond": {"type": "var", "name": "make_target"}
-            , "then":
-              [{"type": "join", "$1": {"type": "var", "name": "make_target"}}]
-            , "else": ["install"]
-            }
           , [ { "type": "join"
               , "$1":
                 { "type": "++"
