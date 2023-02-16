@@ -1,8 +1,10 @@
 { "data":
-  { "doc": ["Data produced by Make build and install."]
+  { "doc": ["Data produced by Configure and Make build and install."]
   , "target_fields": ["project"]
   , "string_fields":
     [ "subdir"
+    , "configure"
+    , "configure_options"
     , "targets"
     , "prefix"
     , "options"
@@ -42,6 +44,9 @@
       [ "The subdirectory that contains the configure and Makefile. Individual"
       , "directory components are joined with \"/\"."
       ]
+    , "configure": ["Run ./configure if non-empty."]
+    , "configure_options":
+      ["The configure options (the \"--prefix\" option is automatically set."]
     , "targets":
       [ "The Make targets to build in the specified order"
       , "(default: [\"install\"])."
@@ -204,6 +209,8 @@
           }
         ]
       , ["subdir", {"type": "FIELD", "name": "subdir"}]
+      , ["configure", {"type": "FIELD", "name": "configure"}]
+      , ["configure_options", {"type": "FIELD", "name": "configure_options"}]
       , ["make_targets", {"type": "FIELD", "name": "targets"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
@@ -264,13 +271,15 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by Make build and install."]
+  { "doc": ["Library produced by Configure and Make build and install."]
   , "target_fields": ["project", "deps"]
   , "string_fields":
     [ "subdir"
     , "name"
     , "version"
     , "stage"
+    , "configure"
+    , "configure_options"
     , "targets"
     , "prefix"
     , "options"
@@ -328,6 +337,9 @@
       [ "The library version, used for pkg-config files. Individual version"
       , "components are joined with \".\"."
       ]
+    , "configure": ["Run ./configure if non-empty."]
+    , "configure_options":
+      ["The configure options (the \"--prefix\" option is automatically set."]
     , "targets":
       [ "The Make targets to build in the specified order"
       , "(default: [\"install\"])."
@@ -599,6 +611,8 @@
           }
         ]
       , ["subdir", {"type": "FIELD", "name": "subdir"}]
+      , ["configure", {"type": "FIELD", "name": "configure"}]
+      , ["configure_options", {"type": "FIELD", "name": "configure_options"}]
       , ["make_targets", {"type": "FIELD", "name": "targets"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]

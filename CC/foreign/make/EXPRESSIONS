@@ -2,6 +2,8 @@
   { "vars":
     [ "source_dir"
     , "subdir"
+    , "configure"
+    , "configure_options"
     , "make_targets"
     , "make_prefix"
     , "make_options"
@@ -108,6 +110,20 @@
             }
           }
         ]
+      , [ "PREFIX"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "make_prefix"}
+          , "then":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              { "type": "++"
+              , "$1": [[""], {"type": "var", "name": "make_prefix"}]
+              }
+            }
+          , "else": {"type": "var", "name": "PREFIX", "default": "/"}
+          }
+        ]
       , [ "ENV"
         , { "type": "map_union"
           , "$1":
@@ -187,19 +203,7 @@
                   {"type": "join", "$1": {"type": "var", "name": "var_prefix"}}
                 , "else": "PREFIX"
                 }
-              , "value":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "make_prefix"}
-                , "then":
-                  { "type": "join"
-                  , "separator": "/"
-                  , "$1":
-                    { "type": "++"
-                    , "$1": [[""], {"type": "var", "name": "make_prefix"}]
-                    }
-                  }
-                , "else": {"type": "var", "name": "PREFIX", "default": "/"}
-                }
+              , "value": {"type": "var", "name": "PREFIX"}
               }
             ]
           }
@@ -208,6 +212,21 @@
         , { "type": "join"
           , "separator": "/"
           , "$1": {"type": "var", "name": "subdir", "default": []}
+          }
+        ]
+      , [ "configure_args"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "configure"}
+          , "then":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "configure_options", "default": []}
+              , [ { "type": "join"
+                  , "$1": ["--prefix=", {"type": "var", "name": "PREFIX"}]
+                  }
+                ]
+              ]
+            }
           }
         ]
       , [ "make_targets"
@@ -247,6 +266,23 @@
                     , "readonly VAR_DESTDIR=$2"
                     , "shift 2"
                     ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "configure_args"}
+                    , "then":
+                      [ "( readonly ROOT=\"$(pwd)\""
+                      , "  cd \"source/${SUBDIR}\""
+                      , { "type": "join"
+                        , "$1":
+                          [ "./configure "
+                          , { "type": "join_cmd"
+                            , "$1": {"type": "var", "name": "configure_args"}
+                            }
+                          , " >\"${ROOT}/configure.log\" || (cat \"${ROOT}/configure.log\" && exit 1)"
+                          ]
+                        }
+                      , ")"
+                      ]
+                    }
                   , { "type": "foreach"
                     , "range": {"type": "var", "name": "make_targets"}
                     , "var": "target"
