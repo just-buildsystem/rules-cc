@@ -27,11 +27,24 @@
     , "default-LDFLAGS": ["CC", "default-LDFLAGS"]
     , "default-AR": ["CC", "default-AR"]
     , "default-ENV": ["CC", "default-ENV"]
+    , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
+    , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
     }
   , "expression":
     { "type": "let*"
     , "bindings":
-      [ [ "CMAKE_FLAGS"
+      [ ["TOOLCHAIN_DIR", "toolchain"]
+      , ["TOOLCHAIN", {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}]
+      , [ "TOOLCHAIN"
+        , { "type": "to_subdir"
+          , "subdir": {"type": "var", "name": "TOOLCHAIN_DIR"}
+          , "$1": {"type": "var", "name": "TOOLCHAIN"}
+          }
+        ]
+      , [ "NON_SYSTEM_TOOLS"
+        , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+        ]
+      , [ "CMAKE_FLAGS"
         , { "type": "++"
           , "$1":
             [ { "type": "foreach"
@@ -95,7 +108,24 @@
       , [ "AR"
         , { "type": "var"
           , "name": "AR"
-          , "default": {"type": "CALL_EXPRESSION", "name": "default-AR"}
+          , "default":
+            { "type": "join"
+            , "$1":
+              { "type": "++"
+              , "$1":
+                [ { "type": "if"
+                  , "cond":
+                    { "type": "lookup"
+                    , "key": "AR"
+                    , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                    }
+                  , "then":
+                    ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                  }
+                , {"type": "CALL_EXPRESSION", "name": "default-AR"}
+                ]
+              }
+            }
           }
         ]
       , [ "CMAKE_JOBS"
@@ -184,7 +214,8 @@
       , "inputs":
         { "type": "map_union"
         , "$1":
-          [ {"type": "var", "name": "source_dir"}
+          [ {"type": "var", "name": "TOOLCHAIN"}
+          , {"type": "var", "name": "source_dir"}
           , {"type": "var", "name": "script"}
           ]
         }
