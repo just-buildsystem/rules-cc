@@ -96,6 +96,14 @@
           , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
           }
         ]
+      , ["provider", "LDFLAGS"]
+      , [ "LDFLAGS"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "LDFLAGS"}
+          , "then": {"type": "var", "name": "LDFLAGS"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
+          }
+        ]
       , ["provider", "AR"]
       , [ "AR"
         , { "type": "if"
