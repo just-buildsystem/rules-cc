@@ -143,12 +143,12 @@
           , "cond": {"type": "var", "name": "shared"}
           , "then": []
           , "else":
-            { "type": "foreach"
-            , "var": "lib"
-            , "range": {"type": "var", "name": "staged-libs"}
-            , "body":
-              { "type": "join"
-              , "$1": {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+            { "type": "++"
+            , "$1":
+              { "type": "foreach"
+              , "var": "libs"
+              , "range": {"type": "var", "name": "staged-libs"}
+              , "body": {"type": "keys", "$1": {"type": "var", "name": "libs"}}
               }
             }
           }
@@ -157,12 +157,12 @@
         , { "type": "if"
           , "cond": {"type": "var", "name": "shared"}
           , "then":
-            { "type": "foreach"
-            , "var": "lib"
-            , "range": {"type": "var", "name": "staged-libs"}
-            , "body":
-              { "type": "join"
-              , "$1": {"type": "keys", "$1": {"type": "var", "name": "lib"}}
+            { "type": "++"
+            , "$1":
+              { "type": "foreach"
+              , "var": "libs"
+              , "range": {"type": "var", "name": "staged-libs"}
+              , "body": {"type": "keys", "$1": {"type": "var", "name": "libs"}}
               }
             }
           }
@@ -248,7 +248,16 @@
         ]
       , [ "main-pkg-config"
         , { "type": "foldl"
-          , "range": {"type": "var", "name": "pkg-configs", "default": []}
+          , "range":
+            { "type": "++"
+            , "$1":
+              { "type": "foreach"
+              , "var": "configs"
+              , "range": {"type": "var", "name": "pkg-configs", "default": []}
+              , "body":
+                {"type": "keys", "$1": {"type": "var", "name": "configs"}}
+              }
+            }
           , "start": null
           , "accum_var": "name"
           , "var": "config"
@@ -256,10 +265,7 @@
             { "type": "if"
             , "cond": {"type": "var", "name": "name"}
             , "then": {"type": "var", "name": "name"}
-            , "else":
-              { "type": "join"
-              , "$1": {"type": "keys", "$1": {"type": "var", "name": "config"}}
-              }
+            , "else": {"type": "var", "name": "config"}
             }
           }
         ]
