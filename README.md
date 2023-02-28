@@ -60,7 +60,7 @@ A C++ library
 | ----- | ----------- |
 | `"name"` | The name of the library (without leading `"lib"` or trailing `".a"`). |
 | `"stage"` | The logical location of all header and source files, as well as the resulting library file. Individual directory components are joined with `"/"`. |
-| `"pure C"` | If non-empty, compile as C sources rathter than C++ sources. In particular, CC is used to compile rather than CXX (or their respective defaults). |
+| `"pure C"` | If non-empty, compile as C sources rather than C++ sources. In particular, CC is used to compile rather than CXX (or their respective defaults). |
 | `"defines"` | List of defines set for this target and its consumers. Each list entry will be prepended by `"-D"`. |
 | `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
 | `"cflags"` | List of compile flags set for this target and its consumers. |
@@ -234,15 +234,15 @@ Data produced by Make build and install.
 
 ### Rule `["proto", "library"]`
 
-A proto library as abtract data structure. 
+A proto library as abstract data structure. 
 
- Such a libray does not produce any artifacts itself, but it can be used as a dependency for various language-specific rules.
+ Such a library does not produce any artifacts itself, but it can be used as a dependency for various language-specific rules.
 
 | Field | Description |
 | ----- | ----------- |
 | `"stage"` | The directory to stage the source files to. Directory components are joined by `"/"`. |
 | `"name"` | The name of the (abstract) library. |
-| `"service"` | If non empty, generate a service library (with acces sto `"rpc"` definitions) instead of a regular one. |
+| `"service"` | If non empty, generate a service library (with access to `"rpc"` definitions) instead of a regular one. |
 | `"srcs"` | The proto files for this library |
 | `"deps"` | Any other proto library this library depends on |
 
@@ -263,7 +263,7 @@ Replace a file, logically in place, by a patched version
 | Field | Description |
 | ----- | ----------- |
 | `"patch-part"` | If the patch contains hunks for multiple files, only apply hunks for the specified file path. Individual directory components are joined with `"/"`. Note that the patch must be provided in unified format. |
-| `"src"` | The single source file to patch, typically an explict file reference. |
+| `"src"` | The single source file to patch, typically an explicit file reference. |
 | `"patch"` | The patch to apply. |
 
 ### Rule `["CC/auto", "config"]`
