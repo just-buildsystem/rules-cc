@@ -36,6 +36,12 @@ For interoperability with CMake projects, see
 - [being consumed by CMake](./doc/being-consumed-by-cmake.org)
 
 ## Rule Documentation
+
+In this documentation, the standard configuration variables
+`"AR"`, `"CC"`, `"CXX"`, `"CFLAGS"`, `"CXXFLAGS"`,`"LDFLAGS"`,
+`"ADD_CFLAGS"`, `"ADD_CXXFLAGS"`, `"ADD_LDFLAGS"`, `"ENV"`,
+`"BUILD_POSITION_INDEPENDENT"` are ommitted.
+
 ### Rule `["CC", "binary"]`
 
 A binary written in C++
@@ -106,6 +112,10 @@ Install target's artifacts with transitive dependencies. Depending on the target
 | `"prefix"` | The prefix used for pkg-config files. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"targets"` | Targets to install artifacts from. |
 
+| Config variable | Description |
+| --------------- | ----------- |
+| `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
+
 ### Rule `["CC/test", "test"]`
 
 A test written in C++
@@ -122,6 +132,11 @@ A test written in C++
 | `"private-hdrs"` | Any additional header files that need to be present when compiling the test binary. |
 | `"data"` | Any files the test binary needs access to when running |
 
+| Config variable | Description |
+| --------------- | ----------- |
+| `"TEST_ENV"` | The environment for executing the test runner. |
+| `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
+
 ### Rule `["shell/test", "script"]`
 
 Shell test, given by a test script
@@ -132,6 +147,11 @@ Shell test, given by a test script
 | `"name"` | A name for the test, used in reporting, as well as for staging the test result tree in the runfiles |
 | `"deps"` | Any targets that should be staged (with artifacts and runfiles) into the tests working directory |
 | `"test"` | The shell script for the test, launched with sh.  An empty directory is created to store any temporary files needed by the test, and it is made available in the environment variable TEST_TMPDIR. The test should not assume write permissions outside the working directory and the TEST_TMPDIR. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
+| `"TEST_ENV"` | The environment for executing the test runner. |
 
 ### Rule `["CC/foreign/cmake", "library"]`
 
@@ -209,6 +229,10 @@ Library produced by Make build and install.
 | `"project"` | The Make project directory. It should contain a single tree artifact |
 | `"deps"` | Public dependency on other CC libraries. |
 
+| Config variable | Description |
+| --------------- | ----------- |
+| `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
+
 ### Rule `["CC/foreign/make", "data"]`
 
 Data produced by Make build and install.
@@ -232,6 +256,10 @@ Data produced by Make build and install.
 | `"var_prefix"` | Variable name used to specify the prefix (default: `"PREFIX"`). |
 | `"var_destdir"` | Variable name used to specify the destdir (default: `"DESTDIR"`). |
 | `"project"` | The Make project directory. It should contain a single tree artifact |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
 
 ### Rule `["proto", "library"]`
 
@@ -280,6 +308,20 @@ Generate a C/C++ config header
 | `"guard"` | The include guard. Multiple segments are joined with `"_"`. |
 | `"hdrs"` | Additional header files to be available in the include path. Useful for providing additional header files to values given in `"have_{cfile,cxxfile,ctype,cxxtype,csymbol,cxxsymbol}"`. |
 | `"deps"` | Additional public header files from targets to be available in the include path. Useful for providing additional header files to values given in `"have_{cfile,cxxfile,ctype,cxxtype,csymbol,cxxsymbol}"`. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"defines"` | Set a define to a specific value unless its value is `"null"`. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the value to set. Strings must be properly escaped. Defines generated from this field are added last, so that they can refer to defines from other `"defines*"`,  `"have_*"`, and `"size_*"` values. |
+| `"defines1"` | Set a define to `"1"` unless its value is untrue. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the value. |
+| `"defines01"` | Set a define to `"0"` or `"1"` depending on its value being true. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the value. |
+| `"have_cfile"` | Set a define to `"1"` if the specified C header is in the include path. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the C header file name. |
+| `"have_cxxfile"` | Set a define to `"1"` if the specified C++ header is in the include path. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the C++ header file name. |
+| `"have_ctype"` | Set a define to `"1"` if the specified C type is defined. Must contain a list of pairs. The first element of each pair is the define name and the second argument is name of the C type. If the specified C type is not a built-in type, additionally the headers `"sys/types.h"`, `"stdint.h"`, and `"stddef.h"` are checked as well. |
+| `"have_cxxtype"` | Set a define to `"1"` if the specified C++ type is defined. Must contain a list of pairs. The first element of each pair is the define name and the second argument is name of the C++ type. If the specified C++ type is not a built-in type, additionally the headers `"sys/types.h"`, `"stdint.h"`, and `"stddef.h"` are checked as well. |
+| `"have_csymbol"` | Set a define to `"1"` if the specified C symbol is defined by one of the specified headers in the include path. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C symbol to search for and the second value is a list with the header file names to consider for searching. |
+| `"have_cxxsymbol"` | Set a define to `"1"` if the specified C++ symbol is defined by one of the specified headers in the include path. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C++ symbol to search for and the second value is a list with the header file names to consider for searching. |
+| `"size_ctype"` | Set a define to size of the specified C type. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C type to check for and the second value is a list with possible sizes as numbers. If none of the specified sizes matches, the action fails. |
+| `"size_cxxtype"` | Set a define to size of the specified C++ type. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C++ type to check for and the second value is a list with possible sizes as numbers. If none of the specified sizes matches, the action fails. |
 
 ### Rule `["CC/IDE", "headers"]`
 

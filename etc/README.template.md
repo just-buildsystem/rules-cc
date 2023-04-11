@@ -36,3 +36,9 @@ For interoperability with CMake projects, see
 - [being consumed by CMake](./doc/being-consumed-by-cmake.org)
 
 ## Rule Documentation
+
+In this documentation, the standard configuration variables
+`"AR"`, `"CC"`, `"CXX"`, `"CFLAGS"`, `"CXXFLAGS"`,`"LDFLAGS"`,
+`"ADD_CFLAGS"`, `"ADD_CXXFLAGS"`, `"ADD_LDFLAGS"`, `"ENV"`,
+`"BUILD_POSITION_INDEPENDENT"` are ommitted.
+

@@ -27,6 +27,7 @@ doc2md() {
   local RULE_DOC="$(just-mr --main "$MAIN" describe --rule --json "$MODULE" "$RULE")"
   local DOC="$(echo "$RULE_DOC" | jq -r '.doc')"
   local FIELD_DOC="$(echo "$RULE_DOC" | jq -r '.field_doc')"
+  local CONFIG_DOC="$(echo "$RULE_DOC" | jq -r '.config_doc | delpaths([["AR"], ["CC"], ["CXX"], ["CFLAGS"], ["CXXFLAGS"],["LDFLAGS"], ["ADD_CFLAGS"], ["ADD_CXXFLAGS"], ["ADD_LDFLAGS"], ["ENV"], ["BUILD_POSITION_INDEPENDENT"]])')"
 
   echo "### Rule \`[\"$MODULE\", \"$RULE\"]\`"
   echo
@@ -40,6 +41,15 @@ doc2md() {
     | jq -r 'keys_unsorted[] as $k | "| \"\($k)\" | \(.[$k] | join(" ")) |"' \
     | sed 's/\("[^"]*"\|\[[^]]*\]\|{[^}]*}\)/`\1`/g'
   echo
+  if [ "$(echo "$CONFIG_DOC" | jq -r 'length')" -gt 0 ]
+  then
+      echo "| Config variable | Description |"
+      echo "| --------------- | ----------- |"
+      echo "$CONFIG_DOC" \
+        | jq -r 'keys_unsorted[] as $k | "| \"\($k)\" | \(.[$k] | join(" ")) |"' \
+        | sed 's/\("[^"]*"\|\[[^]]*\]\|{[^}]*}\)/`\1`/g'
+      echo
+  fi
 }
 
 rm -f "$OUTFILE"
