@@ -11,7 +11,8 @@ importing the `rules-cc` repository with the tool `just-import-git`
 $ just-import-git -C repos.template.json --as rules-cc -b master https://github.com/just-buildsystem/rules-cc > repos.json
 ~~~
 
-or manually add the `rules-cc` repository to your `repos.json`.
+or manually add the `rules-cc` repository to your `repos.json` (also binding
+`protobuf` and `grpc` appropriately if proto libraries are to be used).
 
 ~~~json
 ...
@@ -19,7 +20,7 @@ or manually add the `rules-cc` repository to your `repos.json`.
     { "repository":
       { "type": "git"
       , "branch": "master"
-      , "commit": "7a90f68e5207d541dea937aaff5b6c4c499b8968"
+      , "commit": "c3b895900468f34d6808c56b736ddd88933b81ec"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "subdir": "rules"
       }
