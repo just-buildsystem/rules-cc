@@ -132,7 +132,27 @@
         , {"type": "++", "$1": [["./runner"], {"type": "var", "name": "keep"}]}
         ]
       , [ "test_env"
-        , {"type": "var", "name": "TEST_ENV", "default": {"type": "empty_map"}}
+        , { "type": "map_union"
+          , "$1":
+            [ { "type": "if"
+              , "cond":
+                { "type": "=="
+                , "$1": {"type": "var", "name": "ATTEMPT"}
+                , "$2": null
+                }
+              , "then": {"type": "empty_map"}
+              , "else":
+                { "type": "singelton_map"
+                , "key": "TEST_RUN_NUMBER"
+                , "value": {"type": "var", "name": "ATTEMPT"}
+                }
+              }
+            , { "type": "var"
+              , "name": "TEST_ENV"
+              , "default": {"type": "empty_map"}
+              }
+            ]
+          }
         ]
       ]
     , "body":

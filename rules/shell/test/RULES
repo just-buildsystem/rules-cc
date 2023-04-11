@@ -12,6 +12,10 @@
       , "TEST_TMPDIR. The test should not assume write permissions"
       , "outside the working directory and the TEST_TMPDIR."
       , "For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR."
+      , ""
+      , "If the configuration variable RUNS_PER_TEST is set, the environment"
+      , "variable TEST_RUN_NUMBER will also be set to the number of the attempt,"
+      , "counting from 0."
       ]
     , "name":
       [ "A name for the test, used in reporting, as well as for staging"
@@ -32,7 +36,7 @@
       [ "The number of times the test should be run in order to detect flakyness."
       , "If set, no test action will be taken from cache."
       ]
-    , "TEST_ENV": ["The environment for executing the test runner."]
+    , "TEST_ENV": ["Additional environment for executing the test runner."]
     }
   , "tainted": ["test"]
   , "artifacts_doc":
