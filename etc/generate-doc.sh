@@ -68,7 +68,6 @@ rm -f "$OUTFILE"
   doc2md rules data staged
   doc2md rules patch file
   doc2md rules CC/auto config
-  doc2md rules CC/IDE headers
 ) >> "$OUTFILE"
 
 

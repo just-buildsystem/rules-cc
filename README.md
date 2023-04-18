@@ -110,6 +110,7 @@ Install target's artifacts with transitive dependencies. Depending on the target
 | ----- | ----------- |
 | `"flat-libs"` | Install libraries flat to the `"lib"` subdirectory. Be aware that conflicts may occur if any of the (transitive) libraries happen to have the same base name. |
 | `"prefix"` | The prefix used for pkg-config files. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
+| `"hdrs-only"` | Only collect headers from deps (without subdirectory). |
 | `"targets"` | Targets to install artifacts from. |
 
 | Config variable | Description |
@@ -322,14 +323,4 @@ Generate a C/C++ config header
 | `"have_cxxsymbol"` | Set a define to `"1"` if the specified C++ symbol is defined by one of the specified headers in the include path. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C++ symbol to search for and the second value is a list with the header file names to consider for searching. |
 | `"size_ctype"` | Set a define to size of the specified C type. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C type to check for and the second value is a list with possible sizes as numbers. If none of the specified sizes matches, the action fails. |
 | `"size_cxxtype"` | Set a define to size of the specified C++ type. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C++ type to check for and the second value is a list with possible sizes as numbers. If none of the specified sizes matches, the action fails. |
-
-### Rule `["CC/IDE", "headers"]`
-
-Transitive public headers of C++ target
-
-| Field | Description |
-| ----- | ----------- |
-| `"stage"` | The logical location of the header files. Individual directory components are joined with `"/"`. |
-| `"proto"` | The proto source files for creating cc bindings. |
-| `"deps"` | The targets to obtain the headers from. |
 
