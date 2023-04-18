@@ -588,7 +588,7 @@
     ]
   , "config_vars": ["PREFIX"]
   , "target_fields": ["targets"]
-  , "string_fields": ["flat-libs", "prefix"]
+  , "string_fields": ["flat-libs", "prefix", "hdrs-only"]
   , "imports": {"install result": "install-with-deps result"}
   , "field_doc":
     { "targets": ["Targets to install artifacts from."]
@@ -603,6 +603,7 @@
       , "prefix is specified, the value from the config variable \"PREFIX\" is"
       , "taken, with the default value being \"/\"."
       ]
+    , "hdrs-only": ["Only collect headers from deps (without subdirectory)."]
     }
   , "config_doc":
     { "PREFIX":
@@ -631,6 +632,7 @@
           }
         ]
       , ["flat-libs", {"type": "FIELD", "name": "flat-libs"}]
+      , ["hdrs-only", {"type": "FIELD", "name": "hdrs-only"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "install result"}
     }
