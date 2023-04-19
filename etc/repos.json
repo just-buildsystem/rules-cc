@@ -3,8 +3,7 @@
   { "rules": {"repository": {"type": "file", "path": "rules"}}
   , "rules with bundled tools":
     { "repository": "rules"
-    , "target_root": "just/defaults"
-    , "target_file_name": "TARGETS.just"
+    , "target_root": "defaults"
     , "rule_root": "rules"
     , "bindings":
       { "base": "just/rules"
@@ -12,6 +11,7 @@
       , "grpc": "just/com_github_grpc_grpc"
       }
     }
+  , "defaults": {"repository": {"type": "file", "path": "etc/defaults"}}
   , "tests":
     { "repository": {"type": "file", "path": "tests"}
     , "bindings":
