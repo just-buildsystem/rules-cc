@@ -1,9 +1,16 @@
-{ "main": "rules"
+{ "main": "rules with bundled tools"
 , "repositories":
-  { "rules":
-    { "repository": {"type": "file", "path": "rules"}
+  { "rules": {"repository": {"type": "file", "path": "rules"}}
+  , "rules with bundled tools":
+    { "repository": "rules"
+    , "target_root": "just/defaults"
+    , "target_file_name": "TARGETS.just"
+    , "rule_root": "rules"
     , "bindings":
-      {"protoc": "just/protobuf", "grpc": "just/com_github_grpc_grpc"}
+      { "base": "just/rules"
+      , "protoc": "just/protobuf"
+      , "grpc": "just/com_github_grpc_grpc"
+      }
     }
   , "tests":
     { "repository": {"type": "file", "path": "tests"}
