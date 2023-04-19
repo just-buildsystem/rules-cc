@@ -19,6 +19,40 @@
     , "AR"
     , "PATH"
     ]
+  , "field_doc":
+    { "base": ["Other targets (using the same rule) to inherit values from."]
+    , "CC": ["The C compiler to use"]
+    , "CXX": ["The C++ compiler to use"]
+    , "AR": ["The archiver tool to use"]
+    , "CFLAGS":
+      [ "Flags for C compilation. Specifying this field overwrites"
+      , "values from \"base\"."
+      ]
+    , "CXXFLAGS":
+      [ "Flags for C++ compilation. Specifying this field overwrites"
+      , "values from \"base\"."
+      ]
+    , "LDFLAGS":
+      [ "Linker flags for linking the final CC library. Specifying this field"
+      , "overwrites values from \"base\"."
+      ]
+    , "ADD_CFLAGS":
+      [ "Additional compilation flags for C. Specifying this field"
+      , "extends values from \"base\"."
+      ]
+    , "ADD_CXXFLAGS":
+      [ "Additional compilation flags for C++. Specifying this field"
+      , "extends values from \"base\"."
+      ]
+    , "ADD_LDFLAGS":
+      [ "Additional linker flags for linking the final CC library. Specifying"
+      , "this field extends values from \"base\"."
+      ]
+    , "PATH":
+      [ "Path for looking up the compilers. Individual paths are joined"
+      , "with \":\"."
+      ]
+    }
   , "imports": {"base-provides": "defaults-base-provides"}
   , "expression":
     { "type": "let*"
