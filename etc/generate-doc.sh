@@ -59,6 +59,8 @@ rm -f "$OUTFILE"
   doc2md rules CC/prebuilt library
   doc2md rules CC install-with-deps
   doc2md rules CC/test test
+  doc2md rules CC defaults
+  doc2md rules CC/proto defaults
   doc2md rules shell/test script
   doc2md rules CC/foreign/cmake library
   doc2md rules CC/foreign/cmake data
@@ -69,5 +71,3 @@ rm -f "$OUTFILE"
   doc2md rules patch file
   doc2md rules CC/auto config
 ) >> "$OUTFILE"
-
-

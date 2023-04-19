@@ -4,15 +4,20 @@ A collection of rules for building C/C++ libraries and binaries.
 
 ## How to use this Repository
 
-Either generate your `repos.json` from a template (`repos.template.json`) by
-importing the `rules-cc` repository with the tool `just-import-git`
+There are two ways to import this repository. You can generate your
+`repos.json` from a template (`repos.template.json`) by importing
+the `rules-cc` repository with the tool `just-import-git`
 
 ~~~sh
 $ just-import-git -C repos.template.json --as rules-cc -b master https://github.com/just-buildsystem/rules-cc > repos.json
 ~~~
 
-or manually add the `rules-cc` repository to your `repos.json` (also binding
-`protobuf` and `grpc` appropriately if proto libraries are to be used).
+Importing this way will also pull in `protoc` and `grpc_cpp_plugin`
+as a dependency for generating bindings for proto dependencies, if
+this feature is used.
+
+Alternatively, the `rules-cc` repository can be added manually to
+your `repos.json`.
 
 ~~~json
 ...
@@ -20,13 +25,19 @@ or manually add the `rules-cc` repository to your `repos.json` (also binding
     { "repository":
       { "type": "git"
       , "branch": "master"
-      , "commit": "c3b895900468f34d6808c56b736ddd88933b81ec"
+      , "commit": "2ea50063460a3e11dfcbb71651540c0d61fddc1a"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "subdir": "rules"
       }
     }
 ...
 ~~~
+
+Importing this way, `protoc` and `grpc_cpp_plugin` will be taken
+from the host system. To change the binary names or to bring your
+own proto toolchain, add a corresponding `target_root` layer (and
+provide the needed binding, if your target files refer to other
+reposistories containing the toolchain).
 
 ## Consume and being consumed by CMake Libraries
 
@@ -137,6 +148,39 @@ A test written in C++
 | --------------- | ----------- |
 | `"TEST_ENV"` | The environment for executing the test runner. |
 | `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
+
+### Rule `["CC", "defaults"]`
+
+A rule to provide defaults. All CC targets take their defaults for CC, CXX, flags, etc from the target `["CC", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
+
+| Field | Description |
+| ----- | ----------- |
+| `"CC"` | The C compiler to use |
+| `"CXX"` | The C++ compiler to use |
+| `"CFLAGS"` | Flags for C compilation. Specifying this field overwrites values from `"base"`. |
+| `"CXXFLAGS"` | Flags for C++ compilation. Specifying this field overwrites values from `"base"`. |
+| `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
+| `"ADD_CFLAGS"` | Additional compilation flags for C. Specifying this field extends values from `"base"`. |
+| `"ADD_CXXFLAGS"` | Additional compilation flags for C++. Specifying this field extends values from `"base"`. |
+| `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
+| `"AR"` | The archiver tool to use |
+| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. |
+| `"base"` | Other targets (using the same rule) to inherit values from. |
+
+### Rule `["CC/proto", "defaults"]`
+
+A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "defaults"]` for CC proto libraries and `["CC/proto", "service defaults"]` for CC proto service libraries (GRPC).
+
+| Field | Description |
+| ----- | ----------- |
+| `"PROTOC"` | The proto compiler. If `"toolchain"` is empty, this field's value is considered the proto compiler name that is looked up in `"PATH"`. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the proto compiler in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
+| `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
+| `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
+| `"GRPC_PLUGIN"` | The GRPC plugin for the proto compiler. If `"toolchain"` is empty, this field's value is considered to be the absolute system path to the plugin. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the plugin in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
+| `"PATH"` | Path for looking up the proto compiler. Individual paths are joined with `":"`. |
+| `"base"` | Other targets (using the same rule) to inherit values from. If multiple targets are specified, for values that are overwritten (see documentation of other fields) the last specified value wins. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the protobuf compiler and the GRPC plugin (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field overlays artifacts from `"base"`. |
+| `"deps"` | Optional CC libraries the resulting CC proto libraries implicitly depend on. Those are typically `"libprotobuf"` for CC proto libraries and `"libgrpc++"` for CC proto service libraries. Specifying this field extends dependencies from `"base"`. |
 
 ### Rule `["shell/test", "script"]`
 
