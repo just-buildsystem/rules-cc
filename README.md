@@ -148,6 +148,7 @@ A test written in C++
 | --------------- | ----------- |
 | `"TEST_ENV"` | The environment for executing the test runner. |
 | `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
+| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
 
 ### Rule `["CC", "defaults"]`
 
