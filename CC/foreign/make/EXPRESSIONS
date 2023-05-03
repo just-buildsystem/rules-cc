@@ -277,7 +277,7 @@
                           , { "type": "join_cmd"
                             , "$1": {"type": "var", "name": "configure_args"}
                             }
-                          , " >\"${ROOT}/configure.log\" || (cat \"${ROOT}/configure.log\" && exit 1)"
+                          , " >\"${ROOT}/configure.log\" 2>&1 || (cat \"${ROOT}/configure.log\" && exit 1)"
                           ]
                         }
                       , ")"
@@ -293,7 +293,7 @@
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "target"}]
                           }
-                        , " >>build.log || (cat build.log && exit 1)"
+                        , " >>build.log 2>&1 || (cat build.log && exit 1)"
                         ]
                       }
                     }
