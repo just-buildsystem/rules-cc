@@ -328,6 +328,7 @@ Stage data to a logical subdirectory.
 | Field | Description |
 | ----- | ----------- |
 | `"stage"` | The logical directory to stage the files to. Individual directory components are joined with `"/"`. |
+| `"drop"` | List of paths to drop from (each of) the `"srcs"` targets before joining and staging. In this way, GLOB constructs can be used is `"srcs"`. |
 | `"srcs"` | The files to be staged |
 | `"deps"` | Targets of with their runfiles should be added as well. Their staging is not changed. |
 

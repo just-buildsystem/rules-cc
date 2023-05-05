@@ -1,7 +1,7 @@
 { "staged":
   { "doc": ["Stage data to a logical subdirectory."]
   , "target_fields": ["srcs", "deps"]
-  , "string_fields": ["stage"]
+  , "string_fields": ["stage", "drop"]
   , "field_doc":
     { "srcs": ["The files to be staged"]
     , "stage":
@@ -12,9 +12,15 @@
       [ "Targets of with their runfiles should be added as well."
       , "Their staging is not changed."
       ]
+    , "drop":
+      [ "List of paths to drop from (each of) the \"srcs\" targets"
+      , "before joining and staging. In this way, GLOB constructs can"
+      , "be used is \"srcs\"."
+      ]
     }
   , "artifacts_doc":
-    [ "The runfiles of the \"srcs\" targets staged to the directory"
+    [ "The runfiles and artifacts of the \"srcs\" targets, leaving out"
+    , "the ones with logical path in \"drop\", staged to the directory"
     , "specified in \"stage\" together the runfiles of the targets"
     , "specied in the field \"deps\" (in their original location)."
     ]
@@ -22,6 +28,8 @@
   , "imports":
     { "runfiles": ["./", "..", "field_runfiles"]
     , "artifacts": ["./", "..", "field_artifacts"]
+    , "runfiles w/o": "field_artifacts_without"
+    , "artifacts w/o": "field_artifacts_without"
     }
   , "expression":
     { "type": "let*"
@@ -32,15 +40,36 @@
           , "$1": {"type": "FIELD", "name": "stage"}
           }
         ]
+      , [ "exclude"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "foreach"
+            , "range": {"type": "FIELD", "name": "drop"}
+            , "body":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "_"}
+              , "value": true
+              }
+            }
+          }
+        ]
       , [ "srcs"
         , { "type": "let*"
           , "bindings": [["fieldname", "srcs"]]
           , "body":
             { "type": "map_union"
             , "$1":
-              [ {"type": "CALL_EXPRESSION", "name": "runfiles"}
-              , {"type": "CALL_EXPRESSION", "name": "artifacts"}
-              ]
+              { "type": "if"
+              , "cond": {"type": "var", "name": "exclude"}
+              , "then":
+                [ {"type": "CALL_EXPRESSION", "name": "runfiles w/o"}
+                , {"type": "CALL_EXPRESSION", "name": "artifacts w/o"}
+                ]
+              , "else":
+                [ {"type": "CALL_EXPRESSION", "name": "runfiles"}
+                , {"type": "CALL_EXPRESSION", "name": "artifacts"}
+                ]
+              }
             }
           }
         ]
