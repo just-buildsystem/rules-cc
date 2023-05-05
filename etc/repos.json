@@ -46,13 +46,13 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-alpha+20230419"
-      , "commit": "728f9e810ed3b49a73243b6002e1117a86bad437"
+      , "branch": "v1.1.0-beta1"
+      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
       }
     , "bindings":
       { "rules": "just/rules-just"
       , "just-distfiles": "just/just-distfiles"
-      , "gsl-lite": "just/gsl-lite"
+      , "gsl": "just/com_github_microsoft_gsl"
       , "cli11": "just/cli11"
       , "json": "just/json"
       , "fmt": "just/fmt"
@@ -64,7 +64,6 @@
       , "catch2": "just/catch2"
       , "protoc": "just/protobuf"
       , "libcurl": "just/com_github_curl_curl"
-      , "bzip2": "just/bzip2"
       , "libarchive": "just/com_github_libarchive_libarchive"
       }
     }
@@ -123,11 +122,11 @@
   , "just/com_github_cares_cares":
     { "repository":
       { "type": "archive"
-      , "content": "229bb6835455e73a550e4dc44f8ddac22dc34aa7"
-      , "fetch": "https://github.com/c-ares/c-ares/archive/e982924acee7f7313b4baa4ee5ec000c5e373c30.tar.gz"
-      , "sha256": "e8c2751ddc70fed9dc6f999acd92e232d5846f009ee1674f8aee81f19b2b915a"
-      , "sha512": "c213e2a15e5e8adfc3036d66537d4c9ca6b5685b1d0e7a57fe1abe44eebb99d5e0cb42f6a9259fd8ca75d1a4833dbc1009e2025e633b871b902b02f172fcc9bd"
-      , "subdir": "c-ares-e982924acee7f7313b4baa4ee5ec000c5e373c30"
+      , "content": "998c90eda4410f965ca086ce59811e2cf16c8d6b"
+      , "fetch": "https://github.com/c-ares/c-ares/archive/refs/tags/cares-1_17_2.tar.gz"
+      , "sha256": "444b7dbf33cb6e8a764d069e3485cbaaa28386d60eace6988275c3cb9534d300"
+      , "sha512": "1111f1e7eeb0e5d9e70d1a7c8566145d0a5e6e71b020f3fcaa02ecdf1931553ddeff83fdc152a1f9c5a780078e8afe3670164b631df56eecd2b638210cc59bb3"
+      , "subdir": "c-ares-cares-1_17_2"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.cares"
@@ -154,11 +153,11 @@
   , "just/com_github_grpc_grpc":
     { "repository":
       { "type": "archive"
-      , "content": "23f49d3b842f2e916c861d5150e4b7d048084888"
-      , "fetch": "https://github.com/grpc/grpc/archive/v1.31.0.tar.gz"
-      , "sha256": "1236514199d3deb111a6dd7f6092f67617cd2b147f7eda7adbafccea95de7381"
-      , "sha512": "fc68079a70c39d66cb6f028e775418a90c61694406ddfa413298ec33de2f56e26eb47e10a53fc616e32c254c84e335598dc22598a95c223698ebf8eca60f7cea"
-      , "subdir": "grpc-1.31.0"
+      , "content": "a60418787a6e6f98c584d8de42d93b8983254939"
+      , "fetch": "https://github.com/grpc/grpc/archive/refs/tags/v1.53.0.tar.gz"
+      , "sha256": "9717ffc52120861136e478155c2ff3a9c21740e2244de52fa966f376d7471adf"
+      , "sha512": "a02fe1969787cd39061269b8c7c1313c1f599a31aa4e11760a744a9e0f85202e33832ee669b9d0d07df4af1a45470d605a69d9e4a4df89251e9b0093aee89eca"
+      , "subdir": "grpc-1.53.0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.grpc"
@@ -168,10 +167,10 @@
       , "protobuf": "just/protobuf"
       , "libssl": "just/ssl"
       , "absl": "just/com_google_absl"
-      , "upb": "just/upb"
       , "zlib": "just/zlib"
       , "re2": "just/re2"
       , "cares": "just/com_github_cares_cares"
+      , "google_apis": "just/google_apis"
       }
     }
   , "just/com_github_libarchive_libarchive":
@@ -206,14 +205,27 @@
     , "bindings":
       {"rules": "just/rules-git2", "zlib": "just/zlib", "ssl": "just/ssl"}
     }
+  , "just/com_github_microsoft_gsl":
+    { "repository":
+      { "type": "archive"
+      , "content": "386f0a89a47763481223a63d5026215af8d3c827"
+      , "fetch": "https://github.com/microsoft/GSL/archive/refs/tags/v4.0.0.tar.gz"
+      , "sha256": "f0e32cb10654fea91ad56bde89170d78cfbf4363ee0b01d8f097de2ba49f6ce9"
+      , "sha512": "7fa7446796c6bf82fb3bff09f86a69c446a27be528bef3b17c8bc5ad2f24d5cf86bdb3d3813ecb44726e8f395020180e97e41027330d1fbf545cc0f0b44aac29"
+      , "subdir": "GSL-4.0.0/include/gsl"
+      }
+    , "target_root": "just/import targets"
+    , "target_file_name": "TARGETS.gsl"
+    , "bindings": {"rules": "just/rules"}
+    }
   , "just/com_google_absl":
     { "repository":
       { "type": "archive"
-      , "content": "d9ba22c59e08577e0986c6d483f33c9fa7b2e104"
-      , "fetch": "https://github.com/abseil/abseil-cpp/archive/df3ea785d8c30a9503321a3d35ee7d35808f190d.tar.gz"
-      , "sha256": "f368a8476f4e2e0eccf8a7318b98dafbe30b2600f4e3cf52636e5eb145aba06a"
-      , "sha512": "b429758c37749d3d5c5c220fe0dc00fa0e193b406545484095339b25674c4a3bb7850b76dd1a370ed2006729bcbbbb1b438995b614e149c2290bdb10038c49d1"
-      , "subdir": "abseil-cpp-df3ea785d8c30a9503321a3d35ee7d35808f190d"
+      , "content": "8cc2a99cfd2426ba6fbdc4499a07bccfd19be8a6"
+      , "fetch": "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.0.tar.gz"
+      , "sha256": "3ea49a7d97421b88a8c48a0de16c16048e17725c7ec0f1d3ea2683a2a75adc21"
+      , "sha512": "b3d334215c78b31a2eb10bd9d4a978cd48367866d6daa2065c6c727282bafe19ef7ff5bd7cd4ed5c319d3b04e0711222e08ddbe7621ef1e079fed93a7307112f"
+      , "subdir": "abseil-cpp-20230125.0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.absl"
@@ -234,29 +246,16 @@
     }
   , "just/google_apis":
     { "repository":
-      { "type": "zip"
-      , "content": "8a1ca602cb7eb42094c853f0640489599962c2cc"
-      , "fetch": "https://github.com/googleapis/googleapis/archive/143084a2624b6591ee1f9d23e7f5241856642f4d.zip"
-      , "sha256": "7b6ea252f0b8fb5cd722f45feb83e115b689909bbb6a393a873b6cbad4ceae1d"
-      , "sha512": "319bd988d25877bc72ab7fad8309126268f88d987a64b9ffb7956bdd442938e02ec922251de933aba8d424559fd8dc43cf7954f6c865e3f863940c1e8f533c5a"
-      , "subdir": "googleapis-143084a2624b6591ee1f9d23e7f5241856642f4d"
+      { "type": "archive"
+      , "content": "5d9001f3dff8dec1880c06c0de100a0c2fc65094"
+      , "fetch": "https://github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.tar.gz"
+      , "sha256": "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0"
+      , "sha512": "cdeefae807df7097174b4bb28c0900b06a68d424c00ebba4ff5add260c9c651351d5e429bfc5de42f95ebb75dadec313f7bd3991c2fa476c9104f9ea656acad4"
+      , "subdir": "googleapis-2f9af297c84c55c8b871ba4495e01ade42476c92"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.google_apis"
     , "bindings": {"rules": "just/rules", "patches": "just/patches"}
-    }
-  , "just/gsl-lite":
-    { "repository":
-      { "type": "archive"
-      , "content": "6a2245941d8a713897f439c35512593683f6ad48"
-      , "fetch": "https://github.com/gsl-lite/gsl-lite/archive/v0.40.0.tar.gz"
-      , "sha256": "65af4ec8a1050dac4f1ca4622881bb02a9c3978a9baec289fb56e25412d6cac7"
-      , "sha512": "afd65009bf33f54cd1caf1988b725e618bee4f4f779825ae1df55017034c6fff75feaa737a358a7f5e690757637f4d281c2f22d06c39efb81dacd7d1949251df"
-      , "subdir": "gsl-lite-0.40.0/include/gsl"
-      }
-    , "target_root": "just/import targets"
-    , "target_file_name": "TARGETS.gsl"
-    , "bindings": {"rules": "just/rules"}
     }
   , "just/json":
     { "repository":
@@ -275,7 +274,7 @@
     { "repository":
       { "type": "distdir"
       , "repositories":
-        [ "just/gsl-lite"
+        [ "just/com_github_microsoft_gsl"
         , "just/cli11"
         , "just/json"
         , "just/fmt"
@@ -283,7 +282,6 @@
         , "just/protobuf"
         , "just/bazel_remote_apis"
         , "just/google_apis"
-        , "just/upb"
         , "just/com_google_absl"
         , "just/zlib"
         , "just/re2"
@@ -299,19 +297,19 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-alpha+20230419"
-      , "commit": "728f9e810ed3b49a73243b6002e1117a86bad437"
+      , "branch": "v1.1.0-beta1"
+      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
       , "subdir": "etc/patches"
       }
     }
   , "just/protobuf":
     { "repository":
       { "type": "zip"
-      , "content": "7af7165b585e4aed714555a747b6822376176ef4"
-      , "fetch": "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.12.4.zip"
-      , "sha256": "c5dc4cacbb303d5d0aa20c5cbb5cb88ef82ac61641c951cdf6b8e054184c5e22"
-      , "sha512": "11e7584f44994ed6e9745bf6cbbac791bb090615d362fb3bd9aa8ebc08504042303ff945007030274359e268f8d62e116eaba2bb4910431ea3f7845af23cc7c5"
-      , "subdir": "protobuf-3.12.4"
+      , "content": "5bc92c917a0714d0b37cbb9dcbbf434d132edc00"
+      , "fetch": "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.zip"
+      , "sha256": "f7042d540c969b00db92e8e1066a9b8099c8379c33f40f360eb9e1d98a36ca26"
+      , "sha512": "7f1c9a4297a4e47705d64932483f31ed25da928d24e351d94899038f852015d4a16c88c2b962ac4a0c62e6a3f6689f87fb4cef7165d327aae5381a7b975bdf2e"
+      , "subdir": "protobuf-3.21.12"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.protobuf"
@@ -320,11 +318,11 @@
   , "just/re2":
     { "repository":
       { "type": "archive"
-      , "content": "987bf33d9e876431f4ab3c630ff08605f58b98a7"
-      , "fetch": "https://github.com/google/re2/archive/aecba11114cf1fac5497aeb844b6966106de3eb6.tar.gz"
-      , "sha256": "9f385e146410a8150b6f4cb1a57eab7ec806ced48d427554b1e754877ff26c3e"
-      , "sha512": "bbe972e3fd65da69e0d7ac0e0b025fb09ad894315cb6c0e1268fa296599274f9f7c2e771aa577b340c8fa9412d8539fe3db2171d0e9ab9714f3f10910a1d5529"
-      , "subdir": "re2-aecba11114cf1fac5497aeb844b6966106de3eb6"
+      , "content": "8eebd70d7ebd33ac5d736090cecd7cfe1831b9e3"
+      , "fetch": "https://github.com/google/re2/archive/refs/tags/2022-04-01.tar.gz"
+      , "sha256": "1ae8ccfdb1066a731bba6ee0881baad5efd2cd661acd9569b689f2586e1a50e9"
+      , "sha512": "fc3d7cc1ee6bd771719845566d83ffc8c4e19d838748e842a1e19c7564473c9a0a061bebb3966ffa82de6515346f9bbddc2d94ceb3de89233f58826774bd7ce7"
+      , "subdir": "re2-2022-04-01"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.re2"
@@ -334,8 +332,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-alpha+20230419"
-      , "commit": "728f9e810ed3b49a73243b6002e1117a86bad437"
+      , "branch": "v1.1.0-beta1"
+      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
       , "subdir": "rules"
       }
     , "target_root": "just/defaults"
@@ -422,37 +420,24 @@
   , "just/ssl":
     { "repository":
       { "type": "archive"
-      , "content": "cdf51ff27d78e1aceb7cc01d03f9a115826501be"
-      , "fetch": "https://github.com/google/boringssl/archive/e8a935e323510419e0b37638716f6df4dcbbe6f6.tar.gz"
-      , "sha256": "5bbb2bbddf5e4e5fefd02501f930436f3f45402152d7ea9f8f27916d5cf70157"
-      , "sha512": "c1cb6a94b967985e05c699ff73d1e6aebba27903d771c58008cedbbdead53eda33e112de10691af7471e823013afada466ea1abb420a3d55cfd8e2a4b09effed"
-      , "subdir": "boringssl-e8a935e323510419e0b37638716f6df4dcbbe6f6"
+      , "content": "19cdde8ba529848172c09e84e3deb2c92dc670c3"
+      , "fetch": "https://github.com/google/boringssl/archive/6195bf8242156c9a2fa75702eee058f91b86a88b.tar.gz"
+      , "sha256": "ad0b806b6c5cbd6cae121c608945d5fed468748e330632e8d53315089ad52c67"
+      , "sha512": "bd0ff23103695a08c5072ef4e88042c32b684295ee6434124d9c9292586b72863c35246cd8002ad3de3a79a9dfe10a1e0beb594c1625bdf1d6f6175821ca75a1"
+      , "subdir": "boringssl-6195bf8242156c9a2fa75702eee058f91b86a88b"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.boringssl"
     , "bindings": {"rules": "just/rules-boringssl"}
     }
-  , "just/upb":
-    { "repository":
-      { "type": "archive"
-      , "content": "a234f5d2ccff01ee0a36e016b482276c5078905d"
-      , "fetch": "https://github.com/protocolbuffers/upb/archive/92e63da73328d01b417cf26c2de7b0a27a0f83af.tar.gz"
-      , "sha256": "79f7de61203c4ee5e4fcb2f17c5f3338119d6eb94aca8bce05332d2c1cfee108"
-      , "sha512": "9121c15ba540dbee1e09896a42b88b8616616929c4e607dbbc2f8706a8119672f34a0e81968b1d1d62b532d22bda969a32d22755b086456d031e2689aec7f24f"
-      , "subdir": "upb-92e63da73328d01b417cf26c2de7b0a27a0f83af"
-      }
-    , "target_root": "just/import targets"
-    , "target_file_name": "TARGETS.upb"
-    , "bindings": {"rules": "just/rules"}
-    }
   , "just/zlib":
     { "repository":
       { "type": "archive"
-      , "content": "c47b5e6e3db9dd9f5dfec2ba28428a0444d1c052"
-      , "fetch": "https://github.com/madler/zlib/archive/cacf7f1d4e3d44d871b605da3b647f07d718623f.tar.gz"
-      , "sha256": "6d4d6640ca3121620995ee255945161821218752b551a1a180f4215f7d124d45"
-      , "sha512": "c6a9e08d7cb11ed90faf40335f5378ae92cf3d973edd96be40a5dd46e9b2ab5fa26acea666ee0d3e3c69e3c7d7d709702b82ace809e59972447386c9955cf280"
-      , "subdir": "zlib-cacf7f1d4e3d44d871b605da3b647f07d718623f"
+      , "content": "d115fc690fa59d3be51b3442158876536140b6c2"
+      , "fetch": "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz"
+      , "sha256": "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
+      , "sha512": "99f0e843f52290e6950cc328820c0f322a4d934a504f66c7caa76bd0cc17ece4bf0546424fc95135de85a2656fed5115abb835fd8d8a390d60ffaf946c8887ad"
+      , "subdir": "zlib-1.2.13"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.zlib"
@@ -462,8 +447,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-alpha+20230419"
-      , "commit": "728f9e810ed3b49a73243b6002e1117a86bad437"
+      , "branch": "v1.1.0-beta1"
+      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
       , "subdir": "etc/defaults"
       }
     }
@@ -471,8 +456,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-alpha+20230419"
-      , "commit": "728f9e810ed3b49a73243b6002e1117a86bad437"
+      , "branch": "v1.1.0-beta1"
+      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
       , "subdir": "etc/import"
       }
     }
