@@ -1,0 +1,113 @@
+{ "field_artifacts_without":
+  { "doc":
+    [ "Query and merge artifacts from target_field's targets,"
+    , "leaving out the specified logical paths."
+    ]
+  , "vars": ["fieldname", "transition", "exclude"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "transition": ["The optional configuration transition for the targets."]
+    , "exclude": ["The logical paths to exclude"]
+    }
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "msg":
+      [ "artifacts"
+      , {"type": "var", "name": "fieldname"}
+      , "must not overlap after dropping paths"
+      , {"type": "var", "name": "exclude"}
+      ]
+    , "$1":
+      { "type": "foreach"
+      , "var": "x"
+      , "range":
+        {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+      , "body":
+        { "type": "map_union"
+        , "$1":
+          { "type": "foreach_map"
+          , "range":
+            { "type": "DEP_ARTIFACTS"
+            , "dep": {"type": "var", "name": "x"}
+            , "transition":
+              { "type": "var"
+              , "name": "transition"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          , "body":
+            { "type": "if"
+            , "cond":
+              { "type": "lookup"
+              , "key": {"type": "var", "name": "_"}
+              , "map": {"type": "var", "name": "exclude"}
+              }
+            , "then": {"type": "empty_map"}
+            , "else":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "_"}
+              , "value": {"type": "var", "name": "$_"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+, "field_runfiles_without":
+  { "doc":
+    [ "Query and merge runfiles from target_field's targets,"
+    , "leaving out the specified logical paths."
+    ]
+  , "vars": ["fieldname", "transition", "exclude"]
+  , "vars_doc":
+    { "fieldname": ["The name of the target_field to query."]
+    , "transition": ["The optional configuration transition for the targets."]
+    , "exclude": ["The logical paths to exclude"]
+    }
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "msg":
+      [ "artifacts"
+      , {"type": "var", "name": "fieldname"}
+      , "must not overlap after dropping paths"
+      , {"type": "var", "name": "exclude"}
+      ]
+    , "$1":
+      { "type": "foreach"
+      , "var": "x"
+      , "range":
+        {"type": "FIELD", "name": {"type": "var", "name": "fieldname"}}
+      , "body":
+        { "type": "map_union"
+        , "$1":
+          { "type": "foreach_map"
+          , "range":
+            { "type": "DEP_RUNFILES"
+            , "dep": {"type": "var", "name": "x"}
+            , "transition":
+              { "type": "var"
+              , "name": "transition"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          , "body":
+            { "type": "if"
+            , "cond":
+              { "type": "lookup"
+              , "key": {"type": "var", "name": "_"}
+              , "map": {"type": "var", "name": "exclude"}
+              }
+            , "then": {"type": "empty_map"}
+            , "else":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "_"}
+              , "value": {"type": "var", "name": "$_"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
