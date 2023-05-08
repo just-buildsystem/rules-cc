@@ -27,7 +27,7 @@ def run_pkgconfig(args: list[str], env: dict[str, str]) -> str:
     return result.stdout.decode("utf-8").strip()
 
 
-def read_ldflags(pkg: str, env: dict[str, str]) -> str:
+def read_ldflags(pkg: str, args: list[str], env: dict[str, str]) -> str:
     def libname(filename: str) -> str:
         return filename.split(".")[0]
 
@@ -36,7 +36,7 @@ def read_ldflags(pkg: str, env: dict[str, str]) -> str:
         for it in os.walk(".") for f in it[2] if f.startswith("lib")
     }
 
-    link_flags = run_pkgconfig(["--libs-only-l", pkg], env).split(" ")
+    link_flags = run_pkgconfig(args + ["--libs-only-l", pkg], env).split(" ")
 
     # deduplicate, keep right-most
     seen: set[str] = set()
@@ -55,17 +55,18 @@ def read_ldflags(pkg: str, env: dict[str, str]) -> str:
 
 def read_pkgconfig():
     if len(sys.argv) < 3:
-        print(f"usage: read_pkgconfig OUT_NAME PC_FILE")
+        print(f"usage: read_pkgconfig OUT_NAME PC_FILE [PC_ARGS...]")
         exit(1)
 
     name = sys.argv[1]
     pkg = Path(sys.argv[2]).stem
+    args = sys.argv[3:]
     env = dict(os.environ, PKG_CONFIG_PATH="./lib/pkgconfig")
 
     if name.endswith(".cflags"):
-        data = run_pkgconfig(["--cflags-only-other", pkg], env)
+        data = run_pkgconfig(args + ["--cflags-only-other", pkg], env)
     else:
-        data = read_ldflags(pkg, env)
+        data = read_ldflags(pkg, args, env)
 
     with open(f"{name}", 'w') as f:
         f.write(data)
