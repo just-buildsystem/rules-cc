@@ -28,7 +28,7 @@
   , "imports":
     { "runfiles": ["./", "..", "field_runfiles"]
     , "artifacts": ["./", "..", "field_artifacts"]
-    , "runfiles w/o": "field_artifacts_without"
+    , "runfiles w/o": "field_runfiles_without"
     , "artifacts w/o": "field_artifacts_without"
     }
   , "expression":
