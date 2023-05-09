@@ -288,6 +288,13 @@
             }
           }
         ]
+      , [ "pc-args"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "shared"}
+          , "then": []
+          , "else": ["--static"]
+          }
+        ]
       , [ "cflags-filename"
         , {"type": "join", "$1": [{"type": "var", "name": "name"}, ".cflags"]}
         ]
@@ -307,10 +314,15 @@
                   ]
                 }
               , "cmd":
-                [ "./config_reader"
-                , {"type": "var", "name": "cflags-filename"}
-                , {"type": "var", "name": "main-pkg-config"}
-                ]
+                { "type": "++"
+                , "$1":
+                  [ [ "./config_reader"
+                    , {"type": "var", "name": "cflags-filename"}
+                    , {"type": "var", "name": "main-pkg-config"}
+                    ]
+                  , {"type": "var", "name": "pc-args"}
+                  ]
+                }
               , "env": {"type": "var", "name": "ENV"}
               , "outs": [{"type": "var", "name": "cflags-filename"}]
               }
@@ -368,10 +380,15 @@
                   ]
                 }
               , "cmd":
-                [ "./config_reader"
-                , {"type": "var", "name": "ldflags-filename"}
-                , {"type": "var", "name": "main-pkg-config"}
-                ]
+                { "type": "++"
+                , "$1":
+                  [ [ "./config_reader"
+                    , {"type": "var", "name": "ldflags-filename"}
+                    , {"type": "var", "name": "main-pkg-config"}
+                    ]
+                  , {"type": "var", "name": "pc-args"}
+                  ]
+                }
               , "env": {"type": "var", "name": "ENV"}
               , "outs": [{"type": "var", "name": "ldflags-filename"}]
               }
