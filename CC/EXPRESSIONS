@@ -1190,11 +1190,11 @@
                     }
                   ]
                 , {"type": "var", "name": "COMPILE_FLAGS"}
-                , {"type": "var", "name": "LDFLAGS"}
                 , ["-o", {"type": "var", "name": "libname"}]
                 , {"type": "keys", "$1": {"type": "var", "name": "objects"}}
                 , {"type": "var", "name": "link-args"}
                 , {"type": "var", "name": "run-libs-args"}
+                , {"type": "var", "name": "LDFLAGS"}
                 ]
               }
             }
@@ -1502,9 +1502,9 @@
                 , {"type": "var", "name": "binpath"}
                 ]
               , {"type": "var", "name": "COMPILE_FLAGS"}
-              , {"type": "var", "name": "LDFLAGS"}
               , {"type": "var", "name": "link-args"}
               , {"type": "var", "name": "run-libs-args"}
+              , {"type": "var", "name": "LDFLAGS"}
               ]
             }
           , "env": {"type": "var", "name": "ENV"}
