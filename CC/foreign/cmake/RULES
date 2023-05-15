@@ -50,7 +50,8 @@
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories. Note that data between \"pre_cmds\" and"
       , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
-      , "for this action."
+      , "for this action. The CMake source and build directory can be accessed"
+      , "via $CMAKE_SOURCE_DIR and $CMAKE_BINARY_DIR, respectively."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -286,7 +287,9 @@
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
       , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
-      , "$TMPDIR, which is uniquely reserved for this action."
+      , "$TMPDIR, which is uniquely reserved for this action. The CMake source"
+      , "and build directory can be accessed via $CMAKE_SOURCE_DIR and"
+      , "$CMAKE_BINARY_DIR, respectively."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"

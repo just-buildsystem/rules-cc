@@ -169,7 +169,12 @@
                     , "then":
                       { "type": "++"
                       , "$1":
-                        [ ["(", "set --", "cd ./install"]
+                        [ [ "("
+                          , "set --"
+                          , "readonly CMAKE_SOURCE_DIR=\"$(pwd)/source\""
+                          , "readonly CMAKE_BINARY_DIR=\"$(pwd)/build\""
+                          , "cd ./install"
+                          ]
                         , {"type": "var", "name": "post_cmds"}
                         , [")"]
                         ]
