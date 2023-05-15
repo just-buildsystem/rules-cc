@@ -61,6 +61,7 @@
               , "cond": {"type": "var", "name": "BUILD_POSITION_INDEPENDENT"}
               , "then": ["-DCMAKE_POSITION_INDEPENDENT_CODE=ON"]
               }
+            , ["-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/../lib"]
             ]
           }
         ]

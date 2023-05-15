@@ -77,7 +77,8 @@
           , "$1":
             { "type": "++"
             , "$1":
-              [ { "type": "var"
+              [ ["-Wl,-rpath,$ORIGIN", "-Wl,-rpath,$ORIGIN/../lib"]
+              , { "type": "var"
                 , "name": "LDFLAGS"
                 , "default":
                   {"type": "CALL_EXPRESSION", "name": "default-LDFLAGS"}
