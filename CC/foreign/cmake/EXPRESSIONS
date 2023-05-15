@@ -81,11 +81,6 @@
             }
           }
         ]
-      , [ "CMAKE_BUILD_PARALLEL_LEVEL"
-        , { "type": "join"
-          , "$1": {"type": "var", "name": "cmake_jobs", "default": []}
-          }
-        ]
       , [ "ENV"
         , { "type": "map_union"
           , "$1":
@@ -98,14 +93,7 @@
                   }
                 ]
               , [ { "type": "env"
-                  , "vars":
-                    [ "CC"
-                    , "CXX"
-                    , "CXXFLAGS"
-                    , "CFLAGS"
-                    , "LDFLAGS"
-                    , "CMAKE_BUILD_PARALLEL_LEVEL"
-                    ]
+                  , "vars": ["CC", "CXX", "CXXFLAGS", "CFLAGS", "LDFLAGS"]
                   }
                 ]
               ]
@@ -116,6 +104,21 @@
         , { "type": "var"
           , "name": "AR"
           , "default": {"type": "CALL_EXPRESSION", "name": "default-AR"}
+          }
+        ]
+      , [ "CMAKE_JOBS"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "cmake_jobs"}
+          , "then":
+            [ { "type": "join"
+              , "$1":
+                [ "CMAKE_BUILD_PARALLEL_LEVEL="
+                , { "type": "join_cmd"
+                  , "$1": {"type": "var", "name": "cmake_jobs"}
+                  }
+                ]
+              }
+            ]
           }
         ]
       , [ "script"
@@ -147,9 +150,20 @@
                   , [ "readonly CMAKE_AR=$(which $1)"
                     , "shift"
                     , "cmake \"$@\" -Ssource -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log || (cat configure.log && exit 1)"
-                    , "cmake --build build --target install >build.log || (cat configure.log build.log && exit 1)"
-                    , "find ./install -type l -delete"
                     ]
+                  , [ { "type": "join"
+                      , "separator": " "
+                      , "$1":
+                        { "type": "++"
+                        , "$1":
+                          [ {"type": "var", "name": "CMAKE_JOBS"}
+                          , [ "cmake --build build --target install >build.log || (cat configure.log build.log && exit 1)"
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  , ["find ./install -type l -delete"]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "post_cmds"}
                     , "then":
