@@ -601,7 +601,7 @@
           , "$1": {"type": "FIELD", "name": "stage"}
           }
         ]
-      , ["deps-fieldnames", ["deps"]]
+      , ["deps-fieldnames", ["deps", "defaults"]]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "prebuilt result"}
     }
