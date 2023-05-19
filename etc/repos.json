@@ -46,8 +46,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-beta1"
-      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
+      , "branch": "v1.1.0"
+      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
       }
     , "bindings":
       { "rules": "just/rules-just"
@@ -297,8 +297,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-beta1"
-      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
+      , "branch": "v1.1.0"
+      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
       , "subdir": "etc/patches"
       }
     }
@@ -332,8 +332,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-beta1"
-      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
+      , "branch": "v1.1.0"
+      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
       , "subdir": "rules"
       }
     , "target_root": "just/defaults"
@@ -404,11 +404,7 @@
     , "target_root": "just/defaults"
     , "rule_root": "just/rules"
     , "target_file_name": "TARGETS.protobuf"
-    , "bindings":
-      { "base": "just/rules"
-      , "protoc": "just/protobuf"
-      , "grpc": "just/com_github_grpc_grpc"
-      }
+    , "bindings": {"base": "just/rules"}
     }
   , "just/rules-re2":
     { "repository": "just/rules"
@@ -447,8 +443,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-beta1"
-      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
+      , "branch": "v1.1.0"
+      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
       , "subdir": "etc/defaults"
       }
     }
@@ -456,8 +452,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0-beta1"
-      , "commit": "7b776d35325ed3f07eaaf69699f4be948dd1394c"
+      , "branch": "v1.1.0"
+      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
       , "subdir": "etc/import"
       }
     }
