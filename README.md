@@ -166,7 +166,10 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
 | `"AR"` | The archiver tool to use |
 | `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. |
+| `"SYSTEM_TOOLS"` | List of tools (`"CC"`, `"CXX"`, or `"AR"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
 | `"base"` | Other targets (using the same rule) to inherit values from. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field overlays artifacts from `"base"`. |
+| `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
 
 ### Rule `["CC/proto", "defaults"]`
 
@@ -205,6 +208,7 @@ Library produced by CMake configure, build, and install.
 
 | Field | Description |
 | ----- | ----------- |
+| `"subdir"` | The subdirectory that contains the entry CMakeLists.txt. Individual directory components are joined with `"/"`. |
 | `"name"` | The name of the library (without leading `"lib"` or trailing file name extension), also used as name for pkg-config files. |
 | `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
 | `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
@@ -231,6 +235,7 @@ Data produced by CMake configure, build, and install.
 
 | Field | Description |
 | ----- | ----------- |
+| `"subdir"` | The subdirectory that contains the entry CMakeLists.txt. Individual directory components are joined with `"/"`. |
 | `"options"` | CMake options for the configuration phase. (e.g., `["-GNinja", "-Ax64"]`) |
 | `"defines"` | CMake defines for the configuration phase. (e.g., `["CMAKE_BUILD_TYPE=Release"]`) |
 | `"jobs"` | Number of jobs to run simultaneously. If omitted, CMake's default number is used. |
@@ -242,14 +247,17 @@ Data produced by CMake configure, build, and install.
 
 ### Rule `["CC/foreign/make", "library"]`
 
-Library produced by Make build and install.
+Library produced by Configure and Make build and install.
 
 | Field | Description |
 | ----- | ----------- |
+| `"subdir"` | The subdirectory that contains the configure and Makefile. Individual directory components are joined with `"/"`. |
 | `"name"` | The name of the library (without leading `"lib"` or trailing file name extension), also used as name for pkg-config files. |
 | `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
 | `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
-| `"target"` | The Make target to build (default: `["install"]`). |
+| `"configure"` | Run ./configure if non-empty. |
+| `"configure_options"` | The configure options (the `"--prefix"` option is automatically set. |
+| `"targets"` | The Make targets to build in the specified order (default: `["install"]`). |
 | `"prefix"` | The prefix used for the Make target. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"options"` | Make options for the configuration phase. (e.g., `["-f", "Makefile", "ARCH=x86"]`) |
 | `"jobs"` | Number of jobs to run simultaneously. If omitted, Make's default number is used. |
@@ -281,11 +289,14 @@ Library produced by Make build and install.
 
 ### Rule `["CC/foreign/make", "data"]`
 
-Data produced by Make build and install.
+Data produced by Configure and Make build and install.
 
 | Field | Description |
 | ----- | ----------- |
-| `"target"` | The Make target to build (default: `["install"]`). |
+| `"subdir"` | The subdirectory that contains the configure and Makefile. Individual directory components are joined with `"/"`. |
+| `"configure"` | Run ./configure if non-empty. |
+| `"configure_options"` | The configure options (the `"--prefix"` option is automatically set. |
+| `"targets"` | The Make targets to build in the specified order (default: `["install"]`). |
 | `"prefix"` | The prefix used for the Make target. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"options"` | Make options for the configuration phase. (e.g., `["-f", "Makefile", "ARCH=x86"]`) |
 | `"jobs"` | Number of jobs to run simultaneously. If omitted, Make's default number is used. |
