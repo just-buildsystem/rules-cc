@@ -61,6 +61,8 @@
     , "compile-args-deps": ["CC", "compile-args-deps"]
     , "link-deps": ["CC", "link-deps"]
     , "link-args-deps": ["CC", "link-args-deps"]
+    , "run-libs-deps": ["CC", "run-libs-deps"]
+    , "run-libs-args-deps": ["CC", "run-libs-args-deps"]
     , "cflags-files-deps": ["CC", "cflags-files-deps"]
     , "ldflags-files-deps": ["CC", "ldflags-files-deps"]
     , "for host": ["transitions", "for host"]
@@ -193,6 +195,10 @@
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
       , ["link-args", {"type": "CALL_EXPRESSION", "name": "link-args-deps"}]
+      , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
+      , [ "run-libs-args"
+        , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
+        ]
       , [ "cflags-files"
         , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
         ]
@@ -216,6 +222,8 @@
           , "compile-args"
           , "link-deps"
           , "link-args"
+          , "run-libs"
+          , "run-libs-args"
           , "package"
           ]
         }
@@ -245,8 +253,8 @@
           , "$1": {"type": "FIELD", "name": "stage"}
           }
         ]
-      , ["public-fieldnames", ["deps", "proto-defaults"]]
-      , ["private-fieldnames", ["deps", "proto-defaults"]]
+      , ["public-fieldnames", ["deps", "proto-defaults", "defaults"]]
+      , ["private-fieldnames", ["deps", "proto-defaults", "defaults"]]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "protoc-compile"}
     }
@@ -277,8 +285,8 @@
           , "$1": {"type": "FIELD", "name": "stage"}
           }
         ]
-      , ["public-fieldnames", ["deps", "proto-defaults"]]
-      , ["private-fieldnames", ["deps", "proto-defaults"]]
+      , ["public-fieldnames", ["deps", "proto-defaults", "defaults"]]
+      , ["private-fieldnames", ["deps", "proto-defaults", "defaults"]]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "protoc-compile"}
     }

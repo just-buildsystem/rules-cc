@@ -1,8 +1,11 @@
 { "data":
-  { "doc": ["Data produced by Make build and install."]
+  { "doc": ["Data produced by Configure and Make build and install."]
   , "target_fields": ["project"]
   , "string_fields":
-    [ "target"
+    [ "subdir"
+    , "configure"
+    , "configure_options"
+    , "targets"
     , "prefix"
     , "options"
     , "jobs"
@@ -37,7 +40,17 @@
   , "field_doc":
     { "project":
       ["The Make project directory. It should contain a single tree artifact"]
-    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "subdir":
+      [ "The subdirectory that contains the configure and Makefile. Individual"
+      , "directory components are joined with \"/\"."
+      ]
+    , "configure": ["Run ./configure if non-empty."]
+    , "configure_options":
+      ["The configure options (the \"--prefix\" option is automatically set."]
+    , "targets":
+      [ "The Make targets to build in the specified order"
+      , "(default: [\"install\"])."
+      ]
     , "prefix":
       [ "The prefix used for the Make target. The path will be made absolute"
       , "and individual directory components are joined with \"/\". If no"
@@ -195,7 +208,10 @@
             }
           }
         ]
-      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["subdir", {"type": "FIELD", "name": "subdir"}]
+      , ["configure", {"type": "FIELD", "name": "configure"}]
+      , ["configure_options", {"type": "FIELD", "name": "configure_options"}]
+      , ["make_targets", {"type": "FIELD", "name": "targets"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
@@ -255,13 +271,16 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by Make build and install."]
+  { "doc": ["Library produced by Configure and Make build and install."]
   , "target_fields": ["project", "deps"]
   , "string_fields":
-    [ "name"
+    [ "subdir"
+    , "name"
     , "version"
     , "stage"
-    , "target"
+    , "configure"
+    , "configure_options"
+    , "targets"
     , "prefix"
     , "options"
     , "jobs"
@@ -306,6 +325,10 @@
   , "field_doc":
     { "project":
       ["The Make project directory. It should contain a single tree artifact"]
+    , "subdir":
+      [ "The subdirectory that contains the configure and Makefile. Individual"
+      , "directory components are joined with \"/\"."
+      ]
     , "name":
       [ "The name of the library (without leading \"lib\" or trailing file name"
       , "extension), also used as name for pkg-config files."
@@ -314,7 +337,13 @@
       [ "The library version, used for pkg-config files. Individual version"
       , "components are joined with \".\"."
       ]
-    , "target": ["The Make target to build (default: [\"install\"])."]
+    , "configure": ["Run ./configure if non-empty."]
+    , "configure_options":
+      ["The configure options (the \"--prefix\" option is automatically set."]
+    , "targets":
+      [ "The Make targets to build in the specified order"
+      , "(default: [\"install\"])."
+      ]
     , "prefix":
       [ "The prefix used for the Make target. The path will be made absolute"
       , "and individual directory components are joined with \"/\". If no"
@@ -581,7 +610,10 @@
             ]
           }
         ]
-      , ["make_target", {"type": "FIELD", "name": "target"}]
+      , ["subdir", {"type": "FIELD", "name": "subdir"}]
+      , ["configure", {"type": "FIELD", "name": "configure"}]
+      , ["configure_options", {"type": "FIELD", "name": "configure_options"}]
+      , ["make_targets", {"type": "FIELD", "name": "targets"}]
       , ["make_prefix", {"type": "FIELD", "name": "prefix"}]
       , ["make_options", {"type": "FIELD", "name": "options"}]
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
@@ -668,7 +700,7 @@
           , "$1": {"type": "FIELD", "name": "stage"}
           }
         ]
-      , ["deps-fieldnames", ["deps"]]
+      , ["deps-fieldnames", ["deps", "defaults"]]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "prebuilt result"}
     }

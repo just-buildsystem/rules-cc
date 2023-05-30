@@ -2,7 +2,8 @@
   { "doc": ["Data produced by CMake configure, build, and install."]
   , "target_fields": ["project"]
   , "string_fields":
-    [ "options"
+    [ "subdir"
+    , "options"
     , "defines"
     , "jobs"
     , "pre_cmds"
@@ -27,6 +28,10 @@
   , "field_doc":
     { "project":
       ["The CMake project directory. It should contain a single tree artifact"]
+    , "subdir":
+      [ "The subdirectory that contains the entry CMakeLists.txt. Individual"
+      , "directory components are joined with \"/\"."
+      ]
     , "options":
       [ "CMake options for the configuration phase."
       , "(e.g., [\"-GNinja\", \"-Ax64\"])"
@@ -162,6 +167,7 @@
             }
           }
         ]
+      , ["cmake_subdir", {"type": "FIELD", "name": "subdir"}]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
       , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
@@ -218,7 +224,8 @@
   { "doc": ["Library produced by CMake configure, build, and install."]
   , "target_fields": ["project", "deps"]
   , "string_fields":
-    [ "name"
+    [ "subdir"
+    , "name"
     , "version"
     , "stage"
     , "options"
@@ -256,6 +263,10 @@
   , "field_doc":
     { "project":
       ["The CMake project directory. It should contain a single tree artifact"]
+    , "subdir":
+      [ "The subdirectory that contains the entry CMakeLists.txt. Individual"
+      , "directory components are joined with \"/\"."
+      ]
     , "name":
       [ "The name of the library (without leading \"lib\" or trailing file name"
       , "extension), also used as name for pkg-config files."
@@ -509,6 +520,7 @@
             ]
           }
         ]
+      , ["cmake_subdir", {"type": "FIELD", "name": "subdir"}]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
       , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
@@ -589,7 +601,7 @@
           , "$1": {"type": "FIELD", "name": "stage"}
           }
         ]
-      , ["deps-fieldnames", ["deps"]]
+      , ["deps-fieldnames", ["deps", "defaults"]]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "prebuilt result"}
     }
