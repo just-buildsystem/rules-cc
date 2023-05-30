@@ -1184,8 +1184,8 @@
     { "compiler": "compiler"
     , "flags": "flags"
     , "objects": "objects"
-    , "default-LDFLAGS": "default-LDFLAGS"
     , "default-ENV": "default-ENV"
+    , "default-LDFLAGS": "default-LDFLAGS"
     , "default-TOOLCHAIN": "default-TOOLCHAIN"
     , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
     }
