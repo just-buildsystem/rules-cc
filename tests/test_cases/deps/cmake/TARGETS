@@ -49,4 +49,32 @@
   }
 , "install_testbin":
   {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["testbin"]}
+, "libz":
+  { "type": ["@", "rules", "CC/foreign/cmake", "library"]
+  , "name": ["libz"]
+  , "version": ["1", "2", "13"]
+  , "project": [["@", "libz", "", "tree"]]
+  , "defines": ["BUILD_SHARED_LIBS=ON"]
+  , "post_cmds":
+    [ "cp lib/libz.so.1.2.13 lib/libz.so"
+    , "cp lib/libz.so.1.2.13 lib/libz.so.1"
+    ]
+  , "out_hdrs": ["zconf.h", "zlib.h"]
+  , "out_libs": ["libz.so", "libz.so.1", "libz.so.1.2.13"]
+  , "pc_prefix": ["share/pkgconfig"]
+  , "pkg-config": ["zlib.pc"]
+  }
+, "libcurl":
+  { "type": ["@", "rules", "CC/foreign/cmake", "library"]
+  , "name": ["libcurl"]
+  , "version": ["8", "0", "1"]
+  , "project": [["@", "libcurl", "", "tree"]]
+  , "defines": ["BUILD_SHARED_LIBS=ON", "CURL_ENABLE_SSL=OFF", "USE_ZLIB=ON"]
+  , "out_hdr_dirs": ["curl"]
+  , "out_libs": ["libcurl.so.4.8.0"]
+  , "pkg-config": ["libcurl.pc"]
+  , "deps": ["libz"]
+  }
+, "install_libcurl":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["libcurl"]}
 }

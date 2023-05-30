@@ -151,7 +151,7 @@
 , "cmake":
   { "type": ["test_rules", "test_case"]
   , "name": ["deps_cmake"]
-  , "libs": ["googletest"]
+  , "libs": ["googletest", "libz", "libcurl"]
   , "targets":
     [ "+gtest"
     , "+test"
@@ -161,6 +161,7 @@
     , "+install_gtest"
     , "+install_gtest_main"
     , "+install_testbin"
+    , "+install_libcurl"
     ]
   , "asserts":
     [ "test -f gtest/libgtest.a"
@@ -184,6 +185,7 @@
     , "grep 'Libs.*libgtest_main.so.1.13.0' install_gtest_main/lib/pkgconfig/gtest_main.pc"
     , "grep 'Libs.*lib/pkgconfig/gtest_main.ldflags' install_gtest_main/lib/pkgconfig/gtest_main.pc"
     , "./install_testbin/bin/test | grep 'PASSED.*1 test'"
+    , "path=$(ldd install_libcurl/lib/libcurl.so.4.8.0 | awk '/libz/{print $3}') && test -z \"${path##$(pwd)*}\""
     ]
   , "data": [["TREE", null, "cmake"]]
   }

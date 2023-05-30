@@ -29,7 +29,7 @@
   , "test-libs":
     { "repository": "imports"
     , "target_file_name": "libs.TARGETS"
-    , "bindings": {"gtest": "gtest"}
+    , "bindings": {"gtest": "gtest", "libz": "libz", "libcurl": "libcurl"}
     }
   , "gtest":
     { "repository":
@@ -41,6 +41,31 @@
       }
     , "target_root": "imports"
     , "target_file_name": "gtest.TARGETS"
+    }
+  , "libz":
+    { "repository":
+      { "type": "archive"
+      , "content": "d115fc690fa59d3be51b3442158876536140b6c2"
+      , "fetch": "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz"
+      , "sha256": "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
+      , "sha512": "99f0e843f52290e6950cc328820c0f322a4d934a504f66c7caa76bd0cc17ece4bf0546424fc95135de85a2656fed5115abb835fd8d8a390d60ffaf946c8887ad"
+      , "subdir": "zlib-1.2.13"
+      }
+    , "target_root": "imports"
+    , "target_file_name": "libz.TARGETS"
+    }
+  , "libcurl":
+    { "repository":
+      { "type": "archive"
+      , "content": "540b4de2edfa015b894ad86d51b33a55f451ac99"
+      , "fetch": "https://github.com/curl/curl/releases/download/curl-8_0_1/curl-8.0.1.tar.gz"
+      , "sha256": "5fd29000a4089934f121eff456101f0a5d09e2a3e89da1d714adf06c4be887cb"
+      , "sha512": "87d945e65176613c6296f8b130bd6c5355e3ca3c62ee4010edd481950cad9760482fd3be8a84e51501c118c29ebc284b8f87c49b06f9d248e9da5819fda38f8f"
+      , "subdir": "curl-8.0.1"
+      }
+    , "target_root": "imports"
+    , "target_file_name": "libcurl.TARGETS"
+    , "bindings": {"libz": "libz"}
     }
   }
 }

@@ -1,0 +1,6 @@
+{ "tree":
+  { "type": "install"
+  , "dirs": [[["TREE", null, "."], "libcurl"]]
+  , "tainted": ["test"]
+  }
+}
