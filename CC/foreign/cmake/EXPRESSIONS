@@ -2,6 +2,7 @@
   { "vars":
     [ "source_dir"
     , "cmake_subdir"
+    , "localbase_dir"
     , "cmake_options"
     , "cmake_defines"
     , "cmake_jobs"
@@ -180,7 +181,7 @@
                   , [ "readonly CMAKE_SUBDIR=\"$1\""
                     , "readonly CMAKE_AR=$(which $2)"
                     , "shift 2"
-                    , "cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install >configure.log 2>&1 || (cat configure.log && exit 1)"
+                    , "cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$(pwd)/localbase\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli >configure.log 2>&1 || (cat configure.log && exit 1)"
                     ]
                   , [ { "type": "join"
                       , "separator": " "
@@ -225,6 +226,10 @@
         , "$1":
           [ {"type": "var", "name": "TOOLCHAIN"}
           , {"type": "var", "name": "source_dir"}
+          , { "type": "var"
+            , "name": "localbase_dir"
+            , "default": {"type": "empty_map"}
+            }
           , {"type": "var", "name": "script"}
           ]
         }

@@ -1710,7 +1710,7 @@
       }
     }
   }
-, "install-with-deps result":
+, "install-with-deps stage":
   { "vars": ["pc-install-dir", "targets", "prefix", "flat-libs", "hdrs-only"]
   , "imports":
     { "compile-deps": "compile-deps"
@@ -1932,8 +1932,15 @@
           }
         ]
       ]
-    , "body":
-      {"type": "RESULT", "artifacts": {"type": "var", "name": "install-stage"}}
+    , "body": {"type": "var", "name": "install-stage"}
+    }
+  }
+, "install-with-deps result":
+  { "vars": ["pc-install-dir", "targets", "prefix", "flat-libs", "hdrs-only"]
+  , "imports": {"install stage": "install-with-deps stage"}
+  , "expression":
+    { "type": "RESULT"
+    , "artifacts": {"type": "CALL_EXPRESSION", "name": "install stage"}
     }
   }
 }

@@ -406,6 +406,7 @@
     , "cmake-build": "cmake-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
     , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
+    , "install-deps": ["CC", "install-with-deps stage"]
     }
   , "expression":
     { "type": "let*"
@@ -462,6 +463,20 @@
         , { "type": "let*"
           , "bindings": [["fieldname", "project"], ["location", "source"]]
           , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "localbase_dir"
+        , { "type": "to_subdir"
+          , "subdir": "localbase"
+          , "msg": "dependency installation files may not overlap"
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [ ["pc-install-dir", "lib/pkgconfig"]
+              , ["targets", {"type": "FIELD", "name": "deps"}]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "install-deps"}
+            }
           }
         ]
       , [ "installed_dirs"
