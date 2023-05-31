@@ -115,7 +115,7 @@ A prebuilt C++ library
 
 ### Rule `["CC", "install-with-deps"]`
 
-Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"share/pkgconfig"`.
+Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"lib/pkgconfig"`.
 
 | Field | Description |
 | ----- | ----------- |
