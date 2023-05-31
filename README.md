@@ -201,6 +201,7 @@ Shell test, given by a test script
 | --------------- | ----------- |
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
 | `"TEST_ENV"` | Additional environment for executing the test runner. |
+| `"TIMEOUT_SCALE"` | Factor on how to scale the timeout for this test. Defaults to 1.0. |
 
 ### Rule `["CC/foreign/cmake", "library"]`
 
