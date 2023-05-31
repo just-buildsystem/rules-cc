@@ -1,6 +1,7 @@
 { "test-action":
   { "vars":
     [ "TEST_ENV"
+    , "TIMEOUT_SCALE"
     , "ATTEMPT"
     , "name"
     , "test.sh"
@@ -170,6 +171,8 @@
           { "type": "join"
           , "$1": ["shell test ", {"type": "var", "name": "name"}, " failed"]
           }
+        , "timeout scaling":
+          {"type": "var", "name": "TIMEOUT_SCALE", "default": 1.0}
         }
       , "else":
         { "type": "ACTION"
@@ -189,6 +192,8 @@
             , ")"
             ]
           }
+        , "timeout scaling":
+          {"type": "var", "name": "TIMEOUT_SCALE", "default": 1.0}
         }
       }
     }
@@ -196,6 +201,7 @@
 , "test-result":
   { "vars":
     [ "TEST_ENV"
+    , "TIMEOUT_SCALE"
     , "name"
     , "test.sh"
     , "keep"
