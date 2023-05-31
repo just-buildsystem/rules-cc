@@ -339,14 +339,17 @@
             , "else": ["DESTDIR"]
             }
           , {"type": "var", "name": "make_options"}
-          , [ { "type": "join"
-              , "$1":
-                { "type": "++"
+          , { "type": "if"
+            , "cond": {"type": "var", "name": "make_jobs"}
+            , "then":
+              [ { "type": "join"
                 , "$1":
-                  [["-j"], {"type": "var", "name": "make_jobs", "default": []}]
+                  { "type": "++"
+                  , "$1": [["-j"], {"type": "var", "name": "make_jobs"}]
+                  }
                 }
-              }
-            ]
+              ]
+            }
           ]
         }
       , "out_dirs": ["install"]
