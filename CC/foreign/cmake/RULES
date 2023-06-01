@@ -23,6 +23,7 @@
     , "ENV"
     , "AR"
     , "BUILD_POSITION_INDEPENDENT"
+    , "TIMEOUT_SCALE"
     ]
   , "implicit": {"defaults": [["CC", "defaults"]]}
   , "field_doc":
@@ -123,6 +124,10 @@
       , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
       ]
     , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
+    , "TIMEOUT_SCALE":
+      [ "The scaling of the timeout for the invocation of the foreign build."
+      , "Defaults to 10."
+      ]
     }
   , "imports":
     { "stage_field": ["", "stage_singleton_field"]
@@ -255,6 +260,7 @@
     , "ENV"
     , "AR"
     , "BUILD_POSITION_INDEPENDENT"
+    , "TIMEOUT_SCALE"
     ]
   , "implicit":
     { "defaults": [["CC", "defaults"]]
@@ -400,6 +406,10 @@
       , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
       ]
     , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
+    , "TIMEOUT_SCALE":
+      [ "The scaling of the timeout for the invocation of the foreign build."
+      , "Defaults to 10."
+      ]
     }
   , "imports":
     { "stage_field": ["", "stage_singleton_field"]
