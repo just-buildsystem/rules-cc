@@ -246,6 +246,8 @@
         }
       , "out_dirs": ["install"]
       , "env": {"type": "var", "name": "ENV"}
+      , "timeout scaling":
+        {"type": "var", "name": "TIMEOUT_SCALE", "default": 10.0}
       }
     }
   }
