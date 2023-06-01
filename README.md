@@ -230,6 +230,10 @@ Library produced by CMake configure, build, and install.
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
 | `"deps"` | Public dependency on other CC libraries. |
 
+| Config variable | Description |
+| --------------- | ----------- |
+| `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+
 ### Rule `["CC/foreign/cmake", "data"]`
 
 Data produced by CMake configure, build, and install.
@@ -245,6 +249,10 @@ Data produced by CMake configure, build, and install.
 | `"out_files"` | Paths to the produced output files. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
 
 ### Rule `["CC/foreign/make", "library"]`
 
@@ -287,6 +295,7 @@ Library produced by Configure and Make build and install.
 | Config variable | Description |
 | --------------- | ----------- |
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
+| `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
 
 ### Rule `["CC/foreign/make", "data"]`
 
@@ -318,6 +327,7 @@ Data produced by Configure and Make build and install.
 | Config variable | Description |
 | --------------- | ----------- |
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
+| `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
 
 ### Rule `["proto", "library"]`
 
