@@ -43,8 +43,8 @@ reposistories containing the toolchain).
 
 For interoperability with CMake projects, see
 
-- [consume CMake libraries](./doc/consume-cmake-libraries.org)
-- [being consumed by CMake](./doc/being-consumed-by-cmake.org)
+- [consume CMake libraries](./doc/consume-cmake-libraries.md)
+- [being consumed by CMake](./doc/being-consumed-by-cmake.md)
 
 ## Rule Documentation
 

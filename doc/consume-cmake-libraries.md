@@ -1,28 +1,31 @@
-* Consume CMake Libraries
+Consume CMake Libraries
+=======================
 
-To support libraries built with CMake to be consumed by JustBuild, the rule
-~["CC/foreign/cmake", "library"]~ can be used. This rule will run CMake and
-collect the library's artifacts, public headers, and pkg-config files (if
-available), to produce a proper JustBuild library target.
+To support libraries built with CMake to be consumed by JustBuild, the
+rule `["CC/foreign/cmake", "library"]` can be used. This rule will run
+CMake and collect the library's artifacts, public headers, and
+pkg-config files (if available), to produce a proper JustBuild library
+target.
 
-In this example, we show how to consume the ~gtest~ library built with CMake
-using JustBuild.
+In this example, we show how to consume the `gtest` library built with
+CMake using JustBuild.
 
-** Example: Build the ~gtest~ Library with CMake
+Example: Build the `gtest` Library with CMake
+---------------------------------------------
 
-First make sure that ~just~, ~just-mr~, and ~just-import-git~ are available in
-your ~PATH~. Then, define a new workspace by creating a ~ROOT~ marker.
+First make sure that `just`, `just-mr`, and `just-import-git` are
+available in your `PATH`. Then, define a new workspace by creating a
+`ROOT` marker.
 
-#+BEGIN_SRC sh
+``` sh
 $ touch ROOT
-#+END_SRC
+```
 
 To define a repository for the
-[[https://github.com/google/googletest/tree/v1.13.0][gtest]] library, create the
-following ~repos.template.json~ file.
+[gtest](https://github.com/google/googletest/tree/v1.13.0) library,
+create the following `repos.template.json` file.
 
-#+SRCNAME: repos.template.json
-#+BEGIN_SRC js
+``` {.jsonc srcname="repos.template.json"}
 { "main": "tests"
 , "repositories":
   { "imports": {"repository": {"type": "file", "path": "imports"}}
@@ -43,19 +46,18 @@ following ~repos.template.json~ file.
     }
   }
 }
-#+END_SRC
+```
 
-Now the missing ~rules-cc~ repository can be imported via:
+Now the missing `rules-cc` repository can be imported via:
 
-#+BEGIN_SRC sh
+``` sh
 $ just-import-git -C repos.template.json --as rules-cc -b master https://github.com/just-buildsystem/rules-cc > repos.json
 $
-#+END_SRC
+```
 
-Create the file ~imports/gtest.TARGETS~ with the following content.
+Create the file `imports/gtest.TARGETS` with the following content.
 
-#+SRCNAME: imports/gtest.TARGETS
-#+BEGIN_SRC js
+``` {.jsonc srcname="imports/gtest.TARGETS"}
 { "gtest_main":
   { "type": ["@", "rules", "CC/foreign/cmake", "library"]
   , "name": ["gtest_main"]
@@ -67,21 +69,21 @@ Create the file ~imports/gtest.TARGETS~ with the following content.
   , "pkg-config": ["gtest_main.pc", "gtest.pc"]
   }
 }
-#+END_SRC
+```
 
-The library ~gtest_main~ uses the rule ~["CC/foreign/cmake", "library"]~. It
-sets ~defines~ to build shared libraries and collects the public header
-directory ~gtest~, as well as the two libraries ~libgtest_main.so.1.13.0~ and
-~libgtest.so.1.13.0~ (in this particular link order). Furthermore, to
-automatically infer public compile and link flags (e.g., a link dependency to
-the system's ~pthread~ library), the pkg-config files ~gtest_main.pc~ and
-~gtest.pc~ are read, with the former (entry point) depending on the latter.
+The library `gtest_main` uses the rule
+`["CC/foreign/cmake", "library"]`. It sets `defines` to build shared
+libraries and collects the public header directory `gtest`, as well as
+the two libraries `libgtest_main.so.1.13.0` and `libgtest.so.1.13.0` (in
+this particular link order). Furthermore, to automatically infer public
+compile and link flags (e.g., a link dependency to the system's
+`pthread` library), the pkg-config files `gtest_main.pc` and `gtest.pc`
+are read, with the former (entry point) depending on the latter.
 
-Now, create the actual ~test~ target, which consumes the ~gtest_main~ library,
-by creating the following ~TARGETS~ file.
+Now, create the actual `test` target, which consumes the `gtest_main`
+library, by creating the following `TARGETS` file.
 
-#+SRCNAME: TARGETS
-#+BEGIN_SRC js
+``` {.jsonc srcname="TARGETS"}
 { "test":
   { "type": ["@", "rules", "CC/test", "test"]
   , "name": ["test"]
@@ -89,22 +91,21 @@ by creating the following ~TARGETS~ file.
   , "private-deps": [["@", "gtest", "", "gtest_main"]]
   }
 }
-#+END_SRC
+```
 
-The last file missing yet is the actual test source file ~test.cpp~.
+The last file missing yet is the actual test source file `test.cpp`.
 
-#+SRCNAME: test.cpp
-#+BEGIN_SRC cpp
+``` {.cpp srcname="test.cpp"}
 #include <gtest/gtest.h>
 
 TEST(CastTest, double) {
   EXPECT_EQ (42.0, double(42));
 }
-#+END_SRC
+```
 
-Finally, build the ~test~ target to run the test.
+Finally, build the `test` target to run the test.
 
-#+BEGIN_SRC sh
+``` sh
 $ just-mr build test -Pstdout
 INFO: Requested target is [["@","tests","","test"],{}]
 INFO: Analysed target [["@","tests","","test"],{}]
@@ -134,4 +135,4 @@ Running main() from src/gtest_main.cc
 
 INFO: Target tainted ["test"].
 $
-#+END_SRC
+```

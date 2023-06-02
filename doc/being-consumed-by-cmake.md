@@ -1,28 +1,30 @@
-* Being consumed by CMake
+Being consumed by CMake
+=======================
 
-To support libraries built with JustBuild to be consumed by CMake, the rule
-~["CC", "install-with-deps"]~ can be used. This rule will install the library's
-artifacts, its public headers, and a pkg-config file, which can be used by CMake
-to properly consume the library.
+To support libraries built with JustBuild to be consumed by CMake, the
+rule `["CC", "install-with-deps"]` can be used. This rule will install
+the library's artifacts, its public headers, and a pkg-config file,
+which can be used by CMake to properly consume the library.
 
-In this example, we show how to build and install the ~ssl~ library with
+In this example, we show how to build and install the `ssl` library with
 JustBuild, so it can be picked up and used by CMake afterwards.
 
-** Example: Build and install the ~ssl~ Library with JustBuild
+Example: Build and install the `ssl` Library with JustBuild
+-----------------------------------------------------------
 
-First make sure that ~just~, ~just-mr~, and ~just-import-git~ are available in
-your ~PATH~. Then, define a new workspace by creating the ~ROOT~ marker.
+First make sure that `just`, `just-mr`, and `just-import-git` are
+available in your `PATH`. Then, define a new workspace by creating the
+`ROOT` marker.
 
-#+BEGIN_SRC sh
+``` sh
 $ touch ROOT
-#+END_SRC
+```
 
-The ~ssl~ library that we want to use is a defined dependency of the JustBuild
-repository ~just/ssl~. To define a repository for that library, create the
-following ~repos.template.json~ file.
+The `ssl` library that we want to use is a defined dependency of the
+JustBuild repository `just/ssl`. To define a repository for that
+library, create the following `repos.template.json` file.
 
-#+SRCNAME: repos.template.json
-#+BEGIN_SRC js
+``` {.jsonc srcname="repos.template.json"}
 { "main": "ssl"
 , "repositories":
   { "ssl":
@@ -31,23 +33,22 @@ following ~repos.template.json~ file.
     }
   }
 }
-#+END_SRC
+```
 
-and import the ~rules-cc~ and JustBuild repository, including its dependency
-~just/ssl~, via:
+and import the `rules-cc` and JustBuild repository, including its
+dependency `just/ssl`, via:
 
-#+BEGIN_SRC sh
+``` sh
 $ cat repos.template.json \
   | just-import-git -C - --as just -b master https://github.com/just-buildsystem/justbuild \
   | just-import-git -C - --as rules-cc -b master https://github.com/just-buildsystem/rules-cc \
   > repos.json
 $
-#+END_SRC
+```
 
-Next, the following ~TARGETS~ file needs to be provided.
+Next, the following `TARGETS` file needs to be provided.
 
-#+SRCNAME: TARGETS
-#+BEGIN_SRC js
+``` {.jsonc srcname="TARGETS"}
 { "ssl-lib":
   { "type": ["@", "rules", "CC", "library"]
   , "name": ["ssl"]
@@ -56,19 +57,20 @@ Next, the following ~TARGETS~ file needs to be provided.
 , "ssl-pkg":
   {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["ssl-lib"]}
 }
-#+END_SRC
+```
 
-The library target ~ssl-lib~ specifies the name ~"ssl"~ (also used as package
-name) and a dependency on the ~ssl~ library from ~just-ssl~. Note that although
-this library target is merely a "wrapper" (header-only library without headers),
-it could equally well be a full-blown library target. Furthermore, the package
-target ~ssl-pkg~ installs the ~ssl-lib~ target including its dependencies and
-generates a pkg-config file that can be later used by CMake.
+The library target `ssl-lib` specifies the name `"ssl"` (also used as
+package name) and a dependency on the `ssl` library from `just-ssl`.
+Note that although this library target is merely a "wrapper"
+(header-only library without headers), it could equally well be a
+full-blown library target. Furthermore, the package target `ssl-pkg`
+installs the `ssl-lib` target including its dependencies and generates a
+pkg-config file that can be later used by CMake.
 
-Finally, the ~ssl-pkg~ target can be built and installed to a specific ~PREFIX~
-(note that ~OS~ and ~ARCH~ must be set as well).
+Finally, the `ssl-pkg` target can be built and installed to a specific
+`PREFIX` (note that `OS` and `ARCH` must be set as well).
 
-#+BEGIN_SRC sh
+``` sh
 $ export PREFIX=/tmp/just_ssl
 $ just-mr install -D'{"OS":"linux", "ARCH":"x64_64", "PREFIX":"'$PREFIX'"}' -o $PREFIX ssl-pkg
 INFO: Requested target is [["@","ssl","","ssl-pkg"],{"ARCH":"x64_64","OS":"linux","PREFIX":"/tmp/just_ssl"}]
@@ -85,29 +87,28 @@ INFO: Artifacts can be found in:
         /tmp/just_ssl/lib/libssl.a [77d2c2bfbe3ef3608895c854f1d1f6e1c200efd0:852620:f]
         /tmp/just_ssl/share/pkgconfig/ssl.pc [9b69c758430f5b5fb6ff7a9b1f1ffc89471509af:406:f]
 $
-#+END_SRC
+```
 
-** Example: Consume the installed ~ssl~ Library with CMake
+Example: Consume the installed `ssl` Library with CMake
+-------------------------------------------------------
 
-As an example, a minimal ~main.c~ file is created that depends on the ~ssl~
-library.
+As an example, a minimal `main.c` file is created that depends on the
+`ssl` library.
 
-#+SRCNAME: main.c
-#+BEGIN_SRC C
+``` {.c srcname="main.c"}
 #include <openssl/evp.h>
 
 int main(int argc, char** argv) {
   OpenSSL_add_all_algorithms();
   return 0;
 }
-#+END_SRC
+```
 
-In the ~CMakeLists.txt~ file, the ~pkg_check_modules()~ macro can be used to
-determine the compile and linker flags needed to consume our ~ssl~ library with
-CMake.
+In the `CMakeLists.txt` file, the `pkg_check_modules()` macro can be
+used to determine the compile and linker flags needed to consume our
+`ssl` library with CMake.
 
-#+SRCNAME: CMakeLists.txt
-#+BEGIN_SRC cmake
+``` {.cmake srcname="CMakeLists.txt"}
 cmake_minimum_required(VERSION 3.1)
 
 project(test_ssl)
@@ -120,17 +121,17 @@ target_include_directories(main PRIVATE ${SSL_INCLUDE_DIRS})
 target_compile_options(main PRIVATE ${SSL_CFLAGS_OTHER})
 target_link_directories(main PRIVATE ${SSL_LIBRARY_DIRS})
 target_link_libraries(main PRIVATE ${SSL_LDFLAGS_OTHER} ${SSL_LIBRARIES})
-#+END_SRC
+```
 
-Note that ~${SSL_LDFLAGS_OTHER}~ can be omitted if the ~ssl-pkg~ target was
-defined with a non-empty value for the field ~"flat-libs"~ (see rule
-documentation of ~["CC", "install-with-deps"]~).
+Note that `${SSL_LDFLAGS_OTHER}` can be omitted if the `ssl-pkg` target
+was defined with a non-empty value for the field `"flat-libs"` (see rule
+documentation of `["CC", "install-with-deps"]`).
 
-Finally, when running CMake, make sure to set the ~CMAKE_PREFIX_PATH~ to the
-previously used install prefix in order to successfully find the installed ~ssl~
-library and its pkg-config file.
+Finally, when running CMake, make sure to set the `CMAKE_PREFIX_PATH` to
+the previously used install prefix in order to successfully find the
+installed `ssl` library and its pkg-config file.
 
-#+BEGIN_SRC sh
+``` sh
 $ cmake -DCMAKE_PREFIX_PATH=/tmp/just_ssl -S . -B /tmp/test_ssl
 -- The C compiler identification is GNU 10.2.1
 -- The CXX compiler identification is GNU 10.2.1
@@ -155,11 +156,12 @@ $ cmake --build /tmp/test_ssl
 [100%] Linking CXX executable main
 [100%] Built target main
 $
-#+END_SRC
+```
 
-Note that if the package is moved to a different location, the ~prefix~ variable
-within the pkg-config file ~share/pkgconfig/ssl.pc~ must be updated as well.
-Alternatively, CMake can be instructed to automatically guess the correct prefix
-by setting the variable ~PKG_CONFIG_ARGN~ to ~"--define-prefix"~ (either on the
-command line or in the ~CMakeLists.txt~). However, this is a fairly recent CMake
-feature and requires at least CMake version 3.22.
+Note that if the package is moved to a different location, the `prefix`
+variable within the pkg-config file `share/pkgconfig/ssl.pc` must be
+updated as well. Alternatively, CMake can be instructed to automatically
+guess the correct prefix by setting the variable `PKG_CONFIG_ARGN` to
+`"--define-prefix"` (either on the command line or in the
+`CMakeLists.txt`). However, this is a fairly recent CMake feature and
+requires at least CMake version 3.22.
