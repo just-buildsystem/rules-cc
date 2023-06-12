@@ -19,7 +19,7 @@ this feature is used.
 Alternatively, the `rules-cc` repository can be added manually to
 your `repos.json`.
 
-~~~json
+~~~jsonc
 ...
   , "rules-cc":
     { "repository":
@@ -37,14 +37,14 @@ Importing this way, `protoc` and `grpc_cpp_plugin` will be taken
 from the host system. To change the binary names or to bring your
 own proto toolchain, add a corresponding `target_root` layer (and
 provide the needed binding, if your target files refer to other
-reposistories containing the toolchain).
+repositories containing the toolchain).
 
 ## Consume and being consumed by CMake Libraries
 
 For interoperability with CMake projects, see
 
-- [consume CMake libraries](./doc/consume-cmake-libraries.org)
-- [being consumed by CMake](./doc/being-consumed-by-cmake.org)
+- [consume CMake libraries](./doc/consume-cmake-libraries.md)
+- [being consumed by CMake](./doc/being-consumed-by-cmake.md)
 
 ## Rule Documentation
 
