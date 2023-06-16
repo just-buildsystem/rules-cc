@@ -85,7 +85,7 @@ INFO: Artifacts can be found in:
         ...
         /tmp/just_ssl/lib/libcrypto.a [df64da43f0168a717d09d609bf0c631d29c86b61:2336092:f]
         /tmp/just_ssl/lib/libssl.a [77d2c2bfbe3ef3608895c854f1d1f6e1c200efd0:852620:f]
-        /tmp/just_ssl/share/pkgconfig/ssl.pc [9b69c758430f5b5fb6ff7a9b1f1ffc89471509af:406:f]
+        /tmp/just_ssl/lib/pkgconfig/ssl.pc [9b69c758430f5b5fb6ff7a9b1f1ffc89471509af:406:f]
 $
 ```
 
@@ -159,7 +159,7 @@ $
 ```
 
 Note that if the package is moved to a different location, the `prefix`
-variable within the pkg-config file `share/pkgconfig/ssl.pc` must be
+variable within the pkg-config file `lib/pkgconfig/ssl.pc` must be
 updated as well. Alternatively, CMake can be instructed to automatically
 guess the correct prefix by setting the variable `PKG_CONFIG_ARGN` to
 `"--define-prefix"` (either on the command line or in the
