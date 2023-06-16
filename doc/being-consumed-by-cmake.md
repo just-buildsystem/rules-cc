@@ -92,10 +92,10 @@ $
 Example: Consume the installed `ssl` Library with CMake
 -------------------------------------------------------
 
-As an example, a minimal `main.c` file is created that depends on the
+As an example, a minimal `main.cpp` file is created that depends on the
 `ssl` library.
 
-``` {.c srcname="main.c"}
+``` {.cpp srcname="main.cpp"}
 #include <openssl/evp.h>
 
 int main(int argc, char** argv) {
@@ -116,7 +116,7 @@ project(test_ssl)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SSL REQUIRED ssl)
 
-add_executable(main main.c)
+add_executable(main main.cpp)
 target_include_directories(main PRIVATE ${SSL_INCLUDE_DIRS})
 target_compile_options(main PRIVATE ${SSL_CFLAGS_OTHER})
 target_link_directories(main PRIVATE ${SSL_LIBRARY_DIRS})
@@ -152,7 +152,7 @@ $ cmake -DCMAKE_PREFIX_PATH=/tmp/just_ssl -S . -B /tmp/test_ssl
 -- Generating done
 -- Build files have been written to: /tmp/test_ssl
 $ cmake --build /tmp/test_ssl
-[ 50%] Building CXX object CMakeFiles/main.dir/main.c.o
+[ 50%] Building CXX object CMakeFiles/main.dir/main.cpp.o
 [100%] Linking CXX executable main
 [100%] Built target main
 $
