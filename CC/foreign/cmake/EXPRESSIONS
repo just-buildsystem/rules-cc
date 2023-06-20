@@ -39,6 +39,12 @@
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
     , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
+    , "foreign-MAKE": ["CC/foreign", "default-MAKE"]
+    , "foreign-CMAKE": ["CC/foreign", "default-CMAKE"]
+    , "foreign-ENV": ["CC/foreign", "default-ENV"]
+    , "foreign-PATH": ["CC/foreign", "default-PATH"]
+    , "foreign-TOOLCHAIN": ["CC/foreign", "default-TOOLCHAIN"]
+    , "foreign-NON_SYSTEM_TOOLS": ["CC/foreign", "default-NON_SYSTEM_TOOLS"]
     }
   , "expression":
     { "type": "let*"
@@ -54,7 +60,15 @@
           }
         ]
       , ["TOOLCHAIN_DIR", "toolchain"]
-      , ["TOOLCHAIN", {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}]
+      , [ "TOOLCHAIN"
+        , { "type": "disjoint_map_union"
+          , "msg": "Toolchain trees may not overlap"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "foreign-TOOLCHAIN"}
+            , {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}
+            ]
+          }
+        ]
       , [ "TOOLCHAIN"
         , { "type": "to_subdir"
           , "subdir": {"type": "var", "name": "TOOLCHAIN_DIR"}
@@ -62,7 +76,12 @@
           }
         ]
       , [ "NON_SYSTEM_TOOLS"
-        , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "foreign-NON_SYSTEM_TOOLS"}
+            , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+            ]
+          }
         ]
       , [ "CMAKE_FLAGS"
         , { "type": "++"
@@ -85,6 +104,42 @@
           }
         ]
       , ["BUILD_POSITION_INDEPENDENT", null]
+      , [ "MAKE"
+        , { "type": "join"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond":
+                  { "type": "lookup"
+                  , "key": "MAKE"
+                  , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                  }
+                , "then": ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                }
+              , {"type": "CALL_EXPRESSION", "name": "foreign-MAKE"}
+              ]
+            }
+          }
+        ]
+      , [ "CMAKE"
+        , { "type": "join"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond":
+                  { "type": "lookup"
+                  , "key": "CMAKE"
+                  , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                  }
+                , "then": ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                }
+              , {"type": "CALL_EXPRESSION", "name": "foreign-CMAKE"}
+              ]
+            }
+          }
+        ]
       , ["CC", {"type": "CALL_EXPRESSION", "name": "compiler-cc"}]
       , ["CXX", {"type": "CALL_EXPRESSION", "name": "compiler-cxx"}]
       , [ "CFLAGS"
@@ -153,9 +208,19 @@
         , { "type": "map_union"
           , "$1":
             [ { "type": "env"
-              , "vars": ["CC", "CXX", "CXXFLAGS", "CFLAGS", "LDFLAGS", "AR"]
+              , "vars":
+                [ "CC"
+                , "CXX"
+                , "CXXFLAGS"
+                , "CFLAGS"
+                , "LDFLAGS"
+                , "AR"
+                , "MAKE"
+                , "CMAKE"
+                ]
               }
             , {"type": "CALL_EXPRESSION", "name": "default-ENV"}
+            , {"type": "CALL_EXPRESSION", "name": "foreign-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
             ]
           }
@@ -205,6 +270,8 @@
                     , "export TMPDIR=\"$(pwd)/scratch\""
                     , "export TOOLCHAIN=\"$(pwd)/toolchain\""
                     , "export LOCALBASE=\"$(pwd)/localbase\""
+                    , "export MAKE=$([ -x \"${MAKE}\" ] && realpath ${MAKE} || echo ${MAKE})"
+                    , "export CMAKE=$([ -x \"${CMAKE}\" ] && realpath ${CMAKE} || echo ${CMAKE})"
                     , { "type": "join"
                       , "$1":
                         [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
@@ -229,7 +296,23 @@
                   , [ "readonly CMAKE_SUBDIR=\"$1\""
                     , "readonly CMAKE_AR=$(command -v $2)"
                     , "shift 2"
-                    , "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR -- cmake -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$LOCALBASE\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli \"$@\" >configure.log 2>&1 || (cat configure.log && exit 1)"
+                    ]
+                  , [ { "type": "join"
+                      , "separator": " "
+                      , "$1":
+                        [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR"
+                        , "--"
+                        , "${CMAKE} -S\"source/${CMAKE_SUBDIR}\" -Bbuild"
+                        , "-DCMAKE_MAKE_PROGRAM=${MAKE}"
+                        , "-DCMAKE_AR=${CMAKE_AR}"
+                        , "-DCMAKE_INSTALL_PREFIX=./install"
+                        , "-DCMAKE_PREFIX_PATH=\"$(pwd)/localbase\""
+                        , "-DPKG_CONFIG_ARGN=--define-prefix"
+                        , "--no-warn-unused-cli"
+                        , "\"$@\""
+                        , ">configure.log 2>&1 || (cat configure.log && exit 1)"
+                        ]
+                      }
                     ]
                   , { "type": "foreach"
                     , "range": {"type": "var", "name": "cmake_targets"}
@@ -241,11 +324,13 @@
                         { "type": "++"
                         , "$1":
                           [ {"type": "var", "name": "CMAKE_JOBS"}
-                          , [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR -- cmake --build build --target"
+                          , [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR"
+                            , "--"
+                            , "${CMAKE} --build build --target"
                             , { "type": "join_cmd"
                               , "$1": [{"type": "var", "name": "target"}]
                               }
-                            , ">>build.log 2>&1 || (cat build.log && exit 1)"
+                            , ">>build.log 2>&1 || (cat configure.log build.log && exit 1)"
                             ]
                           ]
                         }

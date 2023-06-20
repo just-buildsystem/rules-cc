@@ -1,0 +1,167 @@
+{ "defaults":
+  { "doc":
+    [ "A rule to provide defaults for foreign rules."
+    , "All foreign rules take their defaults for MAKE, CMAKE, etc from"
+    , "the target [\"CC/foreign\", \"defaults\"]."
+    ]
+  , "target_fields": ["base", "toolchain"]
+  , "string_fields": ["MAKE", "CMAKE", "PATH", "SYSTEM_TOOLS"]
+  , "field_doc":
+    { "base": ["Other targets (using the same rule) to inherit values from."]
+    , "toolchain":
+      [ "Optional toolchain directory. A collection of artifacts that provide"
+      , "the tools MAKE, CMAKE. Note that only artifacts of"
+      , "the specified targets are considered (no runfiles etc.). Specifying"
+      , "this field extends artifacts from \"base\"."
+      ]
+    , "MAKE": ["The make binary to use"]
+    , "CMAKE": ["The cmake binary to use"]
+    , "SYSTEM_TOOLS":
+      [ "List of tools (\"MAKE\", \"CMAKE\") that should be taken from"
+      , "the system instead of from \"toolchain\" (if specified)."
+      ]
+    , "PATH":
+      [ "Path for looking up the tools. Individual paths are joined with"
+      , "with \":\". Specifying this field extends values from \"base\"."
+      ]
+    }
+  , "config_vars": ["ARCH", "HOST_ARCH"]
+  , "imports":
+    { "base-provides": ["./", "..", "defaults-base-provides"]
+    , "base-provides-list": ["./", "..", "defaults-base-provides-list"]
+    , "artifacts_list": ["./", "../..", "field_artifacts_list"]
+    , "nub_left": ["", "nub_left"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    {"toolchain": [{"type": "CALL_EXPRESSION", "name": "for host"}]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["MAKE", {"type": "FIELD", "name": "MAKE"}]
+      , ["CMAKE", {"type": "FIELD", "name": "CMAKE"}]
+      , ["PATH", {"type": "FIELD", "name": "PATH"}]
+      , ["provider", "MAKE"]
+      , [ "MAKE"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "MAKE"}
+          , "then": {"type": "var", "name": "MAKE"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
+          }
+        ]
+      , ["provider", "CMAKE"]
+      , [ "CMAKE"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "CMAKE"}
+          , "then": {"type": "var", "name": "CMAKE"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
+          }
+        ]
+      , ["provider", "PATH"]
+      , [ "PATH"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "PATH"}
+            , { "type": "++"
+              , "$1": {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
+              }
+            ]
+          }
+        ]
+      , [ "PATH"
+        , { "type": "let*"
+          , "bindings": [["list", {"type": "var", "name": "PATH"}]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+          }
+        ]
+      , ["provider", "ENV"]
+      , ["default", {"type": "empty_map"}]
+      , ["ENV", {"type": "CALL_EXPRESSION", "name": "base-provides"}]
+      , ["provider", "NON_SYSTEM_TOOLS"]
+      , ["default", {"type": "empty_map"}]
+      , [ "NON_SYSTEM_TOOLS"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "MAKE"}
+                , "then":
+                  [ { "type": "singleton_map"
+                    , "key": "MAKE"
+                    , "value":
+                      { "type": "if"
+                      , "cond": {"type": "FIELD", "name": "toolchain"}
+                      , "then": true
+                      , "else": false
+                      }
+                    }
+                  ]
+                }
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "CMAKE"}
+                , "then":
+                  [ { "type": "singleton_map"
+                    , "key": "CMAKE"
+                    , "value":
+                      { "type": "if"
+                      , "cond": {"type": "FIELD", "name": "toolchain"}
+                      , "then": true
+                      , "else": false
+                      }
+                    }
+                  ]
+                }
+              , { "type": "foreach"
+                , "range": {"type": "FIELD", "name": "SYSTEM_TOOLS"}
+                , "var": "tool"
+                , "body":
+                  { "type": "singleton_map"
+                  , "key": {"type": "var", "name": "tool"}
+                  , "value": false
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      , ["provider", "TOOLCHAIN"]
+      , ["default", {"type": "empty_map"}]
+      , [ "TOOLCHAIN"
+        , { "type": "disjoint_map_union"
+          , "msg": "toolchain artifacts may not overlap"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "toolchain"}
+                , "then":
+                  { "type": "let*"
+                  , "bindings":
+                    [ ["fieldname", "toolchain"]
+                    , [ "transition"
+                      , {"type": "CALL_EXPRESSION", "name": "for host"}
+                      ]
+                    ]
+                  , "body":
+                    {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "provides":
+        { "type": "env"
+        , "vars":
+          ["MAKE", "CMAKE", "PATH", "ENV", "TOOLCHAIN", "NON_SYSTEM_TOOLS"]
+        }
+      }
+    }
+  }
+}
