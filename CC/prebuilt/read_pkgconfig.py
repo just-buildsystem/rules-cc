@@ -54,7 +54,7 @@ def read_ldflags(pkg: str, args: List[str], env: Dict[str, str]) -> str:
     return " ".join([f for f in link_flags if not is_local(f)])
 
 
-def read_pkgconfig():
+def read_pkgconfig() -> None:
     if len(sys.argv) < 3:
         print(f"usage: read_pkgconfig OUT_NAME PC_FILE [PC_ARGS...]")
         exit(1)
