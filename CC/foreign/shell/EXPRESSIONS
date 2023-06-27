@@ -1,0 +1,344 @@
+{ "shell-build":
+  { "vars":
+    [ "cmds"
+    , "sources"
+    , "localbase"
+    , "outs"
+    , "out_dirs"
+    , "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "AR"
+    , "PREFIX"
+    , "BUILD_POSITION_INDEPENDENT"
+    , "TIMEOUT_SCALE"
+    ]
+  , "imports":
+    { "artifacts": ["", "field_artifacts"]
+    , "nub_left": ["", "nub_left"]
+    , "flags-cc": ["CC", "flags-cc"]
+    , "flags-cxx": ["CC", "flags-cxx"]
+    , "compiler-cc": ["CC", "compiler-cc"]
+    , "compiler-cxx": ["CC", "compiler-cxx"]
+    , "default-LDFLAGS": ["CC", "default-LDFLAGS"]
+    , "default-AR": ["CC", "default-AR"]
+    , "default-PATH": ["CC", "default-PATH"]
+    , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
+    , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
+    , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
+    , "foreign-MAKE": ["CC/foreign", "default-MAKE"]
+    , "foreign-CMAKE": ["CC/foreign", "default-CMAKE"]
+    , "foreign-PATH": ["CC/foreign", "default-PATH"]
+    , "foreign-TOOLCHAIN": ["CC/foreign", "default-TOOLCHAIN"]
+    , "foreign-NON_SYSTEM_TOOLS": ["CC/foreign", "default-NON_SYSTEM_TOOLS"]
+    , "strip-prefix": ["CC/foreign", "strip-prefix"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "expand_exec"
+        , {"type": "CALL_EXPRESSION", "name": "expand_exec_tool"}
+        ]
+      , ["TOOLCHAIN_DIR", "toolchain"]
+      , [ "TOOLCHAIN"
+        , { "type": "disjoint_map_union"
+          , "msg": "Toolchain trees may not overlap"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "foreign-TOOLCHAIN"}
+            , {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}
+            ]
+          }
+        ]
+      , [ "TOOLCHAIN"
+        , { "type": "to_subdir"
+          , "subdir": {"type": "var", "name": "TOOLCHAIN_DIR"}
+          , "$1": {"type": "var", "name": "TOOLCHAIN"}
+          }
+        ]
+      , [ "NON_SYSTEM_TOOLS"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "foreign-NON_SYSTEM_TOOLS"}
+            , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+            ]
+          }
+        ]
+      , [ "MAKE"
+        , { "type": "join"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond":
+                  { "type": "lookup"
+                  , "key": "MAKE"
+                  , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                  }
+                , "then": ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                }
+              , {"type": "CALL_EXPRESSION", "name": "foreign-MAKE"}
+              ]
+            }
+          }
+        ]
+      , [ "CMAKE"
+        , { "type": "join"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond":
+                  { "type": "lookup"
+                  , "key": "CMAKE"
+                  , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                  }
+                , "then": ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                }
+              , {"type": "CALL_EXPRESSION", "name": "foreign-CMAKE"}
+              ]
+            }
+          }
+        ]
+      , ["CC", {"type": "CALL_EXPRESSION", "name": "compiler-cc"}]
+      , ["CXX", {"type": "CALL_EXPRESSION", "name": "compiler-cxx"}]
+      , [ "CFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1": {"type": "CALL_EXPRESSION", "name": "flags-cc"}
+          }
+        ]
+      , [ "CXXFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1": {"type": "CALL_EXPRESSION", "name": "flags-cxx"}
+          }
+        ]
+      , [ "LDFLAGS"
+        , { "type": "join"
+          , "separator": " "
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["-Wl,-rpath,$ORIGIN", "-Wl,-rpath,$ORIGIN/../lib"]
+              , { "type": "var"
+                , "name": "LDFLAGS"
+                , "default":
+                  {"type": "CALL_EXPRESSION", "name": "default-LDFLAGS"}
+                }
+              , {"type": "var", "name": "ldflags", "default": []}
+              ]
+            }
+          }
+        ]
+      , [ "AR"
+        , { "type": "var"
+          , "name": "AR"
+          , "default":
+            { "type": "join"
+            , "$1":
+              { "type": "++"
+              , "$1":
+                [ { "type": "if"
+                  , "cond":
+                    { "type": "lookup"
+                    , "key": "AR"
+                    , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                    }
+                  , "then":
+                    ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                  }
+                , {"type": "CALL_EXPRESSION", "name": "default-AR"}
+                ]
+              }
+            }
+          }
+        ]
+      , [ "PREFIX"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "make_prefix"}
+          , "then":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              { "type": "++"
+              , "$1": [[""], {"type": "var", "name": "make_prefix"}]
+              }
+            }
+          , "else": {"type": "var", "name": "PREFIX", "default": "/"}
+          }
+        ]
+      , [ "PATH"
+        , { "type": "join"
+          , "separator": ":"
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [ [ "list"
+                , { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "foreign-PATH"}
+                    , {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    ]
+                  }
+                ]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+            }
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            [ { "type": "env"
+              , "vars":
+                [ "MAKE"
+                , "CMAKE"
+                , "CC"
+                , "CXX"
+                , "CFLAGS"
+                , "CXXFLAGS"
+                , "LDFLAGS"
+                , "AR"
+                , "PREFIX"
+                ]
+              }
+            , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            ]
+          }
+        ]
+      , ["install_prefix", "install"]
+      , [ "localbase"
+        , { "type": "to_subdir"
+          , "subdir": "localbase"
+          , "$1": {"type": "var", "name": "localbase"}
+          }
+        ]
+      , [ "work_dir"
+        , { "type": "to_subdir"
+          , "subdir": "work"
+          , "$1": {"type": "var", "name": "sources"}
+          }
+        ]
+      , [ "installed_out_files"
+        , { "type": "foreach"
+          , "var": "file_path"
+          , "range": {"type": "var", "name": "outs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "file_path"}
+              ]
+            }
+          }
+        ]
+      , [ "installed_out_dirs"
+        , { "type": "foreach"
+          , "var": "dir_path"
+          , "range": {"type": "var", "name": "out_dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "dir_path"}
+              ]
+            }
+          }
+        ]
+      , [ "script"
+        , { "type": "singleton_map"
+          , "key": "run_cmds.sh"
+          , "value":
+            { "type": "BLOB"
+            , "data":
+              { "type": "join"
+              , "separator": "\n"
+              , "$1":
+                { "type": "++"
+                , "$1":
+                  [ [ "set -eu"
+                    , "mkdir -p scratch work install"
+                    , "export ACTION_DIR=\"$(pwd)\""
+                    , "export TMPDIR=\"$(pwd)/scratch\""
+                    , "export WORKDIR=\"$(pwd)/work\""
+                    , "export TOOLCHAIN=\"$(pwd)/toolchain\""
+                    , "export LOCALBASE=\"$(pwd)/localbase\""
+                    , "export DESTDIR=\"$(pwd)/install\""
+                    , "export CC=$([ -x \"${CC}\" ] && realpath ${CC} || echo ${CC})"
+                    , "export CXX=$([ -x \"${CXX}\" ] && realpath ${CXX} || echo ${CXX})"
+                    , "export AR=$([ -x \"${AR}\" ] && realpath ${AR} || echo ${AR})"
+                    , "export MAKE=$([ -x \"${MAKE}\" ] && realpath ${MAKE} || echo ${MAKE})"
+                    , "export CMAKE=$([ -x \"${CMAKE}\" ] && realpath ${CMAKE} || echo ${CMAKE})"
+                    , { "type": "join"
+                      , "$1":
+                        [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
+                        , { "type": "join_cmd"
+                          , "$1": [{"type": "var", "name": "PATH"}]
+                          }
+                        , ")\":$PATH"
+                        ]
+                      }
+                    ]
+                  , ["(", "set --", "cd ./work"]
+                  , {"type": "var", "name": "cmds"}
+                  , [")"]
+                  , [ "mv install install_with_symlinks"
+                    , "cp -rL install_with_symlinks install"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      , [ "artifacts"
+        , { "type": "ACTION"
+          , "inputs":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "TOOLCHAIN"}
+              , {"type": "var", "name": "work_dir"}
+              , {"type": "var", "name": "localbase"}
+              , {"type": "var", "name": "script"}
+              , {"type": "var", "name": "expand_exec"}
+              ]
+            }
+          , "cmd": ["sh", "run_cmds.sh"]
+          , "outs": {"type": "var", "name": "installed_out_files"}
+          , "out_dirs": {"type": "var", "name": "installed_out_dirs"}
+          , "env": {"type": "var", "name": "ENV"}
+          , "timeout scaling":
+            {"type": "var", "name": "TIMEOUT_SCALE", "default": 10.0}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "map_union"
+      , "$1":
+        { "type": "let*"
+        , "bindings":
+          [ ["artifacts", {"type": "var", "name": "artifacts"}]
+          , [ "paths"
+            , { "type": "++"
+              , "$1":
+                [ {"type": "var", "name": "outs"}
+                , {"type": "var", "name": "out_dirs"}
+                ]
+              }
+            ]
+          , ["prefix", {"type": "var", "name": "install_prefix"}]
+          ]
+        , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+        }
+      }
+    }
+  }
+}
