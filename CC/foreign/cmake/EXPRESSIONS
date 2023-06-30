@@ -166,6 +166,7 @@
                   [ [ "set -eu"
                     , "mkdir scratch"
                     , "readonly TMPDIR=\"$(pwd)/scratch\""
+                    , "readonly LOCALBASE=\"$(pwd)/localbase\""
                     ]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "pre_cmds"}
@@ -181,7 +182,7 @@
                   , [ "readonly CMAKE_SUBDIR=\"$1\""
                     , "readonly CMAKE_AR=$(which $2)"
                     , "shift 2"
-                    , "cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$(pwd)/localbase\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli >configure.log 2>&1 || (cat configure.log && exit 1)"
+                    , "cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$LOCALBASE\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli >configure.log 2>&1 || (cat configure.log && exit 1)"
                     ]
                   , [ { "type": "join"
                       , "separator": " "

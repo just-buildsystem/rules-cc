@@ -1,5 +1,10 @@
 { "data":
-  { "doc": ["Data produced by CMake configure, build, and install."]
+  { "doc":
+    [ "Data produced by CMake configure, build, and install."
+    , ""
+    , "Commands have access to a unique temporary directory via \"$TMPDIR\""
+    , "and to the installed \"deps\" via \"$LOCALBASE\"."
+    ]
   , "target_fields": ["project"]
   , "string_fields":
     [ "subdir"
@@ -48,16 +53,17 @@
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
       , "CMake. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\" which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories. Note that data between \"pre_cmds\" and"
-      , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
-      , "for this action. The CMake source and build directory can be accessed"
-      , "via $CMAKE_SOURCE_DIR and $CMAKE_BINARY_DIR, respectively."
+      , "\"post_cmds\" can be exchanged via \"$TMPDIR\", which is uniquely"
+      , "reserved for this action. The CMake source and build directory can be"
+      , "accessed via \"$CMAKE_SOURCE_DIR\" and \"$CMAKE_BINARY_DIR\","
+      , "respectively."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -226,7 +232,12 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by CMake configure, build, and install."]
+  { "doc":
+    [ "Library produced by CMake configure, build, and install."
+    , ""
+    , "Commands have access to a unique temporary directory via \"$TMPDIR\""
+    , "and to the installed \"deps\" via \"$LOCALBASE\"."
+    ]
   , "target_fields": ["project", "deps"]
   , "string_fields":
     [ "subdir"
@@ -296,17 +307,17 @@
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
       , "CMake. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\" which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
       , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
-      , "$TMPDIR, which is uniquely reserved for this action. The CMake source"
-      , "and build directory can be accessed via $CMAKE_SOURCE_DIR and"
-      , "$CMAKE_BINARY_DIR, respectively."
+      , "\"$TMPDIR\", which is uniquely reserved for this action. The CMake"
+      , "source and build directory can be accessed via \"$CMAKE_SOURCE_DIR\""
+      , "and \"$CMAKE_BINARY_DIR\", respectively."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"

@@ -253,6 +253,7 @@
                   [ [ "set -eu"
                     , "mkdir scratch"
                     , "readonly TMPDIR=\"$(pwd)/scratch\""
+                    , "readonly LOCALBASE=\"$(pwd)/localbase\""
                     ]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "pre_cmds"}

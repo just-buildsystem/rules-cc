@@ -1,5 +1,10 @@
 { "data":
-  { "doc": ["Data produced by Configure and Make build and install."]
+  { "doc":
+    [ "Data produced by Configure and Make build and install."
+    , ""
+    , "Commands have access to a unique temporary directory via \"$TMPDIR\""
+    , "and to the installed \"deps\" via \"$LOCALBASE\"."
+    ]
   , "target_fields": ["project"]
   , "string_fields":
     [ "subdir"
@@ -68,16 +73,16 @@
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
-      , "Make. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "Configure or Make. Useful for renaming files or directories. Note"
+      , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\", which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories. Note that data between \"pre_cmds\" and"
-      , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
-      , "for this action."
+      , "\"post_cmds\" can be exchanged via \"$TMPDIR\", which is uniquely"
+      , "reserved for this action."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -276,7 +281,12 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by Configure and Make build and install."]
+  { "doc":
+    [ "Library produced by Configure and Make build and install."
+    , ""
+    , "Commands have access to a unique temporary directory via \"$TMPDIR\""
+    , "and to the installed \"deps\" via \"$LOCALBASE\"."
+    ]
   , "target_fields": ["project", "deps"]
   , "string_fields":
     [ "subdir"
@@ -357,7 +367,7 @@
       , "taken, with the default value being \"/\"."
       ]
     , "options":
-      [ "Make options for the configuration phase."
+      [ "Make options for the build phase."
       , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
       ]
     , "jobs":
@@ -366,16 +376,16 @@
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
-      , "Make. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "Configure or Make. Useful for renaming files or directories. Note"
+      , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\", which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
       , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
-      , "$TMPDIR, which is uniquely reserved for this action."
+      , "\"$TMPDIR\", which is uniquely reserved for this action."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"
