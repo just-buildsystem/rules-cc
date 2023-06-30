@@ -2,6 +2,7 @@
   { "vars":
     [ "source_dir"
     , "subdir"
+    , "localbase_dir"
     , "configure"
     , "configure_options"
     , "make_targets"
@@ -325,6 +326,10 @@
         , "$1":
           [ {"type": "var", "name": "TOOLCHAIN"}
           , {"type": "var", "name": "source_dir"}
+          , { "type": "var"
+            , "name": "localbase_dir"
+            , "default": {"type": "empty_map"}
+            }
           , {"type": "var", "name": "script"}
           ]
         }
