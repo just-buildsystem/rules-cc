@@ -2,8 +2,10 @@
   { "doc":
     [ "Data produced by CMake configure, build, and install."
     , ""
-    , "Commands have access to a unique temporary directory via \"$TMPDIR\""
-    , "and to the installed \"deps\" via \"$LOCALBASE\"."
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", and"
+    , "\"LDFLAGS\". \"LOCALBASE\" contains the path to the installed artifacts"
+    , "from \"deps\"."
     ]
   , "target_fields": ["project"]
   , "string_fields":
@@ -17,7 +19,9 @@
     , "out_dirs"
     ]
   , "config_vars":
-    [ "CC"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
@@ -139,6 +143,11 @@
     { "stage_field": ["", "stage_singleton_field"]
     , "cmake-build": "cmake-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -184,6 +193,10 @@
       , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "host-defaults-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host"}
+        ]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
         ]
@@ -235,8 +248,10 @@
   { "doc":
     [ "Library produced by CMake configure, build, and install."
     , ""
-    , "Commands have access to a unique temporary directory via \"$TMPDIR\""
-    , "and to the installed \"deps\" via \"$LOCALBASE\"."
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", and"
+    , "\"LDFLAGS\". \"LOCALBASE\" contains the path to the installed artifacts"
+    , "from \"deps\"."
     ]
   , "target_fields": ["project", "deps"]
   , "string_fields":
@@ -260,7 +275,9 @@
     , "pc_prefix"
     ]
   , "config_vars":
-    [ "CC"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
@@ -293,12 +310,14 @@
       , "components are joined with \".\"."
       ]
     , "options":
-      [ "CMake options for the configuration phase."
-      , "(e.g., [\"-GNinja\", \"-Ax64\"])"
+      [ "CMake options for the configuration phase"
+      , "(e.g., [\"-GNinja\", \"-Ax64\"]). Variables can be accessed via"
+      , "\"$(<varname>)\", e.g., \"$(TMPDIR)\" for variable \"$TMPDIR\"."
       ]
     , "defines":
-      [ "CMake defines for the configuration phase."
-      , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+      [ "CMake defines for the configuration phase"
+      , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"]). Variables can be accessed via"
+      , "\"$(<varname>)\", e.g., \"$(TMPDIR)\" for variable \"$TMPDIR\"."
       ]
     , "jobs":
       [ "Number of jobs to run simultaneously. If omitted, CMake's default"
@@ -428,6 +447,11 @@
     , "strip-prefix": ["./", "..", "strip-prefix"]
     , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
     , "install-deps": ["CC", "install-with-deps stage"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -562,6 +586,10 @@
       , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "host-defaults-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host"}
+        ]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
         ]

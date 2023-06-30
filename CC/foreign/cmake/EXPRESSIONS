@@ -1,6 +1,8 @@
 { "cmake-build":
   { "vars":
-    [ "source_dir"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "source_dir"
     , "cmake_subdir"
     , "localbase_dir"
     , "cmake_options"
@@ -19,6 +21,8 @@
     , "ENV"
     , "AR"
     , "BUILD_POSITION_INDEPENDENT"
+    , "defaults-transition"
+    , "host-defaults-transition"
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
@@ -31,11 +35,22 @@
     , "default-ENV": ["CC", "default-ENV"]
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
+    , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
     }
   , "expression":
     { "type": "let*"
     , "bindings":
-      [ ["TOOLCHAIN_DIR", "toolchain"]
+      [ [ "expand_exec"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "defaults-transition"
+              , {"type": "var", "name": "host-defaults-transition"}
+              ]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "expand_exec_tool"}
+          }
+        ]
+      , ["TOOLCHAIN_DIR", "toolchain"]
       , ["TOOLCHAIN", {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}]
       , [ "TOOLCHAIN"
         , { "type": "to_subdir"
@@ -165,8 +180,9 @@
                 , "$1":
                   [ [ "set -eu"
                     , "mkdir scratch"
-                    , "readonly TMPDIR=\"$(pwd)/scratch\""
-                    , "readonly LOCALBASE=\"$(pwd)/localbase\""
+                    , "readonly ROOT=\"$(pwd)\""
+                    , "export TMPDIR=\"$(pwd)/scratch\""
+                    , "export LOCALBASE=\"$(pwd)/localbase\""
                     ]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "pre_cmds"}
@@ -182,7 +198,7 @@
                   , [ "readonly CMAKE_SUBDIR=\"$1\""
                     , "readonly CMAKE_AR=$(which $2)"
                     , "shift 2"
-                    , "cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$LOCALBASE\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli >configure.log 2>&1 || (cat configure.log && exit 1)"
+                    , "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS -- cmake \"$@\" -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$LOCALBASE\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli >configure.log 2>&1 || (cat configure.log && exit 1)"
                     ]
                   , [ { "type": "join"
                       , "separator": " "
@@ -190,7 +206,7 @@
                         { "type": "++"
                         , "$1":
                           [ {"type": "var", "name": "CMAKE_JOBS"}
-                          , [ "cmake --build build --target install >build.log 2>&1 || (cat configure.log build.log && exit 1)"
+                          , [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS -- cmake --build build --target install >build.log 2>&1 || (cat configure.log build.log && exit 1)"
                             ]
                           ]
                         }
@@ -227,6 +243,7 @@
         , "$1":
           [ {"type": "var", "name": "TOOLCHAIN"}
           , {"type": "var", "name": "source_dir"}
+          , {"type": "var", "name": "expand_exec"}
           , { "type": "var"
             , "name": "localbase_dir"
             , "default": {"type": "empty_map"}
