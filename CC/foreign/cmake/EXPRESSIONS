@@ -8,6 +8,7 @@
     , "cmake_options"
     , "cmake_defines"
     , "cmake_jobs"
+    , "cmake_targets"
     , "pre_cmds"
     , "post_cmds"
     , "CC"
@@ -167,6 +168,13 @@
           , "$1": {"type": "var", "name": "cmake_subdir", "default": []}
           }
         ]
+      , [ "cmake_targets"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "cmake_targets"}
+          , "then": {"type": "var", "name": "cmake_targets"}
+          , "else": ["install"]
+          }
+        ]
       , [ "script"
         , { "type": "singleton_map"
           , "key": "run_cmake.sh"
@@ -200,18 +208,26 @@
                     , "shift 2"
                     , "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR -- cmake -S\"source/${CMAKE_SUBDIR}\" -Bbuild -DCMAKE_AR=${CMAKE_AR} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=\"$LOCALBASE\" -DPKG_CONFIG_ARGN=--define-prefix --no-warn-unused-cli \"$@\" >configure.log 2>&1 || (cat configure.log && exit 1)"
                     ]
-                  , [ { "type": "join"
+                  , { "type": "foreach"
+                    , "range": {"type": "var", "name": "cmake_targets"}
+                    , "var": "target"
+                    , "body":
+                      { "type": "join"
                       , "separator": " "
                       , "$1":
                         { "type": "++"
                         , "$1":
                           [ {"type": "var", "name": "CMAKE_JOBS"}
-                          , [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR -- cmake --build build --target install >build.log 2>&1 || (cat configure.log build.log && exit 1)"
+                          , [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR -- cmake --build build --target"
+                            , { "type": "join_cmd"
+                              , "$1": [{"type": "var", "name": "target"}]
+                              }
+                            , ">>build.log 2>&1 || (cat build.log && exit 1)"
                             ]
                           ]
                         }
                       }
-                    ]
+                    }
                   , ["find ./install -type l -delete"]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "post_cmds"}
