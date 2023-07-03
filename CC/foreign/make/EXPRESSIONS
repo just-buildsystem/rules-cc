@@ -224,7 +224,7 @@
                     , "body":
                       { "type": "join"
                       , "$1":
-                        [ "${ROOT}/expand_exec TMPDIR DESTDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR PREFIX -- make DESTDIR=${DESTDIR} \"$@\" -C \"source/${SUBDIR}\""
+                        [ "${ROOT}/expand_exec TMPDIR DESTDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR PREFIX -- make DESTDIR=${DESTDIR} -C \"source/${SUBDIR}\" \"$@\" "
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "target"}]
                           }
