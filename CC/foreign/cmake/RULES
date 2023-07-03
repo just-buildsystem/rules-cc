@@ -3,8 +3,8 @@
     [ "Data produced by CMake configure, build, and install."
     , ""
     , "All variables accessible to commands and options are: \"TMPDIR\","
-    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", and"
-    , "\"LDFLAGS\". \"LOCALBASE\" contains the path to the installed artifacts"
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", \"LDFLAGS\","
+    , "and \"AR\". \"LOCALBASE\" contains the path to the installed artifacts"
     , "from \"deps\"."
     ]
   , "target_fields": ["project"]
@@ -249,8 +249,8 @@
     [ "Library produced by CMake configure, build, and install."
     , ""
     , "All variables accessible to commands and options are: \"TMPDIR\","
-    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", and"
-    , "\"LDFLAGS\". \"LOCALBASE\" contains the path to the installed artifacts"
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", \"LDFLAGS\","
+    , "and \"AR\". \"LOCALBASE\" contains the path to the installed artifacts"
     , "from \"deps\"."
     ]
   , "target_fields": ["project", "deps"]
