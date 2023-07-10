@@ -1,5 +1,12 @@
 { "data":
-  { "doc": ["Data produced by Configure and Make build and install."]
+  { "doc":
+    [ "Data produced by Configure and Make build and install."
+    , ""
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", \"LDFLAGS\","
+    , "\"AR\", and \"PREFIX\". \"LOCALBASE\" contains the path to the"
+    , "installed artifacts from \"deps\"."
+    ]
   , "target_fields": ["project"]
   , "string_fields":
     [ "subdir"
@@ -13,17 +20,11 @@
     , "post_cmds"
     , "out_files"
     , "out_dirs"
-    , "var_cc"
-    , "var_cxx"
-    , "var_ccflags"
-    , "var_cxxflags"
-    , "var_ldflags"
-    , "var_ar"
-    , "var_prefix"
-    , "var_destdir"
     ]
   , "config_vars":
-    [ "CC"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
@@ -47,7 +48,10 @@
       ]
     , "configure": ["Run ./configure if non-empty."]
     , "configure_options":
-      ["The configure options (the \"--prefix\" option is automatically set."]
+      [ "The configure options (the \"--prefix\" option is automatically set."
+      , "Variables can be accessed via \"$(<varname>)\", e.g., \"$(TMPDIR)\""
+      , "for variable \"$TMPDIR\"."
+      ]
     , "targets":
       [ "The Make targets to build in the specified order"
       , "(default: [\"install\"])."
@@ -59,8 +63,10 @@
       , "taken, with the default value being \"/\"."
       ]
     , "options":
-      [ "Make options for the configuration phase."
-      , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
+      [ "Make options for the configuration phase"
+      , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\", \"LD=$(CC)\"]). Variables"
+      , "can be accessed via \"$(<varname>)\", e.g., \"$(TMPDIR)\" for"
+      , "variable \"$TMPDIR\"."
       ]
     , "jobs":
       [ "Number of jobs to run simultaneously. If omitted, Make's default"
@@ -68,16 +74,16 @@
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
-      , "Make. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "Configure or Make. Useful for renaming files or directories. Note"
+      , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\", which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories. Note that data between \"pre_cmds\" and"
-      , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
-      , "for this action."
+      , "\"post_cmds\" can be exchanged via \"$TMPDIR\", which is uniquely"
+      , "reserved for this action."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -89,22 +95,6 @@
       , "relative to the install directory."
       , "Note that \"out_files\" and \"out_dirs\" may not overlap."
       ]
-    , "var_cc":
-      ["Variable name used to specify the C compiler (default: \"CC\")."]
-    , "var_cxx":
-      ["Variable name used to specify the C++ compiler (default: \"CXX\")."]
-    , "var_ccflags":
-      ["Variable name used to specify the C flags (default: \"CFLAGS\")."]
-    , "var_cxxflags":
-      ["Variable name used to specify the C++ flags (default: \"CXXFLAGS\")."]
-    , "var_ldflags":
-      ["Variable name used to specify the link flags (default: \"LDFLAGS\")."]
-    , "var_ar":
-      ["Variable name used to specify the archiver (default: \"AR\")."]
-    , "var_prefix":
-      ["Variable name used to specify the prefix (default: \"PREFIX\")."]
-    , "var_destdir":
-      ["Variable name used to specify the destdir (default: \"DESTDIR\")."]
     }
   , "config_doc":
     { "CC":
@@ -174,6 +164,11 @@
     { "stage_field": ["", "stage_singleton_field"]
     , "make-build": "make-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -222,14 +217,10 @@
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
-      , ["var_cc", {"type": "FIELD", "name": "var_cc"}]
-      , ["var_cxx", {"type": "FIELD", "name": "var_cxx"}]
-      , ["var_ccflags", {"type": "FIELD", "name": "var_ccflags"}]
-      , ["var_cxxflags", {"type": "FIELD", "name": "var_cxxflags"}]
-      , ["var_ldflags", {"type": "FIELD", "name": "var_ldflags"}]
-      , ["var_ar", {"type": "FIELD", "name": "var_ar"}]
-      , ["var_prefix", {"type": "FIELD", "name": "var_prefix"}]
-      , ["var_destdir", {"type": "FIELD", "name": "var_destdir"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "host-defaults-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host"}
+        ]
       , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
       , [ "install_dir"
         , { "type": "ACTION"
@@ -276,7 +267,14 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by Configure and Make build and install."]
+  { "doc":
+    [ "Library produced by Configure and Make build and install."
+    , ""
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", \"LDFLAGS\","
+    , "\"AR\", and \"PREFIX\". \"LOCALBASE\" contains the path to the"
+    , "installed artifacts from \"deps\"."
+    ]
   , "target_fields": ["project", "deps"]
   , "string_fields":
     [ "subdir"
@@ -300,17 +298,11 @@
     , "hdr_prefix"
     , "lib_prefix"
     , "pc_prefix"
-    , "var_cc"
-    , "var_cxx"
-    , "var_ccflags"
-    , "var_cxxflags"
-    , "var_ldflags"
-    , "var_ar"
-    , "var_prefix"
-    , "var_destdir"
     ]
   , "config_vars":
-    [ "CC"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
@@ -357,7 +349,7 @@
       , "taken, with the default value being \"/\"."
       ]
     , "options":
-      [ "Make options for the configuration phase."
+      [ "Make options for the build phase."
       , "(e.g., [\"-f\", \"Makefile\", \"ARCH=x86\"])"
       ]
     , "jobs":
@@ -366,16 +358,16 @@
       ]
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
-      , "Make. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "Configure or Make. Useful for renaming files or directories. Note"
+      , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\", which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
       , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
-      , "$TMPDIR, which is uniquely reserved for this action."
+      , "\"$TMPDIR\", which is uniquely reserved for this action."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"
@@ -424,22 +416,6 @@
       , "directory components are joined with \"/\". Defaults to"
       , "\"lib/pkgconfig\" if not set."
       ]
-    , "var_cc":
-      ["Variable name used to specify the C compiler (default: \"CC\")."]
-    , "var_cxx":
-      ["Variable name used to specify the C++ compiler (default: \"CXX\")."]
-    , "var_ccflags":
-      ["Variable name used to specify the C flags (default: \"CFLAGS\")."]
-    , "var_cxxflags":
-      ["Variable name used to specify the C++ flags (default: \"CXXFLAGS\")."]
-    , "var_ldflags":
-      ["Variable name used to specify the link flags (default: \"LDFLAGS\")."]
-    , "var_ar":
-      ["Variable name used to specify the archiver (default: \"AR\")."]
-    , "var_prefix":
-      ["Variable name used to specify the prefix (default: \"PREFIX\")."]
-    , "var_destdir":
-      ["Variable name used to specify the destdir (default: \"DESTDIR\")."]
     }
   , "config_doc":
     { "CC":
@@ -506,6 +482,12 @@
     , "make-build": "make-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
     , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
+    , "install-deps": ["CC", "install-with-deps stage"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -562,6 +544,20 @@
         , { "type": "let*"
           , "bindings": [["fieldname", "project"], ["location", "source"]]
           , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "localbase_dir"
+        , { "type": "to_subdir"
+          , "subdir": "localbase"
+          , "msg": "dependency installation files may not overlap"
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [ ["pc-install-dir", "lib/pkgconfig"]
+              , ["targets", {"type": "FIELD", "name": "deps"}]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "install-deps"}
+            }
           }
         ]
       , [ "installed_dirs"
@@ -629,14 +625,10 @@
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
-      , ["var_cc", {"type": "FIELD", "name": "var_cc"}]
-      , ["var_cxx", {"type": "FIELD", "name": "var_cxx"}]
-      , ["var_ccflags", {"type": "FIELD", "name": "var_ccflags"}]
-      , ["var_cxxflags", {"type": "FIELD", "name": "var_cxxflags"}]
-      , ["var_ldflags", {"type": "FIELD", "name": "var_ldflags"}]
-      , ["var_ar", {"type": "FIELD", "name": "var_ar"}]
-      , ["var_prefix", {"type": "FIELD", "name": "var_prefix"}]
-      , ["var_destdir", {"type": "FIELD", "name": "var_destdir"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "host-defaults-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host"}
+        ]
       , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
       , [ "install_dir"
         , { "type": "ACTION"

@@ -1,10 +1,18 @@
 { "data":
-  { "doc": ["Data produced by CMake configure, build, and install."]
+  { "doc":
+    [ "Data produced by CMake configure, build, and install."
+    , ""
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", \"LDFLAGS\","
+    , "and \"AR\". \"LOCALBASE\" contains the path to the installed artifacts"
+    , "from \"deps\"."
+    ]
   , "target_fields": ["project"]
   , "string_fields":
     [ "subdir"
     , "options"
     , "defines"
+    , "targets"
     , "jobs"
     , "pre_cmds"
     , "post_cmds"
@@ -12,7 +20,9 @@
     , "out_dirs"
     ]
   , "config_vars":
-    [ "CC"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
@@ -41,6 +51,10 @@
       [ "CMake defines for the configuration phase."
       , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
       ]
+    , "targets":
+      [ "The CMake targets to build in the specified order"
+      , "(default: [\"install\"])."
+      ]
     , "jobs":
       [ "Number of jobs to run simultaneously. If omitted, CMake's default"
       , "number is used."
@@ -48,16 +62,17 @@
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
       , "CMake. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\" which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories. Note that data between \"pre_cmds\" and"
-      , "\"post_cmds\" can be exchanged via $TMPDIR, which is uniquely reserved"
-      , "for this action. The CMake source and build directory can be accessed"
-      , "via $CMAKE_SOURCE_DIR and $CMAKE_BINARY_DIR, respectively."
+      , "\"post_cmds\" can be exchanged via \"$TMPDIR\", which is uniquely"
+      , "reserved for this action. The CMake source and build directory can be"
+      , "accessed via \"$CMAKE_SOURCE_DIR\" and \"$CMAKE_BINARY_DIR\","
+      , "respectively."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -133,6 +148,11 @@
     { "stage_field": ["", "stage_singleton_field"]
     , "cmake-build": "cmake-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -175,9 +195,14 @@
       , ["cmake_subdir", {"type": "FIELD", "name": "subdir"}]
       , ["cmake_options", {"type": "FIELD", "name": "options"}]
       , ["cmake_defines", {"type": "FIELD", "name": "defines"}]
+      , ["cmake_targets", {"type": "FIELD", "name": "targets"}]
       , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "host-defaults-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host"}
+        ]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
         ]
@@ -226,7 +251,14 @@
     }
   }
 , "library":
-  { "doc": ["Library produced by CMake configure, build, and install."]
+  { "doc":
+    [ "Library produced by CMake configure, build, and install."
+    , ""
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"CC\", \"CXX\", \"CFLAGS\", \"CXXFLAGS\", \"LDFLAGS\","
+    , "and \"AR\". \"LOCALBASE\" contains the path to the installed artifacts"
+    , "from \"deps\"."
+    ]
   , "target_fields": ["project", "deps"]
   , "string_fields":
     [ "subdir"
@@ -249,7 +281,9 @@
     , "pc_prefix"
     ]
   , "config_vars":
-    [ "CC"
+    [ "ARCH"
+    , "HOST_ARCH"
+    , "CC"
     , "CXX"
     , "CFLAGS"
     , "CXXFLAGS"
@@ -282,12 +316,14 @@
       , "components are joined with \".\"."
       ]
     , "options":
-      [ "CMake options for the configuration phase."
-      , "(e.g., [\"-GNinja\", \"-Ax64\"])"
+      [ "CMake options for the configuration phase"
+      , "(e.g., [\"-GNinja\", \"-Ax64\"]). Variables can be accessed via"
+      , "\"$(<varname>)\", e.g., \"$(TMPDIR)\" for variable \"$TMPDIR\"."
       ]
     , "defines":
-      [ "CMake defines for the configuration phase."
-      , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"])"
+      [ "CMake defines for the configuration phase"
+      , "(e.g., [\"CMAKE_BUILD_TYPE=Release\"]). Variables can be accessed via"
+      , "\"$(<varname>)\", e.g., \"$(TMPDIR)\" for variable \"$TMPDIR\"."
       ]
     , "jobs":
       [ "Number of jobs to run simultaneously. If omitted, CMake's default"
@@ -296,17 +332,17 @@
     , "pre_cmds":
       [ "List of commands executed in the project directory before calling"
       , "CMake. Useful for renaming files or directories. Note that data"
-      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via $TMPDIR,"
-      , "which is uniquely reserved for this action."
+      , "between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
+      , "\"$TMPDIR\" which is uniquely reserved for this action."
       ]
     , "post_cmds":
       [ "List of commands executed in the install directory after successful"
       , "installation but before the output files are collected. Useful for"
       , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
       , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
-      , "$TMPDIR, which is uniquely reserved for this action. The CMake source"
-      , "and build directory can be accessed via $CMAKE_SOURCE_DIR and"
-      , "$CMAKE_BINARY_DIR, respectively."
+      , "\"$TMPDIR\", which is uniquely reserved for this action. The CMake"
+      , "source and build directory can be accessed via \"$CMAKE_SOURCE_DIR\""
+      , "and \"$CMAKE_BINARY_DIR\", respectively."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"
@@ -417,6 +453,11 @@
     , "strip-prefix": ["./", "..", "strip-prefix"]
     , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
     , "install-deps": ["CC", "install-with-deps stage"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -551,6 +592,10 @@
       , ["cmake_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "host-defaults-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host"}
+        ]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
         ]

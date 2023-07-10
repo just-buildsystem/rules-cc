@@ -2,6 +2,7 @@
   { "vars":
     [ "source_dir"
     , "subdir"
+    , "localbase_dir"
     , "configure"
     , "configure_options"
     , "make_targets"
@@ -10,14 +11,6 @@
     , "make_jobs"
     , "pre_cmds"
     , "post_cmds"
-    , "var_cc"
-    , "var_cxx"
-    , "var_ccflags"
-    , "var_cxxflags"
-    , "var_ldflags"
-    , "var_ar"
-    , "var_prefix"
-    , "var_destdir"
     , "CC"
     , "CXX"
     , "CFLAGS"
@@ -31,6 +24,8 @@
     , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
+    , "defaults-transition"
+    , "host-defaults-transition"
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
@@ -43,11 +38,22 @@
     , "default-ENV": ["CC", "default-ENV"]
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
+    , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
     }
   , "expression":
     { "type": "let*"
     , "bindings":
-      [ ["TOOLCHAIN_DIR", "toolchain"]
+      [ [ "expand_exec"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "defaults-transition"
+              , {"type": "var", "name": "host-defaults-transition"}
+              ]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "expand_exec_tool"}
+          }
+        ]
+      , ["TOOLCHAIN_DIR", "toolchain"]
       , ["TOOLCHAIN", {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}]
       , [ "TOOLCHAIN"
         , { "type": "to_subdir"
@@ -131,81 +137,9 @@
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_cc"}
-                , "then":
-                  {"type": "join", "$1": {"type": "var", "name": "var_cc"}}
-                , "else": "CC"
-                }
-              , "value": {"type": "var", "name": "CC"}
-              }
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_cxx"}
-                , "then":
-                  {"type": "join", "$1": {"type": "var", "name": "var_cxx"}}
-                , "else": "CXX"
-                }
-              , "value": {"type": "var", "name": "CXX"}
-              }
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_ccflags"}
-                , "then":
-                  { "type": "join"
-                  , "$1": {"type": "var", "name": "var_ccflags"}
-                  }
-                , "else": "CFLAGS"
-                }
-              , "value": {"type": "var", "name": "CFLAGS"}
-              }
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_cxxflags"}
-                , "then":
-                  { "type": "join"
-                  , "$1": {"type": "var", "name": "var_cxxflags"}
-                  }
-                , "else": "CXXFLAGS"
-                }
-              , "value": {"type": "var", "name": "CXXFLAGS"}
-              }
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_ldflags"}
-                , "then":
-                  { "type": "join"
-                  , "$1": {"type": "var", "name": "var_ldflags"}
-                  }
-                , "else": "LDFLAGS"
-                }
-              , "value": {"type": "var", "name": "LDFLAGS"}
-              }
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_ar"}
-                , "then":
-                  {"type": "join", "$1": {"type": "var", "name": "var_ar"}}
-                , "else": "AR"
-                }
-              , "value": {"type": "var", "name": "AR"}
-              }
-            , { "type": "singleton_map"
-              , "key":
-                { "type": "if"
-                , "cond": {"type": "var", "name": "var_prefix"}
-                , "then":
-                  {"type": "join", "$1": {"type": "var", "name": "var_prefix"}}
-                , "else": "PREFIX"
-                }
-              , "value": {"type": "var", "name": "PREFIX"}
+            , { "type": "env"
+              , "vars":
+                ["CC", "CXX", "CFLAGS", "CXXFLAGS", "LDFLAGS", "AR", "PREFIX"]
               }
             ]
           }
@@ -251,7 +185,10 @@
                 , "$1":
                   [ [ "set -eu"
                     , "mkdir scratch"
-                    , "readonly TMPDIR=\"$(pwd)/scratch\""
+                    , "readonly ROOT=\"$(pwd)\""
+                    , "export TMPDIR=\"$(pwd)/scratch\""
+                    , "export DESTDIR=\"$(pwd)/install\""
+                    , "export LOCALBASE=\"$(pwd)/localbase\""
                     ]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "pre_cmds"}
@@ -264,18 +201,14 @@
                         ]
                       }
                     }
-                  , [ "readonly SUBDIR=\"$1\""
-                    , "readonly VAR_DESTDIR=$2"
-                    , "shift 2"
-                    ]
+                  , ["readonly SUBDIR=\"$1\"", "shift"]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "configure_args"}
                     , "then":
-                      [ "( readonly ROOT=\"$(pwd)\""
-                      , "  cd \"source/${SUBDIR}\""
+                      [ "( cd \"source/${SUBDIR}\""
                       , { "type": "join"
                         , "$1":
-                          [ "./configure "
+                          [ "${ROOT}/expand_exec TMPDIR DESTDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR PREFIX -- ./configure "
                           , { "type": "join_cmd"
                             , "$1": {"type": "var", "name": "configure_args"}
                             }
@@ -291,7 +224,7 @@
                     , "body":
                       { "type": "join"
                       , "$1":
-                        [ "make \"$@\" -C \"source/${SUBDIR}\" ${VAR_DESTDIR}=$(pwd)/install "
+                        [ "${ROOT}/expand_exec TMPDIR DESTDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR PREFIX -- make DESTDIR=${DESTDIR} -C \"source/${SUBDIR}\" \"$@\" "
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "target"}]
                           }
@@ -325,6 +258,11 @@
         , "$1":
           [ {"type": "var", "name": "TOOLCHAIN"}
           , {"type": "var", "name": "source_dir"}
+          , {"type": "var", "name": "expand_exec"}
+          , { "type": "var"
+            , "name": "localbase_dir"
+            , "default": {"type": "empty_map"}
+            }
           , {"type": "var", "name": "script"}
           ]
         }
@@ -333,12 +271,6 @@
         , "$1":
           [ ["/bin/sh", "run_make.sh"]
           , [{"type": "var", "name": "SUBDIR"}]
-          , { "type": "if"
-            , "cond": {"type": "var", "name": "var_destdir"}
-            , "then":
-              [{"type": "join", "$1": {"type": "var", "name": "var_destdir"}}]
-            , "else": ["DESTDIR"]
-            }
           , {"type": "var", "name": "make_options"}
           , { "type": "if"
             , "cond": {"type": "var", "name": "make_jobs"}
