@@ -146,9 +146,11 @@ A test written in C++
 
 | Config variable | Description |
 | --------------- | ----------- |
+| `"TARGET_ARCH"` | The architecture to build the test for.  Will only be honored, if that architecture is available in the ARCH_DISPATCH map. Otherwise, the test will be built for and run on the host architecture. |
 | `"TEST_ENV"` | The environment for executing the test runner. |
 | `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
+| `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
 
 ### Rule `["CC", "defaults"]`
 
