@@ -255,7 +255,9 @@
                         ]
                       }
                     }
-                  , ["find ./install -type l -delete"]
+                  , [ "mv install install_with_symlinks"
+                    , "cp -rL install_with_symlinks install"
+                    ]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "post_cmds"}
                     , "then":
