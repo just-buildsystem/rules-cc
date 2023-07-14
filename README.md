@@ -204,6 +204,8 @@ Shell test, given by a test script
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
 | `"TEST_ENV"` | Additional environment for executing the test runner. |
 | `"TIMEOUT_SCALE"` | Factor on how to scale the timeout for this test. Defaults to 1.0. |
+| `"TARGET_ARCH"` | The architecture to build the test for.  Will only be honored, if that architecture is available in the ARCH_DISPATCH map. Otherwise, the test will be built for and run on the host architecture. |
+| `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
 
 ### Rule `["CC/foreign/cmake", "library"]`
 
