@@ -9,6 +9,7 @@
     , "runner"
     , "deps-fieldname"
     , "deps-transition"
+    , "target properties"
     ]
   , "imports":
     { "artifacts_list": ["./", "../..", "field_artifacts_list"]
@@ -173,6 +174,7 @@
           }
         , "timeout scaling":
           {"type": "var", "name": "TIMEOUT_SCALE", "default": 1.0}
+        , "execution properties": {"type": "var", "name": "target properties"}
         }
       , "else":
         { "type": "ACTION"
@@ -194,6 +196,7 @@
           }
         , "timeout scaling":
           {"type": "var", "name": "TIMEOUT_SCALE", "default": 1.0}
+        , "execution properties": {"type": "var", "name": "target properties"}
         }
       }
     }
@@ -208,6 +211,7 @@
     , "runner"
     , "deps-fieldname"
     , "deps-transition"
+    , "target properties"
     ]
   , "imports": {"action": "test-action"}
   , "expression":
