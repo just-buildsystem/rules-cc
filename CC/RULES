@@ -26,7 +26,10 @@
       [ "Optional toolchain directory. A collection of artifacts that provide"
       , "the tools CC, CXX, and AR (if needed). Note that only artifacts of"
       , "the specified targets are considered (no runfiles etc.). Specifying"
-      , "this field overlays artifacts from \"base\"."
+      , "this field extends artifacts from \"base\". If the toolchain"
+      , "supports cross-compilation, it should perform a dispatch on the"
+      , "configuration variable \"BUILD_ARCH\" to determine for which"
+      , "architecture to generate code for."
       ]
     , "deps":
       [ "Optional CC libraries any CC library and CC binary implicitly depend"
@@ -66,13 +69,15 @@
       ]
     , "PATH":
       [ "Path for looking up the compilers. Individual paths are joined"
-      , "with \":\"."
+      , "with \":\". Specifying this field extends values from \"base\"."
       ]
     }
-  , "config_vars": ["ARCH", "HOST_ARCH"]
+  , "config_vars": ["ARCH", "HOST_ARCH", "TARGET_ARCH"]
   , "imports":
     { "base-provides": "defaults-base-provides"
-    , "artifacts": ["./", "..", "field_artifacts"]
+    , "base-provides-list": "defaults-base-provides-list"
+    , "artifacts_list": ["./", "..", "field_artifacts_list"]
+    , "nub_left": ["", "nub_left"]
     , "compile-deps": "compile-deps"
     , "compile-args-deps": "compile-args-deps"
     , "link-deps": "link-deps"
@@ -143,23 +148,26 @@
           , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
           }
         ]
-      , ["provider", "ENV"]
-      , ["default", {"type": "empty_map"}]
-      , [ "ENV"
-        , { "type": "if"
-          , "cond": {"type": "var", "name": "PATH"}
-          , "then":
-            { "type": "singleton_map"
-            , "key": "PATH"
-            , "value":
-              { "type": "join"
-              , "separator": ":"
-              , "$1": {"type": "var", "name": "PATH"}
+      , ["provider", "PATH"]
+      , [ "PATH"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "PATH"}
+            , { "type": "++"
+              , "$1": {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
               }
-            }
-          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
+            ]
           }
         ]
+      , [ "PATH"
+        , { "type": "let*"
+          , "bindings": [["list", {"type": "var", "name": "PATH"}]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+          }
+        ]
+      , ["provider", "ENV"]
+      , ["default", {"type": "empty_map"}]
+      , ["ENV", {"type": "CALL_EXPRESSION", "name": "base-provides"}]
       , ["provider", "NON_SYSTEM_TOOLS"]
       , ["default", {"type": "empty_map"}]
       , [ "NON_SYSTEM_TOOLS"
@@ -226,24 +234,28 @@
       , ["provider", "TOOLCHAIN"]
       , ["default", {"type": "empty_map"}]
       , [ "TOOLCHAIN"
-        , { "type": "map_union"
+        , { "type": "disjoint_map_union"
+          , "msg": "toolchain artifacts may not overlap"
           , "$1":
-            [ {"type": "CALL_EXPRESSION", "name": "base-provides"}
-            , { "type": "if"
-              , "cond": {"type": "FIELD", "name": "toolchain"}
-              , "then":
-                { "type": "let*"
-                , "bindings":
-                  [ ["fieldname", "toolchain"]
-                  , [ "transition"
-                    , {"type": "CALL_EXPRESSION", "name": "for host"}
+            { "type": "++"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "toolchain"}
+                , "then":
+                  { "type": "let*"
+                  , "bindings":
+                    [ ["fieldname", "toolchain"]
+                    , [ "transition"
+                      , {"type": "CALL_EXPRESSION", "name": "for host"}
+                      ]
                     ]
-                  ]
-                , "body": {"type": "CALL_EXPRESSION", "name": "artifacts"}
+                  , "body":
+                    {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+                  }
                 }
-              , "else": {"type": "empty_map"}
-              }
-            ]
+              ]
+            }
           }
         ]
       , [ "CFLAGS"
@@ -300,6 +312,7 @@
           , "CXXFLAGS"
           , "LDFLAGS"
           , "AR"
+          , "PATH"
           , "ENV"
           , "TOOLCHAIN"
           , "NON_SYSTEM_TOOLS"

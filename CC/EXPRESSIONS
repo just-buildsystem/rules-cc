@@ -6,9 +6,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "CC"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
@@ -21,9 +19,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "CXX"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
@@ -36,9 +32,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "AR"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
@@ -51,9 +45,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "CFLAGS"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
@@ -66,9 +58,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "CXXFLAGS"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
@@ -81,9 +71,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "LDFLAGS"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
@@ -96,12 +84,23 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "ENV"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       , ["default", {"type": "empty_map"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+    }
+  }
+, "default-PATH":
+  { "vars": ["defaults-transition"]
+  , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["fieldname", "defaults"]
+      , ["provider", "PATH"]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
   }
 , "default-TOOLCHAIN":
@@ -112,9 +111,7 @@
     , "bindings":
       [ ["fieldname", "defaults"]
       , ["provider", "TOOLCHAIN"]
-      , [ "transition"
-        , {"type": "var", "name": "defaults-transition", "default": null}
-        ]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
       , ["default", {"type": "empty_map"}]
       ]
     , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
@@ -142,29 +139,39 @@
       }
     }
   }
-, "defaults-base-provides":
-  { "doc": ["Query list-provider from 'base' targets (last wins)"]
+, "defaults-base-provides-list":
+  { "doc": ["Query list of providers from 'base' targets"]
   , "vars": ["provider", "default"]
   , "vars_doc":
-    { "provider": ["The name of the list-provider in the provides map."]
+    { "provider": ["The name of the provider in the provides map."]
     , "default": ["The default if provider is missing (default: [])."]
     }
   , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
   , "expression":
     { "type": "let*"
     , "bindings": [["fieldname", "base"]]
+    , "body": {"type": "CALL_EXPRESSION", "name": "provider_list"}
+    }
+  }
+, "defaults-base-provides":
+  { "doc": ["Query provider from 'base' targets (last wins)"]
+  , "vars": ["provider", "default"]
+  , "vars_doc":
+    { "provider": ["The name of the provider in the provides map."]
+    , "default": ["The default if provider is missing (default: [])."]
+    }
+  , "imports": {"base-provides-list": "defaults-base-provides-list"}
+  , "expression":
+    { "type": "foldl"
+    , "var": "next"
+    , "start": {"type": "var", "name": "default", "default": []}
+    , "accum_var": "curr"
+    , "range": {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
     , "body":
-      { "type": "foldl"
-      , "var": "next"
-      , "start": {"type": "var", "name": "default", "default": []}
-      , "accum_var": "curr"
-      , "range": {"type": "CALL_EXPRESSION", "name": "provider_list"}
-      , "body":
-        { "type": "if"
-        , "cond": {"type": "var", "name": "next"}
-        , "then": {"type": "var", "name": "next"}
-        , "else": {"type": "var", "name": "curr"}
-        }
+      { "type": "if"
+      , "cond": {"type": "var", "name": "next"}
+      , "then": {"type": "var", "name": "next"}
+      , "else": {"type": "var", "name": "curr"}
       }
     }
   }
@@ -900,6 +907,7 @@
     , "objects": "objects"
     , "default-AR": "default-AR"
     , "default-ENV": "default-ENV"
+    , "default-PATH": "default-PATH"
     , "default-TOOLCHAIN": "default-TOOLCHAIN"
     , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
     }
@@ -954,6 +962,36 @@
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            ]
+          }
+        ]
+      , [ "ENV_PATH"
+        , { "type": "lookup"
+          , "map": {"type": "var", "name": "ENV"}
+          , "key": "PATH"
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "ENV"}
+            , { "type": "singleton_map"
+              , "key": "PATH"
+              , "value":
+                { "type": "join"
+                , "separator": ":"
+                , "$1":
+                  { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "ENV_PATH"}
+                      , "then": [{"type": "var", "name": "ENV_PATH"}]
+                      }
+                    ]
+                  }
+                }
+              }
             ]
           }
         ]
@@ -1517,6 +1555,7 @@
     , "flags": "flags"
     , "objects": "objects"
     , "default-ENV": "default-ENV"
+    , "default-PATH": "default-PATH"
     , "default-LDFLAGS": "default-LDFLAGS"
     , "default-TOOLCHAIN": "default-TOOLCHAIN"
     , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
@@ -1561,6 +1600,36 @@
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            ]
+          }
+        ]
+      , [ "ENV_PATH"
+        , { "type": "lookup"
+          , "map": {"type": "var", "name": "ENV"}
+          , "key": "PATH"
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "ENV"}
+            , { "type": "singleton_map"
+              , "key": "PATH"
+              , "value":
+                { "type": "join"
+                , "separator": ":"
+                , "$1":
+                  { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "ENV_PATH"}
+                      , "then": [{"type": "var", "name": "ENV_PATH"}]
+                      }
+                    ]
+                  }
+                }
+              }
             ]
           }
         ]
