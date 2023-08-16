@@ -167,10 +167,10 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"ADD_CXXFLAGS"` | Additional compilation flags for C++. Specifying this field extends values from `"base"`. |
 | `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
 | `"AR"` | The archiver tool to use |
-| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. |
+| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
 | `"SYSTEM_TOOLS"` | List of tools (`"CC"`, `"CXX"`, or `"AR"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
 | `"base"` | Other targets (using the same rule) to inherit values from. |
-| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field overlays artifacts from `"base"`. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. If the toolchain supports cross-compilation, it should perform a dispatch on the configuration variable `"BUILD_ARCH"` to determine for which architecture to generate code for. |
 | `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
 
 ### Rule `["CC/proto", "defaults"]`
@@ -183,9 +183,9 @@ A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "default
 | `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
 | `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
 | `"GRPC_PLUGIN"` | The GRPC plugin for the proto compiler. If `"toolchain"` is empty, this field's value is considered to be the absolute system path to the plugin. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the plugin in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
-| `"PATH"` | Path for looking up the proto compiler. Individual paths are joined with `":"`. |
+| `"PATH"` | Path for looking up the proto compiler. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
 | `"base"` | Other targets (using the same rule) to inherit values from. If multiple targets are specified, for values that are overwritten (see documentation of other fields) the last specified value wins. |
-| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the protobuf compiler and the GRPC plugin (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field overlays artifacts from `"base"`. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the protobuf compiler and the GRPC plugin (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
 | `"deps"` | Optional CC libraries the resulting CC proto libraries implicitly depend on. Those are typically `"libprotobuf"` for CC proto libraries and `"libgrpc++"` for CC proto service libraries. Specifying this field extends dependencies from `"base"`. |
 
 ### Rule `["shell/test", "script"]`
@@ -357,7 +357,6 @@ Replace a file, logically in place, by a patched version
 
 | Field | Description |
 | ----- | ----------- |
-| `"patch-part"` | If the patch contains hunks for multiple files, only apply hunks for the specified file path. Individual directory components are joined with `"/"`. Note that the patch must be provided in unified format. |
 | `"src"` | The single source file to patch, typically an explicit file reference. |
 | `"patch"` | The patch to apply. |
 
