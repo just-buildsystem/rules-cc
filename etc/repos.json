@@ -71,12 +71,11 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0"
-      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
+      , "branch": "v1.2.0-beta3"
+      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
       }
     , "bindings":
       { "rules": "just/rules-just"
-      , "just-distfiles": "just/just-distfiles"
       , "gsl": "just/com_github_microsoft_gsl"
       , "cli11": "just/cli11"
       , "json": "just/json"
@@ -86,7 +85,6 @@
       , "googleapis": "just/google_apis"
       , "bazel_remote_apis": "just/bazel_remote_apis"
       , "libgit2": "just/com_github_libgit2_libgit2"
-      , "catch2": "just/catch2"
       , "protoc": "just/protobuf"
       , "libcurl": "just/com_github_curl_curl"
       , "libarchive": "just/com_github_libarchive_libarchive"
@@ -95,11 +93,11 @@
   , "just/bazel_remote_apis":
     { "repository":
       { "type": "archive"
-      , "content": "b5deb95d544f03f1918cc9d611c7904b8173befa"
-      , "fetch": "https://github.com/bazelbuild/remote-apis/archive/v2.0.0.tar.gz"
-      , "sha256": "79204ed1fa385c03b5235f65b25ced6ac51cf4b00e45e1157beca6a28bdb8043"
-      , "sha512": "7465f4726a9cc263352f6f0ec5b065c53e2ad787611740e1a458331858bdf28d53d69ba3db3d83fbf4a578229a413ac230886b5fcd33ab76425c61b1f08ef3b3"
-      , "subdir": "remote-apis-2.0.0"
+      , "content": "da6d7d589ccd1924ba9840a4e329e438dfa27f86"
+      , "fetch": "https://github.com/bazelbuild/remote-apis/archive/e1fe21be4c9ae76269a5a63215bb3c72ed9ab3f0.tar.gz"
+      , "sha256": "7421abd5352ccf927c2050453a4dbfa1f7b1c7170ec3e8702b6fe2d39b8805fe"
+      , "sha512": "3042690ee4b17a27db92ca867b4225c25f3f16344dce5fe86695d72ddda531e1593a5f0f70a291283451ce1e9f606c2285d222df3787815cd8f4054e1113bc9d"
+      , "subdir": "remote-apis-e1fe21be4c9ae76269a5a63215bb3c72ed9ab3f0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.bazel_remote_apis"
@@ -118,19 +116,6 @@
     , "target_file_name": "TARGETS.bzip2"
     , "bindings": {"rules": "just/rules-bzip2"}
     }
-  , "just/catch2":
-    { "repository":
-      { "type": "archive"
-      , "content": "fd54249eeb20894ece50696a84ef674a0052b6da"
-      , "fetch": "https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz"
-      , "sha256": "8361907f4d9bff3ae7c1edb027f813659f793053c99b67837a0c0375f065bae2"
-      , "sha512": "3d0c5666509a19be54ea0c48a3c8e1c4a951a2d991a7c9f7fe6d326661464538f1ab9dc573b1b2647f49fb6bef45bbd866142a4ce0fba38545ad182b8d55f61f"
-      , "subdir": "Catch2-3.3.2"
-      }
-    , "target_root": "just/import targets"
-    , "target_file_name": "TARGETS.catch2"
-    , "bindings": {"rules": "just/rules"}
-    }
   , "just/cli11":
     { "repository":
       { "type": "archive"
@@ -147,11 +132,11 @@
   , "just/com_github_cares_cares":
     { "repository":
       { "type": "archive"
-      , "content": "998c90eda4410f965ca086ce59811e2cf16c8d6b"
-      , "fetch": "https://github.com/c-ares/c-ares/archive/refs/tags/cares-1_17_2.tar.gz"
-      , "sha256": "444b7dbf33cb6e8a764d069e3485cbaaa28386d60eace6988275c3cb9534d300"
-      , "sha512": "1111f1e7eeb0e5d9e70d1a7c8566145d0a5e6e71b020f3fcaa02ecdf1931553ddeff83fdc152a1f9c5a780078e8afe3670164b631df56eecd2b638210cc59bb3"
-      , "subdir": "c-ares-cares-1_17_2"
+      , "content": "4237a53f7a5dc1cfb4d04a6b6374f8674c32e271"
+      , "fetch": "https://github.com/c-ares/c-ares/releases/download/cares-1_19_1/c-ares-1.19.1.tar.gz"
+      , "sha256": "321700399b72ed0e037d0074c629e7741f6b2ec2dda92956abe3e9671d3e268e"
+      , "sha512": "466a94efda626e815a6ef7a890637056339f883d549ea6055e289fd8cd2391130e5682c905c0fb3bd7e955af7f6deb793562c170eb0ee066a4a62085a82ba470"
+      , "subdir": "c-ares-1.19.1"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.cares"
@@ -160,11 +145,11 @@
   , "just/com_github_curl_curl":
     { "repository":
       { "type": "archive"
-      , "content": "540b4de2edfa015b894ad86d51b33a55f451ac99"
-      , "fetch": "https://github.com/curl/curl/releases/download/curl-8_0_1/curl-8.0.1.tar.gz"
-      , "sha256": "5fd29000a4089934f121eff456101f0a5d09e2a3e89da1d714adf06c4be887cb"
-      , "sha512": "87d945e65176613c6296f8b130bd6c5355e3ca3c62ee4010edd481950cad9760482fd3be8a84e51501c118c29ebc284b8f87c49b06f9d248e9da5819fda38f8f"
-      , "subdir": "curl-8.0.1"
+      , "content": "23e33f9883e014ced35cc09f66b6b79a0b24e18d"
+      , "fetch": "https://github.com/curl/curl/releases/download/curl-8_2_1/curl-8.2.1.tar.gz"
+      , "sha256": "f98bdb06c0f52bdd19e63c4a77b5eb19b243bcbbd0f5b002b9f3cba7295a3a42"
+      , "sha512": "d0a906f4dff4c485e6dae930d9a7530147f4c0a0cbb46a83cb9be9d7bd6b9c320386c8be5bcdd3749f2d468b0daf39d06e8c581bab1fa792fd26da409a575cbd"
+      , "subdir": "curl-8.2.1"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.curl"
@@ -178,11 +163,11 @@
   , "just/com_github_grpc_grpc":
     { "repository":
       { "type": "archive"
-      , "content": "a60418787a6e6f98c584d8de42d93b8983254939"
-      , "fetch": "https://github.com/grpc/grpc/archive/refs/tags/v1.53.0.tar.gz"
-      , "sha256": "9717ffc52120861136e478155c2ff3a9c21740e2244de52fa966f376d7471adf"
-      , "sha512": "a02fe1969787cd39061269b8c7c1313c1f599a31aa4e11760a744a9e0f85202e33832ee669b9d0d07df4af1a45470d605a69d9e4a4df89251e9b0093aee89eca"
-      , "subdir": "grpc-1.53.0"
+      , "content": "eb5007bb7fb6575db8c1467090719d3262a05868"
+      , "fetch": "https://github.com/grpc/grpc/archive/refs/tags/v1.56.2.tar.gz"
+      , "sha256": "931f07db9d48cff6a6007c1033ba6d691fe655bea2765444bc1ad974dfc840aa"
+      , "sha512": "bb4be3b8a128566581b7ea69d1faa6d08a28624656c2f4afdd8bb8fa804e362b7d8f2bb6c52789081b48f299ddffe18e1795c8dce9b9bc304a5e6d3a4274b11e"
+      , "subdir": "grpc-1.56.2"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.grpc"
@@ -190,7 +175,7 @@
     , "bindings":
       { "rules": "just/rules-grpc"
       , "protobuf": "just/protobuf"
-      , "libssl": "just/ssl"
+      , "ssl": "just/ssl"
       , "absl": "just/com_google_absl"
       , "zlib": "just/zlib"
       , "re2": "just/re2"
@@ -201,11 +186,11 @@
   , "just/com_github_libarchive_libarchive":
     { "repository":
       { "type": "archive"
-      , "content": "2dafab016d6338086925fd04dbaa6a18bd24cb31"
-      , "fetch": "https://github.com/libarchive/libarchive/releases/download/v3.6.2/libarchive-3.6.2.tar.gz"
-      , "sha256": "ba6d02f15ba04aba9c23fd5f236bb234eab9d5209e95d1c4df85c44d5f19b9b3"
-      , "sha512": "24e476465054a29a2d48adf3c197a171b5361fa5038729a1f14d578c6701424de4e5dd6a2b20a6b697969ab43bdd8afc1585f8de0465c266f455d7eaa19e5048"
-      , "subdir": "libarchive-3.6.2"
+      , "content": "922b6c729d391c010ffa6228134c164886bac0f1"
+      , "fetch": "https://github.com/libarchive/libarchive/releases/download/v3.7.1/libarchive-3.7.1.tar.gz"
+      , "sha256": "5d24e40819768f74daf846b99837fc53a3a9dcdf3ce1c2003fe0596db850f0f0"
+      , "sha512": "ccd36fc5e24e5feaad15b08496c4f6373f1bbb6ba657af5dc633b9d1454c98aba9a59ccffc48b41afc1219119d46c15d4db09c5855950422946e4dc058f17b88"
+      , "subdir": "libarchive-3.7.1"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.archive"
@@ -214,16 +199,17 @@
       , "zlib": "just/zlib"
       , "ssl": "just/ssl"
       , "bzip2": "just/bzip2"
+      , "lzma": "just/lzma"
       }
     }
   , "just/com_github_libgit2_libgit2":
     { "repository":
       { "type": "archive"
-      , "content": "0c7c845401ae9ad63c5617da6df7e84145b699a0"
-      , "fetch": "https://github.com/libgit2/libgit2/archive/refs/tags/v1.5.2.tar.gz"
-      , "sha256": "57638ac0e319078f56a7e17570be754515e5b1276d3750904b4214c92e8fa196"
-      , "sha512": "0de5e82953482bf57e9cd221406581a12c6acfbeeea0cebbb9b701d288804ec085b7c0902ba1f04ad7cdaaead9d472be21ffe8d730050db5c77101a93448fb3a"
-      , "subdir": "libgit2-1.5.2"
+      , "content": "02793bbe15088985989d1ff636a23958f4a62c57"
+      , "fetch": "https://github.com/libgit2/libgit2/archive/refs/tags/v1.7.0.tar.gz"
+      , "sha256": "d9d0f84a86bf98b73e68997f5c1543cc5067d0ca9c7a5acaba3e8d117ecefef3"
+      , "sha512": "68c8ed289de7daccaec17ea2ac49f4610325595cf90cddef763a31546a0a1c6bd400bf6180b68e2d3a8bdc3d031328efbbbaf3b61467dfc1b944e8cf3efcfd69"
+      , "subdir": "libgit2-1.7.0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.git2"
@@ -246,24 +232,24 @@
   , "just/com_google_absl":
     { "repository":
       { "type": "archive"
-      , "content": "8cc2a99cfd2426ba6fbdc4499a07bccfd19be8a6"
-      , "fetch": "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.0.tar.gz"
-      , "sha256": "3ea49a7d97421b88a8c48a0de16c16048e17725c7ec0f1d3ea2683a2a75adc21"
-      , "sha512": "b3d334215c78b31a2eb10bd9d4a978cd48367866d6daa2065c6c727282bafe19ef7ff5bd7cd4ed5c319d3b04e0711222e08ddbe7621ef1e079fed93a7307112f"
-      , "subdir": "abseil-cpp-20230125.0"
+      , "content": "08a0c4a58d13f234bd3f1de6c73395ec5ab7d5f6"
+      , "fetch": "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.3.tar.gz"
+      , "sha256": "5366d7e7fa7ba0d915014d387b66d0d002c03236448e1ba9ef98122c13b35c36"
+      , "sha512": "50509acfc4128fd31435631f71ac8cd0350acd9e290f78502723149016e7f07c9d84182ba99e0938b1873fecda09393d3fd7af8dabfb0d89cdcdd8a69a917e70"
+      , "subdir": "abseil-cpp-20230125.3"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.absl"
-    , "bindings": {"rules": "just/rules-absl"}
+    , "bindings": {"rules": "just/rules-absl", "patches": "just/patches"}
     }
   , "just/fmt":
     { "repository":
       { "type": "zip"
-      , "content": "558d83d0fedb1f1ee3c3c4f1576d549cae7614ed"
-      , "fetch": "https://github.com/fmtlib/fmt/releases/download/9.1.0/fmt-9.1.0.zip"
-      , "sha256": "cceb4cb9366e18a5742128cb3524ce5f50e88b476f1e54737a47ffdf4df4c996"
-      , "sha512": "482d1ceaf042e97c66ff570babe9bd6f9cab7e4eec3dc56eb7d5e075b6b9b16f8eb333e96de9627fa33324d32b88d2aacebd0c34c3c706650eaa1729b0dd7fd6"
-      , "subdir": "fmt-9.1.0"
+      , "content": "3af42ee467295259c9bd6533f1092268136b226d"
+      , "fetch": "https://github.com/fmtlib/fmt/releases/download/10.0.0/fmt-10.0.0.zip"
+      , "sha256": "4943cb165f3f587f26da834d3056ee8733c397e024145ca7d2a8a96bb71ac281"
+      , "sha512": "e4f80c34a78490a6bb3fa79fe097dac3d660dc7900fdeac9f8e744c1f1ff414c0a54a9b8a61fc9631702b12aaaa77000673357545e5771872076154810ebbbfc"
+      , "subdir": "fmt-10.0.0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.fmt"
@@ -295,50 +281,44 @@
     , "target_file_name": "TARGETS.json"
     , "bindings": {"rules": "just/rules"}
     }
-  , "just/just-distfiles":
+  , "just/lzma":
     { "repository":
-      { "type": "distdir"
-      , "repositories":
-        [ "just/com_github_microsoft_gsl"
-        , "just/cli11"
-        , "just/json"
-        , "just/fmt"
-        , "just/ssl"
-        , "just/protobuf"
-        , "just/bazel_remote_apis"
-        , "just/google_apis"
-        , "just/com_google_absl"
-        , "just/zlib"
-        , "just/re2"
-        , "just/com_github_cares_cares"
-        , "just/com_github_grpc_grpc"
-        , "just/com_github_libgit2_libgit2"
-        ]
+      { "type": "archive"
+      , "content": "6dae9322046ff66b7074c33b24be9a98f5cee42a"
+      , "fetch": "https://github.com/xz-mirror/xz/archive/refs/tags/v5.4.0.tar.gz"
+      , "sha256": "26ec069c41e5dfae221825b9f28a4934cb6ce3bedd3f55bc0a08073f7c2e42fd"
+      , "sha512": "60aba20197d329a1e0d86b32de8a9727a98e5ff6f1eda6111c5ddf85086edeefcf9e2cc3998d237e248bf4af7cf746923b45d236e6b47d88f63cf3d57cae9e8f"
+      , "subdir": "xz-5.4.0"
       }
     , "target_root": "just/import targets"
-    , "target_file_name": "TARGETS.distfiles"
+    , "target_file_name": "TARGETS.lzma"
+    , "bindings": {"rules": "just/rules-lzma"}
     }
   , "just/patches":
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0"
-      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
+      , "branch": "v1.2.0-beta3"
+      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
       , "subdir": "etc/patches"
       }
     }
   , "just/protobuf":
     { "repository":
-      { "type": "zip"
-      , "content": "5bc92c917a0714d0b37cbb9dcbbf434d132edc00"
-      , "fetch": "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.zip"
-      , "sha256": "f7042d540c969b00db92e8e1066a9b8099c8379c33f40f360eb9e1d98a36ca26"
-      , "sha512": "7f1c9a4297a4e47705d64932483f31ed25da928d24e351d94899038f852015d4a16c88c2b962ac4a0c62e6a3f6689f87fb4cef7165d327aae5381a7b975bdf2e"
-      , "subdir": "protobuf-3.21.12"
+      { "type": "archive"
+      , "content": "3e7ee8fe7138998e31bd367fdd6feaeb1d98ab39"
+      , "fetch": "https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz"
+      , "sha256": "a700a49470d301f1190a487a923b5095bf60f08f4ae4cac9f5f7c36883d17971"
+      , "sha512": "b93a4e0339ecbe085796de5b6c61feae35229d40db9019c043090bcaa483a1cce78a99487c5638482c68832fcede5579a0e5ec731221a88359b80db9bb6dc566"
+      , "subdir": "protobuf-23.4"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.protobuf"
-    , "bindings": {"rules": "just/rules-protobuf", "zlib": "just/zlib"}
+    , "bindings":
+      { "rules": "just/rules-protobuf"
+      , "zlib": "just/zlib"
+      , "absl": "just/com_google_absl"
+      }
     }
   , "just/re2":
     { "repository":
@@ -357,12 +337,13 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0"
-      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
+      , "branch": "v1.2.0-beta3"
+      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
       , "subdir": "rules"
       }
     , "target_root": "just/defaults"
     , "rule_root": "just/rules"
+    , "bindings": {"toolchain": "just/toolchain"}
     }
   , "just/rules-absl":
     { "repository": "just/rules"
@@ -424,6 +405,13 @@
       , "grpc": "just/com_github_grpc_grpc"
       }
     }
+  , "just/rules-lzma":
+    { "repository": "just/rules"
+    , "target_root": "just/defaults"
+    , "rule_root": "just/rules"
+    , "target_file_name": "TARGETS.lzma"
+    , "bindings": {"base": "just/rules"}
+    }
   , "just/rules-protobuf":
     { "repository": "just/rules"
     , "target_root": "just/defaults"
@@ -451,14 +439,24 @@
     , "target_file_name": "TARGETS.boringssl"
     , "bindings": {"rules": "just/rules-boringssl"}
     }
+  , "just/toolchain":
+    { "repository":
+      { "type": "git"
+      , "repository": "https://github.com/just-buildsystem/justbuild"
+      , "branch": "v1.2.0-beta3"
+      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "subdir": "etc/toolchain"
+      }
+    , "rule_root": "just/rules"
+    }
   , "just/zlib":
     { "repository":
       { "type": "archive"
-      , "content": "d115fc690fa59d3be51b3442158876536140b6c2"
-      , "fetch": "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz"
-      , "sha256": "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
-      , "sha512": "99f0e843f52290e6950cc328820c0f322a4d934a504f66c7caa76bd0cc17ece4bf0546424fc95135de85a2656fed5115abb835fd8d8a390d60ffaf946c8887ad"
-      , "subdir": "zlib-1.2.13"
+      , "content": "88faf0fca21e0d82de44366fdd52aaadbab2e6b6"
+      , "fetch": "https://github.com/madler/zlib/releases/download/v1.3/zlib-1.3.tar.gz"
+      , "sha256": "ff0ba4c292013dbc27530b3a81e1f9a813cd39de01ca5e0f8bf355702efa593e"
+      , "sha512": "185795044461cd78a5545250e06f6efdb0556e8d1bfe44e657b509dd6f00ba8892c8eb3febe65f79ee0b192d6af857f0e0055326d33a881449f3833f92e5f8fb"
+      , "subdir": "zlib-1.3"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.zlib"
@@ -468,8 +466,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0"
-      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
+      , "branch": "v1.2.0-beta3"
+      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
       , "subdir": "etc/defaults"
       }
     }
@@ -477,8 +475,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.1.0"
-      , "commit": "d88b339c386b81492fce481cb8fc12d1f1d90aad"
+      , "branch": "v1.2.0-beta3"
+      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
       , "subdir": "etc/import"
       }
     }
