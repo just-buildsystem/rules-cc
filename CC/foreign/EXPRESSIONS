@@ -43,6 +43,7 @@
   , "imports":
     { "compiler-cc": ["CC", "compiler-cc"]
     , "default-ENV": ["CC", "default-ENV"]
+    , "default-PATH": ["CC", "default-PATH"]
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
     }
@@ -66,6 +67,36 @@
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            ]
+          }
+        ]
+      , [ "ENV_PATH"
+        , { "type": "lookup"
+          , "map": {"type": "var", "name": "ENV"}
+          , "key": "PATH"
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "ENV"}
+            , { "type": "singleton_map"
+              , "key": "PATH"
+              , "value":
+                { "type": "join"
+                , "separator": ":"
+                , "$1":
+                  { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "ENV_PATH"}
+                      , "then": [{"type": "var", "name": "ENV_PATH"}]
+                      }
+                    ]
+                  }
+                }
+              }
             ]
           }
         ]
