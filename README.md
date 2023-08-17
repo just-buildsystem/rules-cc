@@ -140,7 +140,7 @@ A test written in C++
 | `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
 | `"private-cflags"` | List of compile flags set for source files local to this target. |
 | `"private-ldflags"` | Additional linker flags for linking external libraries (not built by this tool, typically system libraries). |
-| `"srcs"` | The sources of the test binary |
+| `"srcs"` | The sources of the test binary  The resulting test binary in an environment where it can assume that the environment variable TEST_TMPDIR points to a director that may be used exclusively by this test.  This running of the test is carried out by the implicit dependency on the target `"runner"`. By setting this target in the target layer of this rues repository (instead of letting it default to the respective file), the C/C++ test environment can be modified globally. |
 | `"private-hdrs"` | Any additional header files that need to be present when compiling the test binary. |
 | `"data"` | Any files the test binary needs access to when running |
 
@@ -149,7 +149,7 @@ A test written in C++
 | `"TARGET_ARCH"` | The architecture to build the test for.  Will only be honored, if that architecture is available in the ARCH_DISPATCH map. Otherwise, the test will be built for and run on the host architecture. |
 | `"TEST_ENV"` | The environment for executing the test runner. |
 | `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
-| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
+| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  Test runs are summarized by the `["shell/test", "summarizer"]` that is also used by shell tests. |
 | `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
 
 ### Rule `["CC", "defaults"]`
@@ -197,11 +197,11 @@ Shell test, given by a test script
 | `"keep"` | List of names (relative to the test working directory) of files that the test might generate that should be kept as part of the output. This might be useful for further analysis of the test |
 | `"name"` | A name for the test, used in reporting, as well as for staging the test result tree in the runfiles |
 | `"deps"` | Any targets that should be staged (with artifacts and runfiles) into the tests working directory |
-| `"test"` | The shell script for the test, launched with sh.  An empty directory is created to store any temporary files needed by the test, and it is made available in the environment variable TEST_TMPDIR. The test should not assume write permissions outside the working directory and the TEST_TMPDIR. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR.  If the configuration variable RUNS_PER_TEST is set, the environment variable TEST_RUN_NUMBER will also be set to the number of the attempt, counting from 0. |
+| `"test"` | The shell script for the test, launched with sh.  An empty directory is created to store any temporary files needed by the test, and it is made available in the environment variable TEST_TMPDIR. The test should not assume write permissions outside the working directory and the TEST_TMPDIR. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR.  If the configuration variable RUNS_PER_TEST is set, the environment variable TEST_RUN_NUMBER will also be set to the number of the attempt, counting from 0.  This running of the test is carried out by the implicit dependency on the target `"runner"`. By setting this target in the target layer of this rues repository (instead of letting it default to the respective file), the shell test environment can be modified globally. |
 
 | Config variable | Description |
 | --------------- | ----------- |
-| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache. |
+| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  The individual test runs will be summarized by the implict dependency on the target `"summarizer"`. By setting this target in the target in the target layer of this rues repository (instead of letting it default to the respective file) the layout of the summary can be changed globally. |
 | `"TEST_ENV"` | Additional environment for executing the test runner. |
 | `"TIMEOUT_SCALE"` | Factor on how to scale the timeout for this test. Defaults to 1.0. |
 | `"TARGET_ARCH"` | The architecture to build the test for.  Will only be honored, if that architecture is available in the ARCH_DISPATCH map. Otherwise, the test will be built for and run on the host architecture. |
@@ -360,6 +360,18 @@ Replace a file, logically in place, by a patched version
 | `"src"` | The single source file to patch, typically an explicit file reference. |
 | `"patch"` | The patch to apply. |
 
+### Rule `["patch", "defaults"]`
+
+A rule to provide defaults. All targets take their defaults for PATCH from the target `["", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
+
+| Field | Description |
+| ----- | ----------- |
+| `"PATCH"` | The patch binary to use |
+| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
+| `"SYSTEM_TOOLS"` | List of tools (`"PATCH"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
+| `"base"` | Other targets (using the same rule) to inherit values from. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tool PATCH. Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
+
 ### Rule `["CC/auto", "config"]`
 
 Generate a C/C++ config header 
@@ -387,4 +399,23 @@ Generate a C/C++ config header
 | `"have_cxxsymbol"` | Set a define to `"1"` if the specified C++ symbol is defined by one of the specified headers in the include path. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C++ symbol to search for and the second value is a list with the header file names to consider for searching. If the header file defines the symbol as a macro it is considered available and assumed to work. |
 | `"size_ctype"` | Set a define to size of the specified C type. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C type to check for and the second value is a list with possible sizes as numbers. If none of the specified sizes matches, the action fails. |
 | `"size_cxxtype"` | Set a define to size of the specified C++ type. Must contain a list of pairs. The first element of each pair is the define name and the second argument is another pair. This pair's first value is the C++ type to check for and the second value is a list with possible sizes as numbers. If none of the specified sizes matches, the action fails. |
+
+### Rule `["CC/auto", "config_file"]`
+
+Generate a C/C++ config header from a given template 
+
+ Generate a C/C++ configuration header using defines specified via the target configuration. In the usual case, a target using this rule is configured by depending on it from a target that uses the built-in `"configure"` rule. 
+
+ The actual generation of the header file from the template is done by the implicit dependency on the `"runner"` target which can be changed globally by setting this target in the target layer of this repository.
+
+| Field | Description |
+| ----- | ----------- |
+| `"magic_string"` | The magic string (e.g., `"cmakedefine"`) which identifies in which line we have to `"#define"` or `"#undef"` variables according to what is defined in the config field `"defines"`. |
+| `"@only"` | If set, only replace @VAR@ and not $`{VAR}` |
+| `"output"` | Name of the header file to generate (incl. file name ext). Components are joined with /. |
+| `"input"` | The input configuration file, used as template. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"defines"` | Set a define to a specific value unless its value is `"null"`. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the value to set. Strings must be properly escaped. Defines generated from this field are added last, so that they can refer to defines from other `"defines*"` values. |
 
