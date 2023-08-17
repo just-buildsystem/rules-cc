@@ -69,5 +69,7 @@ rm -f "$OUTFILE"
   doc2md rules proto library
   doc2md rules data staged
   doc2md rules patch file
+  doc2md rules patch defaults
   doc2md rules CC/auto config
+  doc2md rules CC/auto config_file
 ) >> "$OUTFILE"
