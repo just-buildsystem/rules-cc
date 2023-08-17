@@ -32,8 +32,8 @@
     ]
   , "implicit":
     { "defaults": [["./", "..", "defaults"]]
-    , "runner": ["test_runner.py"]
-    , "summarizer": [["./", "../../shell/test", "test_summary.py"]]
+    , "runner": ["runner"]
+    , "summarizer": [["./", "../../shell/test", "summarizer"]]
     }
   , "field_doc":
     { "name":
@@ -42,7 +42,18 @@
       , "Used to name the test binary as well as for staging the test result"
       ]
     , "args": ["Command line arguments for the test binary"]
-    , "srcs": ["The sources of the test binary"]
+    , "srcs":
+      [ "The sources of the test binary"
+      , ""
+      , "The resulting test binary in an environment where it can assume"
+      , "that the environment variable TEST_TMPDIR points to a"
+      , "director that may be used exclusively by this test."
+      , ""
+      , "This running of the test is carried out by the implicit dependency"
+      , "on the target \"runner\". By setting this target in the target layer"
+      , "of this rues repository (instead of letting it default to the"
+      , "respective file), the C/C++ test environment can be modified globally."
+      ]
     , "private-hdrs":
       [ "Any additional header files that need to be present when compiling"
       , "the test binary."
@@ -100,6 +111,9 @@
     , "RUNS_PER_TEST":
       [ "The number of times the test should be run in order to detect flakyness."
       , "If set, no test action will be taken from cache."
+      , ""
+      , "Test runs are summarized by the [\"shell/test\", \"summarizer\"] that"
+      , "is also used by shell tests."
       ]
     , "TARGET_ARCH":
       [ "The architecture to build the test for."
