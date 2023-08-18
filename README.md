@@ -113,6 +113,20 @@ A prebuilt C++ library
 | `"deps"` | Any other libraries this library depends upon. |
 | `"pkg-config"` | Pkg-config file for optional infer of public cflags and ldflags. If multiple files are specified (e.g., one depends on the other), the first one is used as entry. Note that if this field is non-empty the tool `"pkg-config"` must be available in `"PATH"`, which is taken from `["CC", "defaults"]` or the `"ENV"` variable. |
 
+### Rule `["CC/pkgconfig", "system_library"]`
+
+A system library via pkg-config
+
+| Field | Description |
+| ----- | ----------- |
+| `"name"` | The pkg-config name of the library. |
+| `"args"` | Additional pkg-config arguments (e.g., `"--define-prefix"` or `"--static"`), appended to the config variable `"PKG_CONFIG_ARGS"`. |
+| `"stage"` | The stage of the internally created flag files. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"PKG_CONFIG_ARGS"` | Additional pkg-config arguments (e.g., `"--define-prefix"` or `"--static"`). |
+
 ### Rule `["CC", "install-with-deps"]`
 
 Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"lib/pkgconfig"`.
