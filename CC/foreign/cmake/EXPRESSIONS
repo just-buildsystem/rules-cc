@@ -293,7 +293,7 @@
       , "cmd":
         { "type": "++"
         , "$1":
-          [ [ "/bin/sh"
+          [ [ "sh"
             , "run_cmake.sh"
             , {"type": "var", "name": "CMAKE_SUBDIR"}
             , {"type": "var", "name": "AR"}

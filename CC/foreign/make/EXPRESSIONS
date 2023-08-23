@@ -292,7 +292,7 @@
       , "cmd":
         { "type": "++"
         , "$1":
-          [ ["/bin/sh", "run_make.sh"]
+          [ ["sh", "run_make.sh"]
           , [{"type": "var", "name": "SUBDIR"}]
           , {"type": "var", "name": "make_options"}
           , { "type": "if"
