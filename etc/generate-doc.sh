@@ -54,14 +54,15 @@ doc2md() {
 
 rm -f "$OUTFILE"
 ( cat "$ROOT/etc/README.template.md"
+  doc2md rules CC defaults
+  doc2md rules CC/proto defaults
+  doc2md rules patch defaults
   doc2md rules CC binary
   doc2md rules CC library
   doc2md rules CC/prebuilt library
   doc2md rules CC/pkgconfig system_library
   doc2md rules CC install-with-deps
   doc2md rules CC/test test
-  doc2md rules CC defaults
-  doc2md rules CC/proto defaults
   doc2md rules shell/test script
   doc2md rules CC/foreign/cmake library
   doc2md rules CC/foreign/cmake data
@@ -70,7 +71,6 @@ rm -f "$OUTFILE"
   doc2md rules proto library
   doc2md rules data staged
   doc2md rules patch file
-  doc2md rules patch defaults
   doc2md rules CC/auto config
   doc2md rules CC/auto config_file
 ) >> "$OUTFILE"
