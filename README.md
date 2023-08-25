@@ -53,6 +53,67 @@ In this documentation, the standard configuration variables
 `"ADD_CFLAGS"`, `"ADD_CXXFLAGS"`, `"ADD_LDFLAGS"`, `"ENV"`,
 `"BUILD_POSITION_INDEPENDENT"` are ommitted.
 
+### Rule `["CC", "defaults"]`
+
+A rule to provide defaults. All CC targets take their defaults for CC, CXX, flags, etc from the target `["CC", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
+
+| Field | Description |
+| ----- | ----------- |
+| `"CC"` | The C compiler to use |
+| `"CXX"` | The C++ compiler to use |
+| `"CFLAGS"` | Flags for C compilation. Specifying this field overwrites values from `"base"`. |
+| `"CXXFLAGS"` | Flags for C++ compilation. Specifying this field overwrites values from `"base"`. |
+| `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
+| `"ADD_CFLAGS"` | Additional compilation flags for C. Specifying this field extends values from `"base"`. |
+| `"ADD_CXXFLAGS"` | Additional compilation flags for C++. Specifying this field extends values from `"base"`. |
+| `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
+| `"AR"` | The archiver tool to use |
+| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
+| `"SYSTEM_TOOLS"` | List of tools (`"CC"`, `"CXX"`, or `"AR"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
+| `"base"` | Other targets (using the same rule) to inherit values from. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. If the toolchain supports cross-compilation, it should perform a dispatch on the configuration variable `"BUILD_ARCH"` to determine for which architecture to generate code for. |
+| `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
+
+### Rule `["CC/proto", "defaults"]`
+
+A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "defaults"]` for CC proto libraries and `["CC/proto", "service defaults"]` for CC proto service libraries (GRPC).
+
+| Field | Description |
+| ----- | ----------- |
+| `"PROTOC"` | The proto compiler. If `"toolchain"` is empty, this field's value is considered the proto compiler name that is looked up in `"PATH"`. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the proto compiler in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
+| `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
+| `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
+| `"GRPC_PLUGIN"` | The GRPC plugin for the proto compiler. If `"toolchain"` is empty, this field's value is considered to be the absolute system path to the plugin. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the plugin in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
+| `"PATH"` | Path for looking up the proto compiler. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
+| `"base"` | Other targets (using the same rule) to inherit values from. If multiple targets are specified, for values that are overwritten (see documentation of other fields) the last specified value wins. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the protobuf compiler and the GRPC plugin (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
+| `"deps"` | Optional CC libraries the resulting CC proto libraries implicitly depend on. Those are typically `"libprotobuf"` for CC proto libraries and `"libgrpc++"` for CC proto service libraries. Specifying this field extends dependencies from `"base"`. |
+
+### Rule `["CC/foreign", "defaults"]`
+
+A rule to provide defaults for foreign rules. All foreign rules take their defaults for MAKE, CMAKE, etc from the target `["CC/foreign", "defaults"]`.
+
+| Field | Description |
+| ----- | ----------- |
+| `"MAKE"` | The make binary to use |
+| `"CMAKE"` | The cmake binary to use |
+| `"PATH"` | Path for looking up the tools. Individual paths are joined with with `":"`. Specifying this field extends values from `"base"`. |
+| `"SYSTEM_TOOLS"` | List of tools (`"MAKE"`, `"CMAKE"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
+| `"base"` | Other targets (using the same rule) to inherit values from. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools MAKE, CMAKE. Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
+
+### Rule `["patch", "defaults"]`
+
+A rule to provide defaults. All targets take their defaults for PATCH from the target `["", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
+
+| Field | Description |
+| ----- | ----------- |
+| `"PATCH"` | The patch binary to use |
+| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
+| `"SYSTEM_TOOLS"` | List of tools (`"PATCH"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
+| `"base"` | Other targets (using the same rule) to inherit values from. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tool PATCH. Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
+
 ### Rule `["CC", "binary"]`
 
 A binary written in C++
@@ -165,42 +226,6 @@ A test written in C++
 | `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  Test runs are summarized by the `["shell/test", "summarizer"]` that is also used by shell tests. |
 | `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
-
-### Rule `["CC", "defaults"]`
-
-A rule to provide defaults. All CC targets take their defaults for CC, CXX, flags, etc from the target `["CC", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
-
-| Field | Description |
-| ----- | ----------- |
-| `"CC"` | The C compiler to use |
-| `"CXX"` | The C++ compiler to use |
-| `"CFLAGS"` | Flags for C compilation. Specifying this field overwrites values from `"base"`. |
-| `"CXXFLAGS"` | Flags for C++ compilation. Specifying this field overwrites values from `"base"`. |
-| `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
-| `"ADD_CFLAGS"` | Additional compilation flags for C. Specifying this field extends values from `"base"`. |
-| `"ADD_CXXFLAGS"` | Additional compilation flags for C++. Specifying this field extends values from `"base"`. |
-| `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
-| `"AR"` | The archiver tool to use |
-| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
-| `"SYSTEM_TOOLS"` | List of tools (`"CC"`, `"CXX"`, or `"AR"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
-| `"base"` | Other targets (using the same rule) to inherit values from. |
-| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. If the toolchain supports cross-compilation, it should perform a dispatch on the configuration variable `"BUILD_ARCH"` to determine for which architecture to generate code for. |
-| `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
-
-### Rule `["CC/proto", "defaults"]`
-
-A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "defaults"]` for CC proto libraries and `["CC/proto", "service defaults"]` for CC proto service libraries (GRPC).
-
-| Field | Description |
-| ----- | ----------- |
-| `"PROTOC"` | The proto compiler. If `"toolchain"` is empty, this field's value is considered the proto compiler name that is looked up in `"PATH"`. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the proto compiler in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
-| `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
-| `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
-| `"GRPC_PLUGIN"` | The GRPC plugin for the proto compiler. If `"toolchain"` is empty, this field's value is considered to be the absolute system path to the plugin. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the plugin in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
-| `"PATH"` | Path for looking up the proto compiler. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
-| `"base"` | Other targets (using the same rule) to inherit values from. If multiple targets are specified, for values that are overwritten (see documentation of other fields) the last specified value wins. |
-| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the protobuf compiler and the GRPC plugin (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
-| `"deps"` | Optional CC libraries the resulting CC proto libraries implicitly depend on. Those are typically `"libprotobuf"` for CC proto libraries and `"libgrpc++"` for CC proto service libraries. Specifying this field extends dependencies from `"base"`. |
 
 ### Rule `["shell/test", "script"]`
 
@@ -340,6 +365,26 @@ Data produced by Configure and Make build and install.
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
 
+### Rule `["CC/foreign/shell", "data"]`
+
+Data produced by generic shell commands with toolchain support. 
+
+ All variables accessible to commands and options are: `"TMPDIR"`, `"LOCALBASE"`, `"WORKDIR"`, `"DESTDIR"`, `"CC"`, `"CXX"`, `"CFLAGS"`, `"CXXFLAGS"`, `"LDFLAGS"`, and `"AR"`. `"LOCALBASE"` contains the path to the staged artifacts from `"localbase"` and the installed artifacts from `"deps"`. Furthermore, the variable `"ACTION_DIR"` points to the current action directory, if needed for achieving reproducibility.
+
+| Field | Description |
+| ----- | ----------- |
+| `"cmds"` | List of commands to execute by `"sh"`. Multiple commands will be joined with the newline character. |
+| `"outs"` | Paths to the produced output files in `"DESTDIR"`. |
+| `"out_dirs"` | Paths to the produced output directories in `"DESTDIR"`. |
+| `"project"` | The project directory. It should contain a single tree artifact. It's path can be accessed via the `"WORKDIR"` variable. |
+| `"localbase"` | Artifacts to stage to `"LOCALBASE"`. |
+| `"deps"` | CC targets to install to `"LOCALBASE"`. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
+| `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+
 ### Rule `["proto", "library"]`
 
 A proto library as abstract data structure. 
@@ -373,18 +418,6 @@ Replace a file, logically in place, by a patched version
 | ----- | ----------- |
 | `"src"` | The single source file to patch, typically an explicit file reference. |
 | `"patch"` | The patch to apply. |
-
-### Rule `["patch", "defaults"]`
-
-A rule to provide defaults. All targets take their defaults for PATCH from the target `["", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
-
-| Field | Description |
-| ----- | ----------- |
-| `"PATCH"` | The patch binary to use |
-| `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
-| `"SYSTEM_TOOLS"` | List of tools (`"PATCH"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
-| `"base"` | Other targets (using the same rule) to inherit values from. |
-| `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tool PATCH. Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
 
 ### Rule `["CC/auto", "config"]`
 
