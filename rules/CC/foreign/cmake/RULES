@@ -35,7 +35,10 @@
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
     ]
-  , "implicit": {"defaults": [["CC", "defaults"]]}
+  , "implicit":
+    { "defaults": [["CC", "defaults"]]
+    , "foreign-defaults": [["CC/foreign", "defaults"]]
+    }
   , "field_doc":
     { "project":
       ["The CMake project directory. It should contain a single tree artifact"]
@@ -298,6 +301,7 @@
     ]
   , "implicit":
     { "defaults": [["CC", "defaults"]]
+    , "foreign-defaults": [["CC/foreign", "defaults"]]
     , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
     }
   , "field_doc":

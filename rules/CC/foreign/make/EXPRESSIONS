@@ -41,6 +41,11 @@
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
     , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
+    , "foreign-MAKE": ["CC/foreign", "default-MAKE"]
+    , "foreign-ENV": ["CC/foreign", "default-ENV"]
+    , "foreign-PATH": ["CC/foreign", "default-PATH"]
+    , "foreign-TOOLCHAIN": ["CC/foreign", "default-TOOLCHAIN"]
+    , "foreign-NON_SYSTEM_TOOLS": ["CC/foreign", "default-NON_SYSTEM_TOOLS"]
     }
   , "expression":
     { "type": "let*"
@@ -56,7 +61,15 @@
           }
         ]
       , ["TOOLCHAIN_DIR", "toolchain"]
-      , ["TOOLCHAIN", {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}]
+      , [ "TOOLCHAIN"
+        , { "type": "disjoint_map_union"
+          , "msg": "Toolchain trees may not overlap"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "foreign-TOOLCHAIN"}
+            , {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}
+            ]
+          }
+        ]
       , [ "TOOLCHAIN"
         , { "type": "to_subdir"
           , "subdir": {"type": "var", "name": "TOOLCHAIN_DIR"}
@@ -64,7 +77,30 @@
           }
         ]
       , [ "NON_SYSTEM_TOOLS"
-        , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "foreign-NON_SYSTEM_TOOLS"}
+            , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+            ]
+          }
+        ]
+      , [ "MAKE"
+        , { "type": "join"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond":
+                  { "type": "lookup"
+                  , "key": "MAKE"
+                  , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                  }
+                , "then": ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                }
+              , {"type": "CALL_EXPRESSION", "name": "foreign-MAKE"}
+              ]
+            }
+          }
         ]
       , ["CC", {"type": "CALL_EXPRESSION", "name": "compiler-cc"}]
       , ["CXX", {"type": "CALL_EXPRESSION", "name": "compiler-cxx"}]
@@ -150,9 +186,18 @@
           , "$1":
             [ { "type": "env"
               , "vars":
-                ["CC", "CXX", "CFLAGS", "CXXFLAGS", "LDFLAGS", "AR", "PREFIX"]
+                [ "CC"
+                , "CXX"
+                , "CFLAGS"
+                , "CXXFLAGS"
+                , "LDFLAGS"
+                , "AR"
+                , "MAKE"
+                , "PREFIX"
+                ]
               }
             , {"type": "CALL_EXPRESSION", "name": "default-ENV"}
+            , {"type": "CALL_EXPRESSION", "name": "foreign-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
             ]
           }
@@ -203,6 +248,10 @@
                     , "export DESTDIR=\"$(pwd)/install\""
                     , "export TOOLCHAIN=\"$(pwd)/toolchain\""
                     , "export LOCALBASE=\"$(pwd)/localbase\""
+                    , "export CC=$([ -x \"${CC}\" ] && realpath ${CC} || echo ${CC})"
+                    , "export CXX=$([ -x \"${CXX}\" ] && realpath ${CXX} || echo ${CXX})"
+                    , "export AR=$([ -x \"${AR}\" ] && realpath ${AR} || echo ${AR})"
+                    , "export MAKE=$([ -x \"${MAKE}\" ] && realpath ${MAKE} || echo ${MAKE})"
                     , { "type": "join"
                       , "$1":
                         [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
@@ -246,16 +295,21 @@
                     , "var": "target"
                     , "body":
                       { "type": "join"
+                      , "separator": " "
                       , "$1":
-                        [ "${ROOT}/expand_exec TMPDIR DESTDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR PREFIX -- make DESTDIR=${DESTDIR} -C \"source/${SUBDIR}\" \"$@\" "
+                        [ "${ROOT}/expand_exec TMPDIR DESTDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR PREFIX"
+                        , "--"
+                        , "${MAKE} -C \"source/${SUBDIR}\" DESTDIR=${DESTDIR} \"$@\""
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "target"}]
                           }
-                        , " >>build.log 2>&1 || (cat build.log && exit 1)"
+                        , ">>build.log 2>&1 || (cat build.log && exit 1)"
                         ]
                       }
                     }
-                  , ["find ./install -type l -delete"]
+                  , [ "mv install install_with_symlinks"
+                    , "cp -rL install_with_symlinks install"
+                    ]
                   , { "type": "if"
                     , "cond": {"type": "var", "name": "post_cmds"}
                     , "then":
@@ -292,7 +346,7 @@
       , "cmd":
         { "type": "++"
         , "$1":
-          [ ["/bin/sh", "run_make.sh"]
+          [ ["sh", "run_make.sh"]
           , [{"type": "var", "name": "SUBDIR"}]
           , {"type": "var", "name": "make_options"}
           , { "type": "if"

@@ -1,16 +1,10 @@
-{ "cmake-build":
+{ "shell-build":
   { "vars":
-    [ "ARCH"
-    , "HOST_ARCH"
-    , "source_dir"
-    , "cmake_subdir"
-    , "localbase_dir"
-    , "cmake_options"
-    , "cmake_defines"
-    , "cmake_jobs"
-    , "cmake_targets"
-    , "pre_cmds"
-    , "post_cmds"
+    [ "cmds"
+    , "sources"
+    , "localbase"
+    , "outs"
+    , "out_dirs"
     , "CC"
     , "CXX"
     , "CFLAGS"
@@ -21,9 +15,9 @@
     , "ADD_LDFLAGS"
     , "ENV"
     , "AR"
+    , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
-    , "defaults-transition"
-    , "host-defaults-transition"
+    , "TIMEOUT_SCALE"
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
@@ -34,30 +28,22 @@
     , "compiler-cxx": ["CC", "compiler-cxx"]
     , "default-LDFLAGS": ["CC", "default-LDFLAGS"]
     , "default-AR": ["CC", "default-AR"]
-    , "default-ENV": ["CC", "default-ENV"]
     , "default-PATH": ["CC", "default-PATH"]
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
     , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
     , "foreign-MAKE": ["CC/foreign", "default-MAKE"]
     , "foreign-CMAKE": ["CC/foreign", "default-CMAKE"]
-    , "foreign-ENV": ["CC/foreign", "default-ENV"]
     , "foreign-PATH": ["CC/foreign", "default-PATH"]
     , "foreign-TOOLCHAIN": ["CC/foreign", "default-TOOLCHAIN"]
     , "foreign-NON_SYSTEM_TOOLS": ["CC/foreign", "default-NON_SYSTEM_TOOLS"]
+    , "strip-prefix": ["CC/foreign", "strip-prefix"]
     }
   , "expression":
     { "type": "let*"
     , "bindings":
       [ [ "expand_exec"
-        , { "type": "let*"
-          , "bindings":
-            [ [ "defaults-transition"
-              , {"type": "var", "name": "host-defaults-transition"}
-              ]
-            ]
-          , "body": {"type": "CALL_EXPRESSION", "name": "expand_exec_tool"}
-          }
+        , {"type": "CALL_EXPRESSION", "name": "expand_exec_tool"}
         ]
       , ["TOOLCHAIN_DIR", "toolchain"]
       , [ "TOOLCHAIN"
@@ -83,27 +69,6 @@
             ]
           }
         ]
-      , [ "CMAKE_FLAGS"
-        , { "type": "++"
-          , "$1":
-            [ { "type": "foreach"
-              , "var": "define"
-              , "range": {"type": "var", "name": "cmake_defines"}
-              , "body":
-                { "type": "join"
-                , "$1": ["-D", {"type": "var", "name": "define"}]
-                }
-              }
-            , {"type": "var", "name": "cmake_options"}
-            , { "type": "if"
-              , "cond": {"type": "var", "name": "BUILD_POSITION_INDEPENDENT"}
-              , "then": ["-DCMAKE_POSITION_INDEPENDENT_CODE=ON"]
-              }
-            , ["-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/../lib"]
-            ]
-          }
-        ]
-      , ["BUILD_POSITION_INDEPENDENT", null]
       , [ "MAKE"
         , { "type": "join"
           , "$1":
@@ -160,7 +125,8 @@
           , "$1":
             { "type": "++"
             , "$1":
-              [ { "type": "var"
+              [ ["-Wl,-rpath,$ORIGIN", "-Wl,-rpath,$ORIGIN/../lib"]
+              , { "type": "var"
                 , "name": "LDFLAGS"
                 , "default":
                   {"type": "CALL_EXPRESSION", "name": "default-LDFLAGS"}
@@ -193,13 +159,35 @@
             }
           }
         ]
+      , [ "PREFIX"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "make_prefix"}
+          , "then":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              { "type": "++"
+              , "$1": [[""], {"type": "var", "name": "make_prefix"}]
+              }
+            }
+          , "else": {"type": "var", "name": "PREFIX", "default": "/"}
+          }
+        ]
       , [ "PATH"
         , { "type": "join"
           , "separator": ":"
           , "$1":
             { "type": "let*"
             , "bindings":
-              [["list", {"type": "CALL_EXPRESSION", "name": "default-PATH"}]]
+              [ [ "list"
+                , { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "foreign-PATH"}
+                    , {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    ]
+                  }
+                ]
+              ]
             , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
             }
           }
@@ -209,53 +197,65 @@
           , "$1":
             [ { "type": "env"
               , "vars":
-                [ "CC"
+                [ "MAKE"
+                , "CMAKE"
+                , "CC"
                 , "CXX"
-                , "CXXFLAGS"
                 , "CFLAGS"
+                , "CXXFLAGS"
                 , "LDFLAGS"
                 , "AR"
-                , "MAKE"
-                , "CMAKE"
+                , "PREFIX"
                 ]
               }
-            , {"type": "CALL_EXPRESSION", "name": "default-ENV"}
-            , {"type": "CALL_EXPRESSION", "name": "foreign-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
             ]
           }
         ]
-      , [ "CMAKE_JOBS"
-        , { "type": "if"
-          , "cond": {"type": "var", "name": "cmake_jobs"}
-          , "then":
-            [ { "type": "join"
-              , "$1":
-                [ "CMAKE_BUILD_PARALLEL_LEVEL="
-                , { "type": "join_cmd"
-                  , "$1": {"type": "var", "name": "cmake_jobs"}
-                  }
-                ]
-              }
-            ]
+      , ["install_prefix", "install"]
+      , [ "localbase"
+        , { "type": "to_subdir"
+          , "subdir": "localbase"
+          , "$1": {"type": "var", "name": "localbase"}
           }
         ]
-      , [ "CMAKE_SUBDIR"
-        , { "type": "join"
-          , "separator": "/"
-          , "$1": {"type": "var", "name": "cmake_subdir", "default": []}
+      , [ "work_dir"
+        , { "type": "to_subdir"
+          , "subdir": "work"
+          , "$1": {"type": "var", "name": "sources"}
           }
         ]
-      , [ "cmake_targets"
-        , { "type": "if"
-          , "cond": {"type": "var", "name": "cmake_targets"}
-          , "then": {"type": "var", "name": "cmake_targets"}
-          , "else": ["install"]
+      , [ "installed_out_files"
+        , { "type": "foreach"
+          , "var": "file_path"
+          , "range": {"type": "var", "name": "outs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "file_path"}
+              ]
+            }
+          }
+        ]
+      , [ "installed_out_dirs"
+        , { "type": "foreach"
+          , "var": "dir_path"
+          , "range": {"type": "var", "name": "out_dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "dir_path"}
+              ]
+            }
           }
         ]
       , [ "script"
         , { "type": "singleton_map"
-          , "key": "run_cmake.sh"
+          , "key": "run_cmds.sh"
           , "value":
             { "type": "BLOB"
             , "data":
@@ -265,11 +265,13 @@
                 { "type": "++"
                 , "$1":
                   [ [ "set -eu"
-                    , "mkdir scratch"
-                    , "readonly ROOT=\"$(pwd)\""
+                    , "mkdir -p scratch work install"
+                    , "export ACTION_DIR=\"$(pwd)\""
                     , "export TMPDIR=\"$(pwd)/scratch\""
+                    , "export WORKDIR=\"$(pwd)/work\""
                     , "export TOOLCHAIN=\"$(pwd)/toolchain\""
                     , "export LOCALBASE=\"$(pwd)/localbase\""
+                    , "export DESTDIR=\"$(pwd)/install\""
                     , "export CC=$([ -x \"${CC}\" ] && realpath ${CC} || echo ${CC})"
                     , "export CXX=$([ -x \"${CXX}\" ] && realpath ${CXX} || echo ${CXX})"
                     , "export AR=$([ -x \"${AR}\" ] && realpath ${AR} || echo ${AR})"
@@ -285,116 +287,57 @@
                         ]
                       }
                     ]
-                  , { "type": "if"
-                    , "cond": {"type": "var", "name": "pre_cmds"}
-                    , "then":
-                      { "type": "++"
-                      , "$1":
-                        [ ["(", "set --", "cd ./source"]
-                        , {"type": "var", "name": "pre_cmds"}
-                        , [")"]
-                        ]
-                      }
-                    }
-                  , [ "readonly CMAKE_SUBDIR=\"$1\""
-                    , "readonly CMAKE_AR=$(command -v $2)"
-                    , "shift 2"
-                    ]
-                  , [ { "type": "join"
-                      , "separator": " "
-                      , "$1":
-                        [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR"
-                        , "--"
-                        , "${CMAKE} -S\"source/${CMAKE_SUBDIR}\" -Bbuild"
-                        , "-DCMAKE_MAKE_PROGRAM=${MAKE}"
-                        , "-DCMAKE_AR=${CMAKE_AR}"
-                        , "-DCMAKE_INSTALL_PREFIX=./install"
-                        , "-DCMAKE_PREFIX_PATH=\"$(pwd)/localbase\""
-                        , "-DPKG_CONFIG_ARGN=--define-prefix"
-                        , "--no-warn-unused-cli"
-                        , "\"$@\""
-                        , ">configure.log 2>&1 || (cat configure.log && exit 1)"
-                        ]
-                      }
-                    ]
-                  , { "type": "foreach"
-                    , "range": {"type": "var", "name": "cmake_targets"}
-                    , "var": "target"
-                    , "body":
-                      { "type": "join"
-                      , "separator": " "
-                      , "$1":
-                        { "type": "++"
-                        , "$1":
-                          [ {"type": "var", "name": "CMAKE_JOBS"}
-                          , [ "${ROOT}/expand_exec TMPDIR LOCALBASE CC CXX CFLAGS CXXFLAGS LDFLAGS AR"
-                            , "--"
-                            , "${CMAKE} --build build --target"
-                            , { "type": "join_cmd"
-                              , "$1": [{"type": "var", "name": "target"}]
-                              }
-                            , ">>build.log 2>&1 || (cat configure.log build.log && exit 1)"
-                            ]
-                          ]
-                        }
-                      }
-                    }
+                  , ["(", "set --", "cd ./work"]
+                  , {"type": "var", "name": "cmds"}
+                  , [")"]
                   , [ "mv install install_with_symlinks"
                     , "cp -rL install_with_symlinks install"
                     ]
-                  , { "type": "if"
-                    , "cond": {"type": "var", "name": "post_cmds"}
-                    , "then":
-                      { "type": "++"
-                      , "$1":
-                        [ [ "("
-                          , "set --"
-                          , "readonly CMAKE_SOURCE_DIR=\"$(pwd)/source\""
-                          , "readonly CMAKE_BINARY_DIR=\"$(pwd)/build\""
-                          , "cd ./install"
-                          ]
-                        , {"type": "var", "name": "post_cmds"}
-                        , [")"]
-                        ]
-                      }
-                    }
                   ]
                 }
               }
             }
           }
         ]
+      , [ "artifacts"
+        , { "type": "ACTION"
+          , "inputs":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "TOOLCHAIN"}
+              , {"type": "var", "name": "work_dir"}
+              , {"type": "var", "name": "localbase"}
+              , {"type": "var", "name": "script"}
+              , {"type": "var", "name": "expand_exec"}
+              ]
+            }
+          , "cmd": ["sh", "run_cmds.sh"]
+          , "outs": {"type": "var", "name": "installed_out_files"}
+          , "out_dirs": {"type": "var", "name": "installed_out_dirs"}
+          , "env": {"type": "var", "name": "ENV"}
+          , "timeout scaling":
+            {"type": "var", "name": "TIMEOUT_SCALE", "default": 10.0}
+          }
+        ]
       ]
     , "body":
-      { "type": "ACTION"
-      , "inputs":
-        { "type": "map_union"
-        , "$1":
-          [ {"type": "var", "name": "TOOLCHAIN"}
-          , {"type": "var", "name": "source_dir"}
-          , {"type": "var", "name": "expand_exec"}
-          , { "type": "var"
-            , "name": "localbase_dir"
-            , "default": {"type": "empty_map"}
-            }
-          , {"type": "var", "name": "script"}
-          ]
-        }
-      , "cmd":
-        { "type": "++"
-        , "$1":
-          [ [ "sh"
-            , "run_cmake.sh"
-            , {"type": "var", "name": "CMAKE_SUBDIR"}
-            , {"type": "var", "name": "AR"}
+      { "type": "map_union"
+      , "$1":
+        { "type": "let*"
+        , "bindings":
+          [ ["artifacts", {"type": "var", "name": "artifacts"}]
+          , [ "paths"
+            , { "type": "++"
+              , "$1":
+                [ {"type": "var", "name": "outs"}
+                , {"type": "var", "name": "out_dirs"}
+                ]
+              }
             ]
-          , {"type": "var", "name": "CMAKE_FLAGS"}
+          , ["prefix", {"type": "var", "name": "install_prefix"}]
           ]
+        , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
         }
-      , "out_dirs": ["install"]
-      , "env": {"type": "var", "name": "ENV"}
-      , "timeout scaling":
-        {"type": "var", "name": "TIMEOUT_SCALE", "default": 10.0}
       }
     }
   }
