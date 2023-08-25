@@ -71,8 +71,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.2.0-beta3"
-      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "branch": "v1.2.0"
+      , "commit": "a4a59ea849cc439ee67665d0668d8e1f71dfa72e"
       }
     , "bindings":
       { "rules": "just/rules-just"
@@ -298,8 +298,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.2.0-beta3"
-      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "branch": "v1.2.0"
+      , "commit": "a4a59ea849cc439ee67665d0668d8e1f71dfa72e"
       , "subdir": "etc/patches"
       }
     }
@@ -337,8 +337,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.2.0-beta3"
-      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "branch": "v1.2.0"
+      , "commit": "a4a59ea849cc439ee67665d0668d8e1f71dfa72e"
       , "subdir": "rules"
       }
     , "target_root": "just/defaults"
@@ -443,8 +443,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.2.0-beta3"
-      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "branch": "v1.2.0"
+      , "commit": "a4a59ea849cc439ee67665d0668d8e1f71dfa72e"
       , "subdir": "etc/toolchain"
       }
     , "rule_root": "just/rules"
@@ -466,8 +466,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.2.0-beta3"
-      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "branch": "v1.2.0"
+      , "commit": "a4a59ea849cc439ee67665d0668d8e1f71dfa72e"
       , "subdir": "etc/defaults"
       }
     }
@@ -475,8 +475,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.2.0-beta3"
-      , "commit": "8eb74daa0a800ca0552ad691aef76b27288ec8cb"
+      , "branch": "v1.2.0"
+      , "commit": "a4a59ea849cc439ee67665d0668d8e1f71dfa72e"
       , "subdir": "etc/import"
       }
     }
