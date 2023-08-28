@@ -104,7 +104,7 @@ A rule to provide defaults for foreign rules. All foreign rules take their defau
 
 ### Rule `["patch", "defaults"]`
 
-A rule to provide defaults. All targets take their defaults for PATCH from the target `["", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
+A rule to provide defaults. All targets take their defaults for PATCH from the target `["patch", "defaults"]`. This is probably the only sensible use of this rule. As targets form a different root, the defaults can be provided without changing this directory.
 
 | Field | Description |
 | ----- | ----------- |
