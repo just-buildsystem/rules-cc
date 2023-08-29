@@ -17,9 +17,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Dict, List, Set
 
 
-def run_pkgconfig(args: list[str], env: dict[str, str]) -> str:
+def run_pkgconfig(args: List[str], env: Dict[str, str]) -> str:
     result = subprocess.run(["pkg-config"] + args, env=env, capture_output=True)
     if result.returncode != 0:
         print(result.stderr.decode("utf-8"), file=sys.stderr)
@@ -27,7 +28,7 @@ def run_pkgconfig(args: list[str], env: dict[str, str]) -> str:
     return result.stdout.decode("utf-8").strip()
 
 
-def read_ldflags(pkg: str, args: list[str], env: dict[str, str]) -> str:
+def read_ldflags(pkg: str, args: List[str], env: Dict[str, str]) -> str:
     def libname(filename: str) -> str:
         return filename.split(".")[0]
 
@@ -39,7 +40,7 @@ def read_ldflags(pkg: str, args: list[str], env: dict[str, str]) -> str:
     link_flags = run_pkgconfig(args + ["--libs-only-l", pkg], env).split(" ")
 
     # deduplicate, keep right-most
-    seen: set[str] = set()
+    seen: Set[str] = set()
     link_flags = [
         f for f in link_flags[::-1] if f not in seen and not seen.add(f)
     ][::-1]
