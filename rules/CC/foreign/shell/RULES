@@ -29,6 +29,7 @@
   , "implicit":
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
     { "project":
@@ -110,8 +111,15 @@
     }
   , "imports":
     { "artifacts": ["", "field_artifacts"]
+    , "stage_field": ["", "stage_singleton_field"]
     , "shell-build": "shell-build"
     , "install-deps": ["CC", "install-with-deps stage"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "expand_exec": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -143,6 +151,16 @@
         ]
       , ["outs", {"type": "FIELD", "name": "outs"}]
       , ["out_dirs", {"type": "FIELD", "name": "out_dirs"}]
+      , [ "expand_exec"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "expand_exec"]
+            , ["location", "expand_exec"]
+            , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
       ]
     , "body":
       { "type": "RESULT"

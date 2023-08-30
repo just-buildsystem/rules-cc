@@ -38,6 +38,7 @@
   , "implicit":
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
     { "project":
@@ -156,6 +157,7 @@
   , "config_transitions":
     { "defaults":
       [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "expand_exec": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -203,8 +205,15 @@
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
       , ["defaults-transition", {"type": "empty_map"}]
-      , [ "host-defaults-transition"
-        , {"type": "CALL_EXPRESSION", "name": "for host"}
+      , [ "expand_exec"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "expand_exec"]
+            , ["location", "expand_exec"]
+            , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
         ]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}
@@ -303,6 +312,7 @@
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
     , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
+    , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
     { "project":
@@ -462,6 +472,7 @@
   , "config_transitions":
     { "defaults":
       [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "expand_exec": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -597,8 +608,15 @@
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
       , ["defaults-transition", {"type": "empty_map"}]
-      , [ "host-defaults-transition"
-        , {"type": "CALL_EXPRESSION", "name": "for host"}
+      , [ "expand_exec"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "expand_exec"]
+            , ["location", "expand_exec"]
+            , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
         ]
       , [ "full_install_dir"
         , {"type": "CALL_EXPRESSION", "name": "cmake-build"}

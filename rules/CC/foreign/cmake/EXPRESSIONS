@@ -23,7 +23,7 @@
     , "AR"
     , "BUILD_POSITION_INDEPENDENT"
     , "defaults-transition"
-    , "host-defaults-transition"
+    , "expand_exec"
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
@@ -38,7 +38,6 @@
     , "default-PATH": ["CC", "default-PATH"]
     , "default-TOOLCHAIN": ["CC", "default-TOOLCHAIN"]
     , "default-NON_SYSTEM_TOOLS": ["CC", "default-NON_SYSTEM_TOOLS"]
-    , "expand_exec_tool": ["./", "..", "expand_exec_tool"]
     , "foreign-MAKE": ["CC/foreign", "default-MAKE"]
     , "foreign-CMAKE": ["CC/foreign", "default-CMAKE"]
     , "foreign-ENV": ["CC/foreign", "default-ENV"]
@@ -49,17 +48,7 @@
   , "expression":
     { "type": "let*"
     , "bindings":
-      [ [ "expand_exec"
-        , { "type": "let*"
-          , "bindings":
-            [ [ "defaults-transition"
-              , {"type": "var", "name": "host-defaults-transition"}
-              ]
-            ]
-          , "body": {"type": "CALL_EXPRESSION", "name": "expand_exec_tool"}
-          }
-        ]
-      , ["TOOLCHAIN_DIR", "toolchain"]
+      [ ["TOOLCHAIN_DIR", "toolchain"]
       , [ "TOOLCHAIN"
         , { "type": "disjoint_map_union"
           , "msg": "Toolchain trees may not overlap"
