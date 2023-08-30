@@ -1,0 +1,133 @@
+#!/bin/sh
+# Copyright 2023 Huawei Cloud Computing Technology Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -e
+
+check_var_name() {
+  local NAME="$1"
+  if ! expr match "${NAME}" "[A-Z_a-z][0-9A-Z_a-z]*$" >/dev/null; then
+    echo "expand_exec error: invalid variable name '${NAME}'"
+    return 1
+  fi
+  return 0
+}
+
+in_list() {
+  local NAME="$1"
+  local VAR_LIST="$2"
+  check_var_name "${NAME}" && expr match "${NAME}" "\(${VAR_LIST}\)$" >/dev/null
+}
+
+EXPANDED_VAR=
+expand_var() {
+  local NAME="$1"
+  check_var_name "${NAME}" && EXPANDED_VAR="$(eval "printf \"%s\" \"\${$NAME}\"")"
+}
+
+PARSED_ARG=
+parse_arg() {
+  local ARG="$1"
+  local VAR_LIST="$2"
+  local RESULT=""
+  local VAR_NAME=""
+  local PARSE_EXPR=false
+  local PARSE_VAR_NAME=false
+
+  while [ ${#ARG} -gt 0 ]; do
+    local NEXT=${ARG#?}
+    c="${ARG%$NEXT}"
+    ARG=$NEXT
+
+    if $PARSE_VAR_NAME; then
+      # parse <var> from $(<var>)
+      if [ "$c" = ")" ]; then
+        # expand var if in cases list
+        if in_list "${VAR_NAME}" "${VAR_LIST}" && expand_var "${VAR_NAME}"; then
+          RESULT="${RESULT}${EXPANDED_VAR}"
+        else
+          RESULT="${RESULT}\$(${VAR_NAME})"
+        fi
+        VAR_NAME=""
+        PARSE_VAR_NAME=false
+      else
+        # accumulate VAR_NAME
+        VAR_NAME="${VAR_NAME}$c"
+        if [ ${#ARG} -eq 0 ]; then
+          # flush unterminated var name
+          RESULT="${RESULT}\$(${VAR_NAME}"
+        fi
+      fi
+    else
+      # parse single char
+      if $PARSE_EXPR; then
+        if [ "$c" = "(" ]; then
+          # found "$("
+          PARSE_VAR_NAME=true
+        else
+          RESULT="${RESULT}\$$c"
+        fi
+        PARSE_EXPR=false
+      elif [ "$c" = "$" ]; then
+        # found "$"
+        PARSE_EXPR=true
+      else
+        # append char
+        RESULT="${RESULT}$c"
+      fi
+    fi
+  done
+
+  PARSED_ARG="'"
+  while [ ${#RESULT} -gt 0 ]; do
+    local NEXT=${RESULT#?}
+    c="${RESULT%$NEXT}"
+    RESULT=$NEXT
+    if [ "$c" = "'" ]; then
+      PARSED_ARG="${PARSED_ARG}'\\''"
+    else
+      PARSED_ARG="${PARSED_ARG}$c"
+    fi
+  done
+  PARSED_ARG="${PARSED_ARG}'"
+}
+
+# usage: ./expand_exec [VARS...] -- ARGS...
+expand_exec() {
+  local VAR_LIST=""
+  local VAR_SEP=""
+  local EXEC_VEC=""
+  local EXEC_SEP=""
+  local READ_ARGS=false
+
+  while [ "$#" -ge 1 ]; do
+    local ARG="$1";shift
+    if $READ_ARGS; then
+      parse_arg "${ARG}" "${VAR_LIST}"
+      EXEC_VEC="${EXEC_VEC}${EXEC_SEP}${PARSED_ARG}"
+      EXEC_SEP=" "
+    else
+      if [ "${ARG}" = "--" ]; then
+        READ_ARGS=true
+      elif check_var_name "${ARG}"; then
+        VAR_LIST="${VAR_LIST}${VAR_SEP}${ARG}"
+        VAR_SEP="\|"
+      fi
+    fi
+  done
+
+  exec /bin/sh -c "${EXEC_VEC}"
+}
+
+expand_exec "$@"
