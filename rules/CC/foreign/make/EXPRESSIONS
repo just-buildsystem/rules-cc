@@ -165,7 +165,15 @@
           , "$1":
             { "type": "let*"
             , "bindings":
-              [["list", {"type": "CALL_EXPRESSION", "name": "default-PATH"}]]
+              [ [ "list"
+                , { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "foreign-PATH"}
+                    , {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    ]
+                  }
+                ]
+              ]
             , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
             }
           }
