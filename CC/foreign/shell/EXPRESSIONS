@@ -19,6 +19,7 @@
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
     , "expand_exec"
+    , "resolve_symlinks"
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
@@ -287,9 +288,13 @@
                   , ["(", "set --", "cd ./work"]
                   , {"type": "var", "name": "cmds"}
                   , [")"]
-                  , [ "mv install install_with_symlinks"
-                    , "cp -rL install_with_symlinks install"
-                    ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "resolve_symlinks"}
+                    , "then":
+                      [ "mv install install_with_symlinks"
+                      , "cp -rL install_with_symlinks install >copy.log 2>&1 || (echo 'ERROR: symlink resolve failed with:' && cat copy.log && exit 1)"
+                      ]
+                    }
                   ]
                 }
               }

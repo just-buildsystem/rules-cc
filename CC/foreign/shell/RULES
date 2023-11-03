@@ -10,7 +10,7 @@
     , "current action directory, if needed for achieving reproducibility."
     ]
   , "target_fields": ["project", "localbase", "deps"]
-  , "string_fields": ["cmds", "outs", "out_dirs"]
+  , "string_fields": ["cmds", "outs", "out_dirs", "resolve_symlinks"]
   , "config_vars":
     [ "CC"
     , "CXX"
@@ -41,6 +41,10 @@
     , "cmds":
       [ "List of commands to execute by \"sh\". Multiple commands will be"
       , "joined with the newline character."
+      ]
+    , "resolve_symlinks":
+      [ "Resolve all symlinks in the install directory. This operation is"
+      , "performed immediately after \"cmds\" were executed."
       ]
     , "outs": ["Paths to the produced output files in \"DESTDIR\"."]
     , "out_dirs": ["Paths to the produced output directories in \"DESTDIR\"."]
@@ -161,6 +165,7 @@
           , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
           }
         ]
+      , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
       ]
     , "body":
       { "type": "RESULT"
