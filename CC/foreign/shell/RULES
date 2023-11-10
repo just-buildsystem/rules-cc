@@ -118,6 +118,7 @@
     , "stage_field": ["", "stage_singleton_field"]
     , "shell-build": "shell-build"
     , "install-deps": ["CC", "install-with-deps stage"]
+    , "strip-prefix": ["CC/foreign", "strip-prefix"]
     , "for host": ["transitions", "for host"]
     }
   , "config_transitions":
@@ -155,6 +156,35 @@
         ]
       , ["outs", {"type": "FIELD", "name": "outs"}]
       , ["out_dirs", {"type": "FIELD", "name": "out_dirs"}]
+      , ["install_prefix", "install"]
+      , [ "installed_files"
+        , { "type": "foreach"
+          , "var": "file_path"
+          , "range": {"type": "var", "name": "outs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "file_path"}
+              ]
+            }
+          }
+        ]
+      , [ "installed_dirs"
+        , { "type": "foreach"
+          , "var": "dir_path"
+          , "range": {"type": "var", "name": "out_dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "install_prefix"}
+              , {"type": "var", "name": "dir_path"}
+              ]
+            }
+          }
+        ]
       , [ "expand_exec"
         , { "type": "let*"
           , "bindings":
@@ -166,11 +196,441 @@
           }
         ]
       , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
+      , ["artifacts", {"type": "CALL_EXPRESSION", "name": "shell-build"}]
       ]
     , "body":
       { "type": "RESULT"
-      , "artifacts": {"type": "CALL_EXPRESSION", "name": "shell-build"}
+      , "artifacts":
+        { "type": "map_union"
+        , "$1":
+          { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "artifacts"}]
+            , [ "paths"
+              , { "type": "++"
+                , "$1":
+                  [ {"type": "var", "name": "outs"}
+                  , {"type": "var", "name": "out_dirs"}
+                  ]
+                }
+              ]
+            , ["prefix", {"type": "var", "name": "install_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        }
       }
+    }
+  }
+, "library":
+  { "doc":
+    [ "Library produced by generic shell commands with toolchain support."
+    , ""
+    , "All variables accessible to commands and options are: \"TMPDIR\","
+    , "\"LOCALBASE\", \"WORKDIR\", \"DESTDIR\", \"CC\", \"CXX\", \"CFLAGS\","
+    , "\"CXXFLAGS\", \"LDFLAGS\", and \"AR\". \"LOCALBASE\" contains the path"
+    , "to the staged artifacts from \"localbase\" and the installed artifacts"
+    , "from \"deps\". Furthermore, the variable \"ACTION_DIR\" points to the"
+    , "current action directory, if needed for achieving reproducibility."
+    ]
+  , "target_fields": ["project", "localbase", "deps"]
+  , "string_fields":
+    [ "name"
+    , "version"
+    , "stage"
+    , "cmds"
+    , "out_hdrs"
+    , "out_hdr_dirs"
+    , "out_libs"
+    , "cflags"
+    , "ldflags"
+    , "pkg-config"
+    , "hdr_prefix"
+    , "lib_prefix"
+    , "pc_prefix"
+    , "resolve_symlinks"
+    ]
+  , "config_vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "AR"
+    , "PREFIX"
+    , "BUILD_POSITION_INDEPENDENT"
+    , "TIMEOUT_SCALE"
+    ]
+  , "implicit":
+    { "defaults": [["CC", "defaults"]]
+    , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
+    , "expand_exec": [["./", "..", "expand_exec"]]
+    }
+  , "field_doc":
+    { "project":
+      [ "The project directory. It should contain a single tree artifact."
+      , "It's path can be accessed via the \"WORKDIR\" variable."
+      ]
+    , "name":
+      [ "The name of the library (without leading \"lib\" or trailing file name"
+      , "extension), also used as name for pkg-config files."
+      ]
+    , "version":
+      [ "The library version, used for pkg-config files. Individual version"
+      , "components are joined with \".\"."
+      ]
+    , "localbase": ["Artifacts to stage to \"LOCALBASE\"."]
+    , "cmds":
+      [ "List of commands to execute by \"sh\". Multiple commands will be"
+      , "joined with the newline character."
+      ]
+    , "resolve_symlinks":
+      [ "Resolve all symlinks in the install directory. This operation is"
+      , "performed immediately after \"cmds\" were executed."
+      ]
+    , "out_hdrs":
+      [ "Paths to produced public header files. The path is considered"
+      , "relative to the include directory, which be set via \"hdr_prefix\"."
+      , "Note that \"out_hdrs\" and \"out_hdr_dirs\" may not overlap."
+      ]
+    , "out_hdr_dirs":
+      [ "Paths to produced public header directories. The path is considered"
+      , "relative to the include directory, which be set via \"hdr_prefix\"."
+      , "Note that \"out_hdrs\" and \"out_hdr_dirs\" may not overlap."
+      ]
+    , "out_libs":
+      [ "Paths to produced library files. The path is considered relative"
+      , "to the library directory, which be set via \"lib_prefix\"."
+      , "Order matters in the case of one library depending on another."
+      ]
+    , "cflags":
+      ["List of compile flags set for this target and its consumers."]
+    , "ldflags":
+      [ "Additional linker flags that are required for the consumer of the"
+      , "produced libraries."
+      ]
+    , "stage":
+      [ "The logical location of the public headers and library files."
+      , "Individual directory components are joined with \"/\"."
+      ]
+    , "deps": ["Public dependency on other CC libraries."]
+    , "pkg-config":
+      [ "Pkg-config file for optional infer of public cflags and ldflags. If"
+      , "multiple files are specified (e.g., one depends on the other), the"
+      , "first one is used as entry. Note that if this field is non-empty the"
+      , "tool \"pkg-config\" must be available in \"PATH\", which is taken"
+      , "from [\"CC\", \"defaults\"] or the \"ENV\" variable."
+      ]
+    , "hdr_prefix":
+      [ "Prefix where headers will be installed by Make. Individual directory"
+      , "components are joined with \"/\". Defaults to \"include\" if not set."
+      ]
+    , "lib_prefix":
+      [ "Prefix where libraries will be installed by Make. Individual"
+      , "directory components are joined with \"/\". Defaults to \"lib\" if"
+      , "not set."
+      ]
+    , "pc_prefix":
+      [ "Prefix where pkg-config files will be installed by Make. Individual"
+      , "directory components are joined with \"/\". Defaults to"
+      , "\"lib/pkgconfig\" if not set."
+      ]
+    }
+  , "config_doc":
+    { "CC":
+      [ "The name of the C compiler to be used."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "CXX":
+      [ "The name of the C++ compiler to be used."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "CFLAGS":
+      [ "The flags for CC to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice"
+      ]
+    , "CXXFLAGS":
+      [ "The flags for CXX to be used instead of the default ones."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "LDFLAGS":
+      [ "The linker flags to be used instead of the default ones."
+      , "For libraries that should be linked in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice"
+      ]
+    , "ADD_CFLAGS":
+      [ "The flags to add to the default ones for CC."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ADD_CXXFLAGS":
+      [ "The flags to add to the default ones for CXX."
+      , "For libraries that should be built in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ADD_LDFLAGS":
+      [ "The linker flags to add to the default ones."
+      , "For libraries that should be linked in a non-standard way; usually"
+      , "adapting the default target [\"CC\", \"defaults\"] is the better"
+      , "choice."
+      ]
+    , "ENV":
+      [ "The environment for any action generated."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "AR":
+      [ "The archive tool to used for creating the library."
+      , "If null, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
+    , "PREFIX":
+      [ "The absolute path that is used as prefix inside generated pkg-config"
+      , "files. The default value for this variable is \"/\". This variable"
+      , "is ignored if the field \"prefix\" is set."
+      ]
+    , "BUILD_POSITION_INDEPENDENT": ["Build position independent code."]
+    , "TIMEOUT_SCALE":
+      [ "The scaling of the timeout for the invocation of the foreign build."
+      , "Defaults to 10."
+      ]
+    }
+  , "imports":
+    { "artifacts": ["", "field_artifacts"]
+    , "stage_field": ["", "stage_singleton_field"]
+    , "shell-build": "shell-build"
+    , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
+    , "install-deps": ["CC", "install-with-deps stage"]
+    , "strip-prefix": ["CC/foreign", "strip-prefix"]
+    , "for host": ["transitions", "for host"]
+    }
+  , "config_transitions":
+    { "defaults":
+      [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "expand_exec": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "hdr_prefix"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["install"]
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "hdr_prefix"}
+                , "then": {"type": "FIELD", "name": "hdr_prefix"}
+                , "else": ["include"]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "lib_prefix"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["install"]
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "lib_prefix"}
+                , "then": {"type": "FIELD", "name": "lib_prefix"}
+                , "else": ["lib"]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "pc_prefix"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ ["install"]
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "pc_prefix"}
+                , "then": {"type": "FIELD", "name": "pc_prefix"}
+                , "else": ["lib", "pkgconfig"]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "sources"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "project"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "artifacts"}
+          }
+        ]
+      , [ "localbase"
+        , { "type": "disjoint_map_union"
+          , "msg": "localbase and installed dependency files may not overlap"
+          , "$1":
+            [ { "type": "let*"
+              , "bindings":
+                [ ["pc-install-dir", "lib/pkgconfig"]
+                , ["targets", {"type": "FIELD", "name": "deps"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "install-deps"}
+              }
+            , { "type": "let*"
+              , "bindings": [["fieldname", "localbase"]]
+              , "body": {"type": "CALL_EXPRESSION", "name": "artifacts"}
+              }
+            ]
+          }
+        ]
+      , [ "installed_dirs"
+        , { "type": "foreach"
+          , "var": "dir_path"
+          , "range": {"type": "FIELD", "name": "out_hdr_dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "hdr_prefix"}
+              , {"type": "var", "name": "dir_path"}
+              ]
+            }
+          }
+        ]
+      , [ "installed_files"
+        , { "type": "++"
+          , "$1":
+            [ { "type": "foreach"
+              , "var": "lib_path"
+              , "range": {"type": "FIELD", "name": "out_libs"}
+              , "body":
+                { "type": "join"
+                , "separator": "/"
+                , "$1":
+                  [ {"type": "var", "name": "lib_prefix"}
+                  , {"type": "var", "name": "lib_path"}
+                  ]
+                }
+              }
+            , { "type": "foreach"
+              , "var": "hdr_path"
+              , "range": {"type": "FIELD", "name": "out_hdrs"}
+              , "body":
+                { "type": "join"
+                , "separator": "/"
+                , "$1":
+                  [ {"type": "var", "name": "hdr_prefix"}
+                  , {"type": "var", "name": "hdr_path"}
+                  ]
+                }
+              }
+            , { "type": "foreach"
+              , "var": "pc_path"
+              , "range": {"type": "FIELD", "name": "pkg-config"}
+              , "body":
+                { "type": "join"
+                , "separator": "/"
+                , "$1":
+                  [ {"type": "var", "name": "pc_prefix"}
+                  , {"type": "var", "name": "pc_path"}
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      , ["cmds", {"type": "FIELD", "name": "cmds"}]
+      , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
+      , ["defaults-transition", {"type": "empty_map"}]
+      , [ "expand_exec"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "expand_exec"]
+            , ["location", "expand_exec"]
+            , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , ["install_dir", {"type": "CALL_EXPRESSION", "name": "shell-build"}]
+      , [ "hdrs"
+        , { "type": "++"
+          , "$1":
+            [ { "type": "let*"
+              , "bindings":
+                [ ["artifacts", {"type": "var", "name": "install_dir"}]
+                , ["paths", {"type": "FIELD", "name": "out_hdrs"}]
+                , ["prefix", {"type": "var", "name": "hdr_prefix"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+              }
+            , { "type": "let*"
+              , "bindings":
+                [ ["artifacts", {"type": "var", "name": "install_dir"}]
+                , ["paths", {"type": "FIELD", "name": "out_hdr_dirs"}]
+                , ["prefix", {"type": "var", "name": "hdr_prefix"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+              }
+            ]
+          }
+        ]
+      , [ "libs"
+        , { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "install_dir"}]
+            , ["paths", {"type": "FIELD", "name": "out_libs"}]
+            , ["prefix", {"type": "var", "name": "lib_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        ]
+      , [ "config_reader"
+        , { "type": "let*"
+          , "bindings":
+            [["fieldname", "config_reader"], ["location", "config_reader"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
+          }
+        ]
+      , [ "pkg-configs"
+        , { "type": "let*"
+          , "bindings":
+            [ ["artifacts", {"type": "var", "name": "install_dir"}]
+            , ["paths", {"type": "FIELD", "name": "pkg-config"}]
+            , ["prefix", {"type": "var", "name": "pc_prefix"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
+          }
+        ]
+      , [ "name"
+        , { "type": "assert_non_empty"
+          , "msg": "name is required for make library"
+          , "$1": {"type": "join", "$1": {"type": "FIELD", "name": "name"}}
+          }
+        ]
+      , ["version", {"type": "FIELD", "name": "version"}]
+      , ["cflags", {"type": "FIELD", "name": "cflags"}]
+      , ["ldflags", {"type": "FIELD", "name": "ldflags"}]
+      , [ "stage"
+        , { "type": "join"
+          , "separator": "/"
+          , "$1": {"type": "FIELD", "name": "stage"}
+          }
+        ]
+      , ["deps-fieldnames", ["deps", "defaults"]]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "prebuilt result"}
     }
   }
 }
