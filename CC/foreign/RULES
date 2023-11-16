@@ -28,6 +28,7 @@
   , "config_vars": ["ARCH", "HOST_ARCH"]
   , "imports":
     { "base-provides": ["./", "..", "defaults-base-provides"]
+    , "base-provides-++": ["./", "..", "defaults-base-provides-++"]
     , "base-provides-list": ["./", "..", "defaults-base-provides-list"]
     , "artifacts_list": ["./", "../..", "field_artifacts_list"]
     , "nub_left": ["", "nub_left"]
@@ -62,9 +63,7 @@
         , { "type": "++"
           , "$1":
             [ {"type": "var", "name": "PATH"}
-            , { "type": "++"
-              , "$1": {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
-              }
+            , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
             ]
           }
         ]
