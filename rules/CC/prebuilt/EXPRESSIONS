@@ -208,18 +208,7 @@
             }
           }
         ]
-      , [ "run-libs"
-        , { "type": "map_union"
-          , "$1":
-            [ { "type": "if"
-              , "cond": {"type": "var", "name": "shared"}
-              , "then": {"type": "var", "name": "libs"}
-              , "else": {"type": "empty_map"}
-              }
-            , {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}
-            ]
-          }
-        ]
+      , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
       , [ "run-libs-args"
         , { "type": "nub_right"
           , "$1":
@@ -300,6 +289,8 @@
             { "type": "map_union"
             , "$1":
               [ {"type": "var", "name": "libs"}
+              , {"type": "var", "name": "link-deps"}
+              , {"type": "var", "name": "run-libs"}
               , { "type": "to_subdir"
                 , "subdir": "pkgconfig"
                 , "flat": true
@@ -425,6 +416,18 @@
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
             , {"type": "var", "name": "ldflags-file"}
+            ]
+          }
+        ]
+      , [ "run-libs"
+        , { "type": "map_union"
+          , "$1":
+            [ { "type": "if"
+              , "cond": {"type": "var", "name": "shared"}
+              , "then": {"type": "var", "name": "libs"}
+              , "else": {"type": "empty_map"}
+              }
+            , {"type": "var", "name": "run-libs"}
             ]
           }
         ]

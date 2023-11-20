@@ -20,6 +20,7 @@
     , "post_cmds"
     , "out_files"
     , "out_dirs"
+    , "resolve_symlinks"
     ]
   , "config_vars":
     [ "ARCH"
@@ -88,6 +89,10 @@
       , "renaming files or directories. Note that data between \"pre_cmds\" and"
       , "\"post_cmds\" can be exchanged via \"$TMPDIR\", which is uniquely"
       , "reserved for this action."
+      ]
+    , "resolve_symlinks":
+      [ "Resolve all symlinks in the install directory. This operation is"
+      , "performed immediately after the install, before \"post_cmds\" are run."
       ]
     , "out_files":
       [ "Paths to the produced output files. The paths are considered relative"
@@ -222,6 +227,7 @@
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
       , ["defaults-transition", {"type": "empty_map"}]
       , [ "expand_exec"
         , { "type": "let*"
@@ -310,6 +316,7 @@
     , "hdr_prefix"
     , "lib_prefix"
     , "pc_prefix"
+    , "resolve_symlinks"
     ]
   , "config_vars":
     [ "ARCH"
@@ -382,6 +389,10 @@
       , "renaming files or directories (e.g., in case of SONAME mismatch). Note"
       , "that data between \"pre_cmds\" and \"post_cmds\" can be exchanged via"
       , "\"$TMPDIR\", which is uniquely reserved for this action."
+      ]
+    , "resolve_symlinks":
+      [ "Resolve all symlinks in the install directory. This operation is"
+      , "performed immediately after the install, before \"post_cmds\" are run."
       ]
     , "out_hdrs":
       [ "Paths to produced public header files. The path is considered"
@@ -640,6 +651,7 @@
       , ["make_jobs", {"type": "FIELD", "name": "jobs"}]
       , ["pre_cmds", {"type": "FIELD", "name": "pre_cmds"}]
       , ["post_cmds", {"type": "FIELD", "name": "post_cmds"}]
+      , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
       , ["defaults-transition", {"type": "empty_map"}]
       , [ "expand_exec"
         , { "type": "let*"

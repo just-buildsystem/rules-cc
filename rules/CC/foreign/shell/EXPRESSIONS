@@ -3,8 +3,8 @@
     [ "cmds"
     , "sources"
     , "localbase"
-    , "outs"
-    , "out_dirs"
+    , "installed_files"
+    , "installed_dirs"
     , "CC"
     , "CXX"
     , "CFLAGS"
@@ -19,6 +19,7 @@
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
     , "expand_exec"
+    , "resolve_symlinks"
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
@@ -37,7 +38,6 @@
     , "foreign-PATH": ["CC/foreign", "default-PATH"]
     , "foreign-TOOLCHAIN": ["CC/foreign", "default-TOOLCHAIN"]
     , "foreign-NON_SYSTEM_TOOLS": ["CC/foreign", "default-NON_SYSTEM_TOOLS"]
-    , "strip-prefix": ["CC/foreign", "strip-prefix"]
     }
   , "expression":
     { "type": "let*"
@@ -209,7 +209,6 @@
             ]
           }
         ]
-      , ["install_prefix", "install"]
       , [ "localbase"
         , { "type": "to_subdir"
           , "subdir": "localbase"
@@ -220,34 +219,6 @@
         , { "type": "to_subdir"
           , "subdir": "work"
           , "$1": {"type": "var", "name": "sources"}
-          }
-        ]
-      , [ "installed_out_files"
-        , { "type": "foreach"
-          , "var": "file_path"
-          , "range": {"type": "var", "name": "outs"}
-          , "body":
-            { "type": "join"
-            , "separator": "/"
-            , "$1":
-              [ {"type": "var", "name": "install_prefix"}
-              , {"type": "var", "name": "file_path"}
-              ]
-            }
-          }
-        ]
-      , [ "installed_out_dirs"
-        , { "type": "foreach"
-          , "var": "dir_path"
-          , "range": {"type": "var", "name": "out_dirs"}
-          , "body":
-            { "type": "join"
-            , "separator": "/"
-            , "$1":
-              [ {"type": "var", "name": "install_prefix"}
-              , {"type": "var", "name": "dir_path"}
-              ]
-            }
           }
         ]
       , [ "script"
@@ -269,11 +240,11 @@
                     , "export TOOLCHAIN=\"$(pwd)/toolchain\""
                     , "export LOCALBASE=\"$(pwd)/localbase\""
                     , "export DESTDIR=\"$(pwd)/install\""
-                    , "export CC=$([ -x \"${CC}\" ] && realpath ${CC} || echo ${CC})"
-                    , "export CXX=$([ -x \"${CXX}\" ] && realpath ${CXX} || echo ${CXX})"
-                    , "export AR=$([ -x \"${AR}\" ] && realpath ${AR} || echo ${AR})"
-                    , "export MAKE=$([ -x \"${MAKE}\" ] && realpath ${MAKE} || echo ${MAKE})"
-                    , "export CMAKE=$([ -x \"${CMAKE}\" ] && realpath ${CMAKE} || echo ${CMAKE})"
+                    , "export CC=$([ -x \"${CC}\" ] && echo $(pwd)/${CC} || echo ${CC})"
+                    , "export CXX=$([ -x \"${CXX}\" ] && echo $(pwd)/${CXX} || echo ${CXX})"
+                    , "export AR=$([ -x \"${AR}\" ] && echo $(pwd)/${AR} || echo ${AR})"
+                    , "export MAKE=$([ -x \"${MAKE}\" ] && echo $(pwd)/${MAKE} || echo ${MAKE})"
+                    , "export CMAKE=$([ -x \"${CMAKE}\" ] && echo $(pwd)/${CMAKE} || echo ${CMAKE})"
                     , { "type": "join"
                       , "$1":
                         [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
@@ -287,9 +258,13 @@
                   , ["(", "set --", "cd ./work"]
                   , {"type": "var", "name": "cmds"}
                   , [")"]
-                  , [ "mv install install_with_symlinks"
-                    , "cp -rL install_with_symlinks install"
-                    ]
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "resolve_symlinks"}
+                    , "then":
+                      [ "mv install install_with_symlinks"
+                      , "cp -rL install_with_symlinks install >copy.log 2>&1 || (echo 'ERROR: symlink resolve failed with:' && cat copy.log && exit 1)"
+                      ]
+                    }
                   ]
                 }
               }
@@ -309,33 +284,15 @@
               ]
             }
           , "cmd": ["sh", "run_cmds.sh"]
-          , "outs": {"type": "var", "name": "installed_out_files"}
-          , "out_dirs": {"type": "var", "name": "installed_out_dirs"}
+          , "outs": {"type": "var", "name": "installed_files"}
+          , "out_dirs": {"type": "var", "name": "installed_dirs"}
           , "env": {"type": "var", "name": "ENV"}
           , "timeout scaling":
             {"type": "var", "name": "TIMEOUT_SCALE", "default": 10.0}
           }
         ]
       ]
-    , "body":
-      { "type": "map_union"
-      , "$1":
-        { "type": "let*"
-        , "bindings":
-          [ ["artifacts", {"type": "var", "name": "artifacts"}]
-          , [ "paths"
-            , { "type": "++"
-              , "$1":
-                [ {"type": "var", "name": "outs"}
-                , {"type": "var", "name": "out_dirs"}
-                ]
-              }
-            ]
-          , ["prefix", {"type": "var", "name": "install_prefix"}]
-          ]
-        , "body": {"type": "CALL_EXPRESSION", "name": "strip-prefix"}
-        }
-      }
+    , "body": {"type": "var", "name": "artifacts"}
     }
   }
 }
