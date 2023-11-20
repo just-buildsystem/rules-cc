@@ -55,10 +55,6 @@
   , "version": ["1", "2", "13"]
   , "project": [["@", "libz", "", "tree"]]
   , "defines": ["BUILD_SHARED_LIBS=ON"]
-  , "post_cmds":
-    [ "cp lib/libz.so.1.2.13 lib/libz.so"
-    , "cp lib/libz.so.1.2.13 lib/libz.so.1"
-    ]
   , "out_hdrs": ["zconf.h", "zlib.h"]
   , "out_libs": ["libz.so", "libz.so.1", "libz.so.1.2.13"]
   , "pc_prefix": ["share/pkgconfig"]
