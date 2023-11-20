@@ -69,6 +69,7 @@ rm -f "$OUTFILE"
   doc2md rules CC/foreign/cmake data
   doc2md rules CC/foreign/make library
   doc2md rules CC/foreign/make data
+  doc2md rules CC/foreign/shell library
   doc2md rules CC/foreign/shell data
   doc2md rules proto library
   doc2md rules data staged

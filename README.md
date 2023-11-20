@@ -272,6 +272,7 @@ Library produced by CMake configure, build, and install.
 | `"hdr_prefix"` | Prefix where headers will be installed by CMake. Individual directory components are joined with `"/"`. Defaults to `"include"` if not set. |
 | `"lib_prefix"` | Prefix where libraries will be installed by CMake. Individual directory components are joined with `"/"`. Defaults to `"lib"` if not set. |
 | `"pc_prefix"` | Prefix where pkg-config files will be installed by CMake. Individual directory components are joined with `"/"`. Defaults to `"lib/pkgconfig"` if not set. |
+| `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after the install, before `"post_cmds"` are run. |
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
 | `"deps"` | Public dependency on other CC libraries. |
 
@@ -296,6 +297,7 @@ Data produced by CMake configure, build, and install.
 | `"post_cmds"` | List of commands executed in the install directory after successful installation but before the output files are collected. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via `"$TMPDIR"`, which is uniquely reserved for this action. The CMake source and build directory can be accessed via `"$CMAKE_SOURCE_DIR"` and `"$CMAKE_BINARY_DIR"`, respectively. |
 | `"out_files"` | Paths to the produced output files. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
+| `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after the install, before `"post_cmds"` are run. |
 | `"project"` | The CMake project directory. It should contain a single tree artifact |
 
 | Config variable | Description |
@@ -331,6 +333,7 @@ Library produced by Configure and Make build and install.
 | `"hdr_prefix"` | Prefix where headers will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"include"` if not set. |
 | `"lib_prefix"` | Prefix where libraries will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib"` if not set. |
 | `"pc_prefix"` | Prefix where pkg-config files will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib/pkgconfig"` if not set. |
+| `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after the install, before `"post_cmds"` are run. |
 | `"project"` | The Make project directory. It should contain a single tree artifact |
 | `"deps"` | Public dependency on other CC libraries. |
 
@@ -358,7 +361,39 @@ Data produced by Configure and Make build and install.
 | `"post_cmds"` | List of commands executed in the install directory after successful installation but before the output files are collected. Useful for renaming files or directories. Note that data between `"pre_cmds"` and `"post_cmds"` can be exchanged via `"$TMPDIR"`, which is uniquely reserved for this action. |
 | `"out_files"` | Paths to the produced output files. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
 | `"out_dirs"` | Paths to the produced output directories. The paths are considered relative to the install directory. Note that `"out_files"` and `"out_dirs"` may not overlap. |
+| `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after the install, before `"post_cmds"` are run. |
 | `"project"` | The Make project directory. It should contain a single tree artifact |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
+| `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+
+### Rule `["CC/foreign/shell", "library"]`
+
+Library produced by generic shell commands with toolchain support. 
+
+ All variables accessible to commands and options are: `"TMPDIR"`, `"LOCALBASE"`, `"WORKDIR"`, `"DESTDIR"`, `"CC"`, `"CXX"`, `"CFLAGS"`, `"CXXFLAGS"`, `"LDFLAGS"`, and `"AR"`. `"LOCALBASE"` contains the path to the staged artifacts from `"localbase"` and the installed artifacts from `"deps"`. Furthermore, the variable `"ACTION_DIR"` points to the current action directory, if needed for achieving reproducibility.
+
+| Field | Description |
+| ----- | ----------- |
+| `"name"` | The name of the library (without leading `"lib"` or trailing file name extension), also used as name for pkg-config files. |
+| `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
+| `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
+| `"cmds"` | List of commands to execute by `"sh"`. Multiple commands will be joined with the newline character. |
+| `"out_hdrs"` | Paths to produced public header files. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
+| `"out_hdr_dirs"` | Paths to produced public header directories. The path is considered relative to the include directory, which be set via `"hdr_prefix"`. Note that `"out_hdrs"` and `"out_hdr_dirs"` may not overlap. |
+| `"out_libs"` | Paths to produced library files. The path is considered relative to the library directory, which be set via `"lib_prefix"`. Order matters in the case of one library depending on another. |
+| `"cflags"` | List of compile flags set for this target and its consumers. |
+| `"ldflags"` | Additional linker flags that are required for the consumer of the produced libraries. |
+| `"pkg-config"` | Pkg-config file for optional infer of public cflags and ldflags. If multiple files are specified (e.g., one depends on the other), the first one is used as entry. Note that if this field is non-empty the tool `"pkg-config"` must be available in `"PATH"`, which is taken from `["CC", "defaults"]` or the `"ENV"` variable. |
+| `"hdr_prefix"` | Prefix where headers will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"include"` if not set. |
+| `"lib_prefix"` | Prefix where libraries will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib"` if not set. |
+| `"pc_prefix"` | Prefix where pkg-config files will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib/pkgconfig"` if not set. |
+| `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after `"cmds"` were executed. |
+| `"project"` | The project directory. It should contain a single tree artifact. It's path can be accessed via the `"WORKDIR"` variable. |
+| `"localbase"` | Artifacts to stage to `"LOCALBASE"`. |
+| `"deps"` | Public dependency on other CC libraries. |
 
 | Config variable | Description |
 | --------------- | ----------- |
@@ -376,6 +411,7 @@ Data produced by generic shell commands with toolchain support.
 | `"cmds"` | List of commands to execute by `"sh"`. Multiple commands will be joined with the newline character. |
 | `"outs"` | Paths to the produced output files in `"DESTDIR"`. |
 | `"out_dirs"` | Paths to the produced output directories in `"DESTDIR"`. |
+| `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after `"cmds"` were executed. |
 | `"project"` | The project directory. It should contain a single tree artifact. It's path can be accessed via the `"WORKDIR"` variable. |
 | `"localbase"` | Artifacts to stage to `"LOCALBASE"`. |
 | `"deps"` | CC targets to install to `"LOCALBASE"`. |
