@@ -279,7 +279,7 @@
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "PATH"}]
                           }
-                        , ")\":$PATH"
+                        , ")${PATH:+:}${PATH}\""
                         ]
                       }
                     ]
