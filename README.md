@@ -215,7 +215,7 @@ A test written in C++
 | `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
 | `"private-cflags"` | List of compile flags set for source files local to this target. |
 | `"private-ldflags"` | Additional linker flags for linking external libraries (not built by this tool, typically system libraries). |
-| `"srcs"` | The sources of the test binary  The resulting test binary in an environment where it can assume that the environment variable TEST_TMPDIR points to a director that may be used exclusively by this test.  This running of the test is carried out by the implicit dependency on the target `"runner"`. By setting this target in the target layer of this rues repository (instead of letting it default to the respective file), the C/C++ test environment can be modified globally. |
+| `"srcs"` | The sources of the test binary  The resulting test binary is run in an environment where it can assume that the environment variable TEST_TMPDIR points to a directory that may be used exclusively by this test. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR.  This running of the test is carried out by the implicit dependency on the target `"runner"`. By setting this target in the target layer of this rues repository (instead of letting it default to the respective file), the C/C++ test environment can be modified globally. |
 | `"private-hdrs"` | Any additional header files that need to be present when compiling the test binary. |
 | `"data"` | Any files the test binary needs access to when running |
 
