@@ -1,0 +1,36 @@
+{ "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "shared": ["yes"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "deps": ["bar"]
+  , "stage": ["foo"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "object_only": ["yes"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "stage": ["bar"]
+  }
+, "main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["foo"]
+  }
+, "test_main":
+  { "type": ["@", "rules", "shell/test", "script"]
+  , "name": ["test_main"]
+  , "test": ["test_main.sh"]
+  , "deps": ["main"]
+  }
+, "test_main.sh":
+  { "type": "file_gen"
+  , "name": "test.sh"
+  , "data": "set -e\n[ \"$(./main)\" = \"Hello World and Galaxy\" ]"
+  }
+, "install_main":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["main"]}
+}

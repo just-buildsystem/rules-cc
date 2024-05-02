@@ -96,6 +96,19 @@
     ]
   , "data": [["TREE", null, "shared"]]
   }
+, "object":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_object"]
+  , "targets": ["+foo", "+bar", "+main", "+test_main", "+install_main"]
+  , "asserts":
+    [ "[ -f ./foo/libfoo.so ]"
+    , "[ -f ./bar/bar/bar.o ]"
+    , "[ -f ./install_main/lib/libfoo.so ]"
+    , "[ ! -f ./install_main/lib/bar/bar.o ]"
+    , "[ \"$(./install_main/bin/main)\" = 'Hello World and Galaxy' ]"
+    ]
+  , "data": [["TREE", null, "object"]]
+  }
 , "prebuilt_tests":
   { "type": "tree"
   , "deps":
@@ -191,7 +204,7 @@
   }
 , "ALL":
   { "type": "install"
-  , "deps": ["private", "public", "shared", "prebuilt", "cmake"]
+  , "deps": ["private", "public", "shared", "object", "prebuilt", "cmake"]
   , "tainted": ["test"]
   }
 }
