@@ -156,7 +156,8 @@ A C++ library
 | `"private-deps"` | Any other libraries this library depends upon but does not include in its public headers. |
 | `"proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon privately. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
-| `"shared"` | If non-empty, produce a shared instead of a static library. |
+| `"shared"` | If non-empty, produce a shared instead of a static library. Setting this option is mutually exclusive to the `"object_only"` option. |
+| `"object_only"` | If non-empty, produce an object library, resulting in object files added to the linker line of all depending targets. Setting this option is mutually exclusive to the `"shared"` option. |
 
 ### Rule `["CC/prebuilt", "library"]`
 
