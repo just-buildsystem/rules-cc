@@ -1592,6 +1592,235 @@
       }
     }
   }
+, "object artifacts":
+  { "vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "AR"
+    , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
+    , "name"
+    , "pure C"
+    , "srcs"
+    , "hdrs"
+    , "private-hdrs"
+    , "stage"
+    , "compile-deps"
+    , "compile-args"
+    , "cflags-files"
+    , "defaults-transition"
+    ]
+  , "imports":
+    { "compiler": "compiler"
+    , "flags": "flags"
+    , "objects": "objects"
+    , "default-AR": "default-AR"
+    , "default-ENV": "default-ENV"
+    , "default-PATH": "default-PATH"
+    , "default-TOOLCHAIN": "default-TOOLCHAIN"
+    , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["TOOLCHAIN_DIR", "toolchain"]
+      , ["TOOLCHAIN", {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}]
+      , [ "TOOLCHAIN"
+        , { "type": "to_subdir"
+          , "subdir": {"type": "var", "name": "TOOLCHAIN_DIR"}
+          , "$1": {"type": "var", "name": "TOOLCHAIN"}
+          }
+        ]
+      , [ "NON_SYSTEM_TOOLS"
+        , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
+        ]
+      , ["COMPILER", {"type": "CALL_EXPRESSION", "name": "compiler"}]
+      , [ "COMPILE_FLAGS"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "flags"}
+            , {"type": "var", "name": "compile-args"}
+            ]
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "default-ENV"}
+            , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            ]
+          }
+        ]
+      , [ "ENV_PATH"
+        , { "type": "lookup"
+          , "map": {"type": "var", "name": "ENV"}
+          , "key": "PATH"
+          }
+        ]
+      , [ "ENV"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "ENV"}
+            , { "type": "singleton_map"
+              , "key": "PATH"
+              , "value":
+                { "type": "join"
+                , "separator": ":"
+                , "$1":
+                  { "type": "++"
+                  , "$1":
+                    [ {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "ENV_PATH"}
+                      , "then": [{"type": "var", "name": "ENV_PATH"}]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "objects"}
+    }
+  }
+, "object result":
+  { "vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "AR"
+    , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
+    , "name"
+    , "pure C"
+    , "srcs"
+    , "hdrs"
+    , "private-hdrs"
+    , "cflags"
+    , "private-cflags"
+    , "ldflags"
+    , "private-ldflags"
+    , "stage"
+    , "pkg-name"
+    , "extra-provides"
+    , "public-fieldnames"
+    , "private-fieldnames"
+    ]
+  , "imports":
+    { "compile-deps": "compile-deps"
+    , "compile-args-deps": "compile-args-deps"
+    , "link-deps": "link-deps"
+    , "link-args-deps": "link-args-deps"
+    , "run-libs-deps": "run-libs-deps"
+    , "run-libs-args-deps": "run-libs-args-deps"
+    , "cflags-files-deps": "cflags-files-deps"
+    , "ldflags-files-deps": "ldflags-files-deps"
+    , "object artifacts": "object artifacts"
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["deps-fieldnames", {"type": "var", "name": "private-fieldnames"}]
+      , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
+      , [ "compile-args"
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "cflags"}
+              , {"type": "var", "name": "private-cflags"}
+              , {"type": "CALL_EXPRESSION", "name": "compile-args-deps"}
+              ]
+            }
+          }
+        ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
+        ]
+      , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
+      , ["objects", {"type": "CALL_EXPRESSION", "name": "object artifacts"}]
+      , [ "link-args"
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "keys", "$1": {"type": "var", "name": "objects"}}
+              , {"type": "var", "name": "ldflags", "default": []}
+              , {"type": "var", "name": "private-ldflags", "default": []}
+              , {"type": "CALL_EXPRESSION", "name": "link-args-deps"}
+              ]
+            }
+          }
+        ]
+      , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
+      , [ "run-libs-args"
+        , { "type": "nub_right"
+          , "$1": {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
+          }
+        ]
+      , [ "ldflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
+        ]
+      , ["deps-fieldnames", {"type": "var", "name": "public-fieldnames"}]
+      , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
+      , [ "compile-args"
+        , { "type": "nub_right"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "cflags"}
+              , {"type": "CALL_EXPRESSION", "name": "compile-args-deps"}
+              ]
+            }
+          }
+        ]
+      , [ "cflags-files"
+        , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
+        ]
+      , [ "package"
+        , { "type": "let*"
+          , "bindings": [["name", {"type": "var", "name": "pkg-name"}]]
+          , "body":
+            {"type": "env", "vars": ["name", "cflags-files", "ldflags-files"]}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts": {"type": "var", "name": "objects"}
+      , "runfiles": {"type": "var", "name": "hdrs"}
+      , "provides":
+        { "type": "map_union"
+        , "$1":
+          [ { "type": "env"
+            , "vars":
+              [ "compile-deps"
+              , "compile-args"
+              , "link-deps"
+              , "link-args"
+              , "run-libs"
+              , "run-libs-args"
+              , "package"
+              ]
+            }
+          , { "type": "var"
+            , "name": "extra-provides"
+            , "default": {"type": "empty_map"}
+            }
+          ]
+        }
+      }
+    }
+  }
 , "bin artifact":
   { "doc": ["Produces the binary artifact."]
   , "vars":
