@@ -358,7 +358,7 @@
     , "soversion"
     , "pkg-name"
     ]
-  , "config_fields": ["shared"]
+  , "config_fields": ["shared", "object_only"]
   , "config_vars":
     [ "CC"
     , "CXX"
@@ -432,7 +432,15 @@
       , "duplicate work will be carried out, even if the same proto library"
       , "is used at various places)."
       ]
-    , "shared": ["If non-empty, produce a shared instead of a static library."]
+    , "shared":
+      [ "If non-empty, produce a shared instead of a static library. Setting"
+      , "this option is mutually exclusive to the \"object_only\" option."
+      ]
+    , "object_only":
+      [ "If non-empty, produce an object library, resulting in object files"
+      , "added to the linker line of all depending targets. Setting this option"
+      , "is mutually exclusive to the \"shared\" option."
+      ]
     , "soversion":
       [ "The SOVERSION for shared libraries. Individual version components are"
       , "joined with \".\"."
@@ -534,6 +542,7 @@
     { "artifacts": ["./", "..", "field_artifacts"]
     , "static result": "lib result"
     , "shared result": "shared result"
+    , "object result": "object result"
     , "fPIC transition": ["transitions", "with fPIC"]
     }
   , "config_transitions":
@@ -639,10 +648,26 @@
         ]
       ]
     , "body":
-      { "type": "if"
-      , "cond": {"type": "FIELD", "name": "shared"}
-      , "then": {"type": "CALL_EXPRESSION", "name": "shared result"}
-      , "else": {"type": "CALL_EXPRESSION", "name": "static result"}
+      { "type": "cond"
+      , "cond":
+        [ [ { "type": "and"
+            , "$1":
+              [ {"type": "FIELD", "name": "shared"}
+              , {"type": "FIELD", "name": "object_only"}
+              ]
+            }
+          , { "type": "fail"
+            , "msg": "Fields \"shared\" and \"object_only\" are mutually exclusive."
+            }
+          ]
+        , [ {"type": "FIELD", "name": "shared"}
+          , {"type": "CALL_EXPRESSION", "name": "shared result"}
+          ]
+        , [ {"type": "FIELD", "name": "object_only"}
+          , {"type": "CALL_EXPRESSION", "name": "object result"}
+          ]
+        ]
+      , "default": {"type": "CALL_EXPRESSION", "name": "static result"}
       }
     }
   }
