@@ -132,6 +132,10 @@ A binary written in C++
 | `"private-deps"` | Any other libraries this binary depends upon. |
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of is dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 
+| Config variable | Description |
+| --------------- | ----------- |
+| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+
 ### Rule `["CC", "library"]`
 
 A C++ library
@@ -158,6 +162,10 @@ A C++ library
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon privately. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 | `"shared"` | If non-empty, produce a shared instead of a static library. Setting this option is mutually exclusive to the `"object_only"` option. |
 | `"object_only"` | If non-empty, produce an object library, resulting in object files added to the linker line of all depending targets. Setting this option is mutually exclusive to the `"shared"` option. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
 
 ### Rule `["CC/prebuilt", "library"]`
 
@@ -192,7 +200,7 @@ A system library via pkg-config
 
 ### Rule `["CC", "install-with-deps"]`
 
-Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"lib/pkgconfig"`.
+Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"lib/pkgconfig"`. In debug mode, sources needed for local debugging will be installed to subdirectory `"debug-src"`.
 
 | Field | Description |
 | ----- | ----------- |
