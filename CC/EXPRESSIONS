@@ -188,6 +188,40 @@
       }
     }
   }
+, "debug-srcs":
+  { "doc": ["Collect debug dependencies (sources) from given target_fields"]
+  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars_doc":
+    { "deps-fieldnames":
+      ["List of target_field names to collect dependencies from."]
+    , "deps-transition":
+      ["The optional configuration transition for the targets."]
+    }
+  , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
+  , "expression":
+    { "type": "map_union"
+    , "$1":
+      { "type": "++"
+      , "$1":
+        { "type": "foreach"
+        , "var": "fieldname"
+        , "range": {"type": "var", "name": "deps-fieldnames"}
+        , "body":
+          { "type": "++"
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [ ["provider", "debug-srcs"]
+              , ["transition", {"type": "var", "name": "deps-transition"}]
+              , ["default", {"type": "empty_map"}]
+              ]
+            , "body": [{"type": "CALL_EXPRESSION", "name": "provider_list"}]
+            }
+          }
+        }
+      }
+    }
+  }
 , "compile-deps":
   { "doc": ["Collect compile dependencies (headers) from given target_fields"]
   , "vars": ["deps-fieldnames", "deps-transition"]
@@ -1109,6 +1143,7 @@
     , "AR"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -1134,6 +1169,7 @@
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
     , "lib artifact": "lib artifact"
+    , "debug-srcs": "debug-srcs"
     }
   , "expression":
     { "type": "let*"
@@ -1179,6 +1215,19 @@
       , [ "ldflags-files"
         , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
         ]
+      , [ "debug-srcs"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUG"}
+          , "then":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "debug-srcs"}
+              , {"type": "var", "name": "srcs"}
+              ]
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , ["deps-fieldnames", {"type": "var", "name": "public-fieldnames"}]
       , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
       , [ "compile-args"
@@ -1219,6 +1268,7 @@
               , "run-libs"
               , "run-libs-args"
               , "package"
+              , "debug-srcs"
               ]
             }
           , { "type": "var"
@@ -1434,6 +1484,7 @@
     , "ADD_CFLAGS"
     , "ADD_LDFLAGS"
     , "ENV"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -1461,6 +1512,7 @@
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
     , "shared artifact": "shared artifact"
+    , "debug-srcs": "debug-srcs"
     }
   , "expression":
     { "type": "let*"
@@ -1501,6 +1553,19 @@
         , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
         ]
       , ["lib", {"type": "CALL_EXPRESSION", "name": "shared artifact"}]
+      , [ "debug-srcs"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUG"}
+          , "then":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "debug-srcs"}
+              , {"type": "var", "name": "srcs"}
+              ]
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , ["deps-fieldnames", {"type": "var", "name": "public-fieldnames"}]
       , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
       , [ "compile-args"
@@ -1581,6 +1646,7 @@
               , "run-libs"
               , "run-libs-args"
               , "package"
+              , "debug-srcs"
               ]
             }
           , { "type": "var"
@@ -1700,6 +1766,7 @@
     , "AR"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -1725,6 +1792,7 @@
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
     , "object artifacts": "object artifacts"
+    , "debug-srcs": "debug-srcs"
     }
   , "expression":
     { "type": "let*"
@@ -1770,6 +1838,19 @@
       , [ "ldflags-files"
         , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
         ]
+      , [ "debug-srcs"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUG"}
+          , "then":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "debug-srcs"}
+              , {"type": "var", "name": "srcs"}
+              ]
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , ["deps-fieldnames", {"type": "var", "name": "public-fieldnames"}]
       , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
       , [ "compile-args"
@@ -1810,6 +1891,7 @@
               , "run-libs"
               , "run-libs-args"
               , "package"
+              , "debug-srcs"
               ]
             }
           , { "type": "var"
@@ -2014,6 +2096,7 @@
     , "ADD_LDFLAGS"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -2033,6 +2116,7 @@
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
     , "binary": "bin artifact"
+    , "debug-srcs": "debug-srcs"
     }
   , "expression":
     { "type": "let*"
@@ -2070,11 +2154,25 @@
         , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
         ]
       , ["package", {"type": "singleton_map", "key": "to_bin", "value": true}]
+      , [ "debug-srcs"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUG"}
+          , "then":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "debug-srcs"}
+              , {"type": "var", "name": "srcs"}
+              ]
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       ]
     , "body":
       { "type": "RESULT"
       , "artifacts": {"type": "CALL_EXPRESSION", "name": "binary"}
-      , "provides": {"type": "env", "vars": ["run-libs", "package"]}
+      , "provides":
+        {"type": "env", "vars": ["run-libs", "package", "debug-srcs"]}
       }
     }
   }
@@ -2122,6 +2220,13 @@
                       [ {"type": "var", "name": "runfiles"}
                       , {"type": "var", "name": "compile-deps"}
                       ]
+                    }
+                  ]
+                , [ "debug-srcs"
+                  , { "type": "DEP_PROVIDES"
+                    , "dep": {"type": "var", "name": "target"}
+                    , "provider": "debug-srcs"
+                    , "default": {"type": "empty_map"}
                     }
                   ]
                 ]
@@ -2290,6 +2395,10 @@
                       , { "type": "to_subdir"
                         , "subdir": {"type": "var", "name": "pc-install-dir"}
                         , "$1": {"type": "var", "name": "pkg-config"}
+                        }
+                      , { "type": "to_subdir"
+                        , "subdir": "debug-src"
+                        , "$1": {"type": "var", "name": "debug-srcs"}
                         }
                       ]
                     }
