@@ -14,6 +14,13 @@
   , "srcs": ["bar.cpp"]
   , "stage": ["bar"]
   }
+, "baz":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["baz"]
+  , "shared": ["yes"]
+  , "deps": ["bar"]
+  , "stage": ["baz"]
+  }
 , "main":
   { "type": ["@", "rules", "CC", "binary"]
   , "name": ["main"]
