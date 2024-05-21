@@ -1394,7 +1394,13 @@
       , ["objects", {"type": "CALL_EXPRESSION", "name": "objects"}]
       , [ "base name"
         , { "type": "if"
-          , "cond": {"type": "var", "name": "objects"}
+          , "cond":
+            { "type": "or"
+            , "$1":
+              [ {"type": "var", "name": "objects"}
+              , {"type": "var", "name": "link-deps"}
+              ]
+            }
           , "then":
             { "type": "assert_non_empty"
             , "msg": "A name has to be provided for non-header-only libraries"
@@ -1422,7 +1428,13 @@
         ]
       , [ "lib"
         , { "type": "if"
-          , "cond": {"type": "var", "name": "objects"}
+          , "cond":
+            { "type": "or"
+            , "$1":
+              [ {"type": "var", "name": "objects"}
+              , {"type": "var", "name": "link-deps"}
+              ]
+            }
           , "else": {"type": "empty_map"}
           , "then":
             { "type": "ACTION"
