@@ -42,6 +42,7 @@
   , "implicit":
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "shell defaults": [["shell", "defaults"]]
     , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
@@ -174,6 +175,8 @@
     , "make-build": "make-build"
     , "strip-prefix": ["./", "..", "strip-prefix"]
     , "for host": ["transitions", "for host"]
+    , "map_provider": ["", "field_map_provider"]
+    , "sh": ["shell", "sh"]
     }
   , "config_transitions":
     { "defaults":
@@ -240,10 +243,33 @@
           }
         ]
       , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
+      , ["TOOLCHAIN_DIR", "toolchain"]
+      , [ "shell TOOLCHAIN"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "shell defaults"]
+            , ["provider", "TOOLCHAIN"]
+            , ["default", {"type": "empty_map"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+          }
+        ]
+      , [ "sh"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "shell defaults"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "sh"}
+          }
+        ]
       , [ "install_dir"
         , { "type": "ACTION"
-          , "inputs": {"type": "var", "name": "full_install_dir"}
-          , "cmd": ["/bin/sh", "-c", ":"]
+          , "inputs":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "shell TOOLCHAIN"}
+              , {"type": "var", "name": "full_install_dir"}
+              ]
+            }
+          , "cmd": [{"type": "var", "name": "sh"}, "-c", ":"]
           , "outs": {"type": "var", "name": "installed_out_files"}
           , "out_dirs": {"type": "var", "name": "installed_out_dirs"}
           }
@@ -338,6 +364,7 @@
   , "implicit":
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "shell defaults": [["shell", "defaults"]]
     , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
     , "expand_exec": [["./", "..", "expand_exec"]]
     }
@@ -509,6 +536,8 @@
     , "prebuilt result": ["CC/prebuilt", "prebuilt result"]
     , "install-deps": ["CC", "install-with-deps stage"]
     , "for host": ["transitions", "for host"]
+    , "map_provider": ["", "field_map_provider"]
+    , "sh": ["shell", "sh"]
     }
   , "config_transitions":
     { "defaults":
@@ -664,10 +693,32 @@
           }
         ]
       , ["full_install_dir", {"type": "CALL_EXPRESSION", "name": "make-build"}]
+      , [ "shell TOOLCHAIN"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "shell defaults"]
+            , ["provider", "TOOLCHAIN"]
+            , ["default", {"type": "empty_map"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+          }
+        ]
+      , [ "sh"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "shell defaults"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "sh"}
+          }
+        ]
       , [ "install_dir"
         , { "type": "ACTION"
-          , "inputs": {"type": "var", "name": "full_install_dir"}
-          , "cmd": ["/bin/sh", "-c", ":"]
+          , "inputs":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "shell TOOLCHAIN"}
+              , {"type": "var", "name": "full_install_dir"}
+              ]
+            }
+          , "cmd": [{"type": "var", "name": "sh"}, "-c", ":"]
           , "outs": {"type": "var", "name": "installed_files"}
           , "out_dirs": {"type": "var", "name": "installed_dirs"}
           }

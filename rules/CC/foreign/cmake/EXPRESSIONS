@@ -45,17 +45,37 @@
     , "foreign-PATH": ["CC/foreign", "default-PATH"]
     , "foreign-TOOLCHAIN": ["CC/foreign", "default-TOOLCHAIN"]
     , "foreign-NON_SYSTEM_TOOLS": ["CC/foreign", "default-NON_SYSTEM_TOOLS"]
+    , "map_provider": ["", "field_map_provider"]
+    , "sh": ["shell", "sh"]
+    , "sh-PATH": ["shell", "PATH"]
     }
   , "expression":
     { "type": "let*"
     , "bindings":
       [ ["TOOLCHAIN_DIR", "toolchain"]
+      , [ "shell TOOLCHAIN"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "shell defaults"]
+            , ["provider", "TOOLCHAIN"]
+            , ["default", {"type": "empty_map"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+          }
+        ]
+      , [ "sh"
+        , { "type": "let*"
+          , "bindings": [["fieldname", "shell defaults"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "sh"}
+          }
+        ]
       , [ "TOOLCHAIN"
         , { "type": "disjoint_map_union"
           , "msg": "Toolchain trees may not overlap"
           , "$1":
             [ {"type": "CALL_EXPRESSION", "name": "foreign-TOOLCHAIN"}
             , {"type": "CALL_EXPRESSION", "name": "default-TOOLCHAIN"}
+            , {"type": "var", "name": "shell TOOLCHAIN"}
             ]
           }
         ]
@@ -183,6 +203,27 @@
             }
           }
         ]
+      , [ "sh-PATH"
+        , { "type": "join"
+          , "separator": ":"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["fieldname", "shell defaults"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "sh-PATH"}
+            }
+          }
+        ]
+      , [ "sh-ENV"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "sh-PATH"}
+          , "then":
+            { "type": "singleton_map"
+            , "key": "PATH"
+            , "value": {"type": "var", "name": "sh-PATH"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , [ "PATH"
         , { "type": "join"
           , "separator": ":"
@@ -217,6 +258,7 @@
                 , "CMAKE"
                 ]
               }
+            , {"type": "var", "name": "sh-ENV"}
             , {"type": "CALL_EXPRESSION", "name": "default-ENV"}
             , {"type": "CALL_EXPRESSION", "name": "foreign-ENV"}
             , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
@@ -385,7 +427,7 @@
       , "cmd":
         { "type": "++"
         , "$1":
-          [ [ "sh"
+          [ [ {"type": "var", "name": "sh"}
             , "run_cmake.sh"
             , {"type": "var", "name": "CMAKE_SUBDIR"}
             , {"type": "var", "name": "AR"}
