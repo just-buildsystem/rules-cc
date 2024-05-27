@@ -203,9 +203,85 @@
     ]
   , "data": [["TREE", null, "cmake"]]
   }
+, "install":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_install"]
+  , "targets":
+    [ "+install_bar_release"
+    , "+install_main_release"
+    , "+install_bar_debug"
+    , "+install_main_debug"
+    , "+install_bar_debug_slim"
+    , "+install_main_debug_slim"
+    ]
+  , "asserts":
+    [ "test -f install_bar_release/lib/bar/libbar.a"
+    , "test -f install_bar_release/lib/foo/libfoo.a"
+    , "test -f install_bar_release/lib/baz/libbaz.a"
+    , "test -f install_bar_release/lib/pkgconfig/bar.pc"
+    , "test -f install_bar_release/include/bar/bar.hpp"
+    , "test -f install_bar_release/include/foo/foo.hpp"
+    , "! test -f install_bar_release/include/baz/baz.hpp"
+    , "! test -d install_bar_release/work"
+    , "test -f install_main_release/bin/main"
+    , "! test -f install_main_release/lib/bar/libbar.a"
+    , "! test -f install_main_release/lib/foo/libfoo.a"
+    , "! test -f install_main_release/lib/baz/libbaz.a"
+    , "! test -d install_main_release/lib/pkgconfig"
+    , "! test -d install_main_release/include"
+    , "! test -d install_main_release/work"
+    , "test -f install_bar_debug/lib/bar/libbar.a"
+    , "test -f install_bar_debug/lib/foo/libfoo.a"
+    , "test -f install_bar_debug/lib/baz/libbaz.a"
+    , "test -f install_bar_debug/lib/pkgconfig/bar.pc"
+    , "test -f install_bar_debug/include/bar/bar.hpp"
+    , "test -f install_bar_debug/include/foo/foo.hpp"
+    , "test -f install_bar_debug/include/baz/baz.hpp"
+    , "test -f install_bar_debug/work/bar/bar.cpp"
+    , "test -f install_bar_debug/work/bar/bar.hpp"
+    , "test -f install_bar_debug/work/foo/foo.cpp"
+    , "test -f install_bar_debug/work/foo/foo.hpp"
+    , "test -f install_bar_debug/work/foo/qux.hpp"
+    , "test -f install_bar_debug/work/baz/baz.cpp"
+    , "test -f install_bar_debug/work/baz/baz.hpp"
+    , "test -f install_main_debug/bin/main"
+    , "test -f install_main_debug/include/bar/bar.hpp"
+    , "test -f install_main_debug/include/foo/foo.hpp"
+    , "test -f install_main_debug/include/baz/baz.hpp"
+    , "test -f install_main_debug/work/bar/bar.cpp"
+    , "test -f install_main_debug/work/bar/bar.hpp"
+    , "test -f install_main_debug/work/foo/foo.cpp"
+    , "test -f install_main_debug/work/foo/foo.hpp"
+    , "test -f install_main_debug/work/foo/qux.hpp"
+    , "test -f install_main_debug/work/baz/baz.cpp"
+    , "test -f install_main_debug/work/baz/baz.hpp"
+    , "test -f install_main_debug/work/main.cpp"
+    , "! test -f install_main_debug/lib/bar/libbar.a"
+    , "! test -f install_main_debug/lib/foo/libfoo.a"
+    , "! test -f install_main_debug/lib/baz/libbaz.a"
+    , "! test -d install_main_debug/lib/pkgconfig"
+    , "test -f install_bar_debug_slim/lib/bar/libbar.a"
+    , "test -f install_bar_debug_slim/lib/foo/libfoo.a"
+    , "test -f install_bar_debug_slim/lib/baz/libbaz.a"
+    , "test -f install_bar_debug_slim/lib/pkgconfig/bar.pc"
+    , "test -f install_bar_debug_slim/include/bar/bar.hpp"
+    , "test -f install_bar_debug_slim/include/foo/foo.hpp"
+    , "! test -f install_bar_debug_slim/include/baz/baz.hpp"
+    , "! test -d install_bar_debug_slim/work"
+    , "test -f install_main_debug_slim/bin/main"
+    , "! test -f install_main_debug_slim/lib/bar/libbar.a"
+    , "! test -f install_main_debug_slim/lib/foo/libfoo.a"
+    , "! test -f install_main_debug_slim/lib/baz/libbaz.a"
+    , "! test -d install_main_debug_slim/lib/pkgconfig"
+    , "! test -d install_main_debug_slim/include"
+    , "! test -d install_main_debug_slim/work"
+    ]
+  , "data": [["TREE", null, "install"]]
+  }
 , "ALL":
   { "type": "install"
-  , "deps": ["private", "public", "shared", "object", "prebuilt", "cmake"]
+  , "deps":
+    ["private", "public", "shared", "object", "prebuilt", "cmake", "install"]
   , "tainted": ["test"]
   }
 }

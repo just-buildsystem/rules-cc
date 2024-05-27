@@ -1,0 +1,69 @@
+{ "baz":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["baz"]
+  , "hdrs": ["baz.hpp"]
+  , "srcs": ["baz.cpp"]
+  , "stage": ["baz"]
+  }
+, "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "hdrs": ["foo.hpp"]
+  , "private-hdrs": ["qux.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "private-deps": ["baz"]
+  , "stage": ["foo"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "deps": ["foo"]
+  , "stage": ["bar"]
+  }
+, "main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["bar"]
+  }
+, "install_bar_release":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["bar"]}
+, "install_main_release":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["main"]}
+, "bar debug":
+  { "type": "configure"
+  , "target": "bar"
+  , "config":
+    { "type": "let*"
+    , "bindings": [["DEBUG", true], ["ADD_CXXFLAGS", ["-g"]]]
+    , "body": {"type": "env", "vars": ["DEBUG", "ADD_CXXFLAGS"]}
+    }
+  }
+, "main debug":
+  { "type": "configure"
+  , "target": "main"
+  , "config":
+    { "type": "let*"
+    , "bindings": [["DEBUG", true], ["ADD_CXXFLAGS", ["-g"]]]
+    , "body": {"type": "env", "vars": ["DEBUG", "ADD_CXXFLAGS"]}
+    }
+  }
+, "install_bar_debug":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["bar debug"]}
+, "install_main_debug":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["main debug"]
+  }
+, "install_bar_debug_slim":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "skip-debug-stage": ["yes"]
+  , "targets": ["bar debug"]
+  }
+, "install_main_debug_slim":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "skip-debug-stage": ["yes"]
+  , "targets": ["main debug"]
+  }
+}
