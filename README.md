@@ -238,6 +238,33 @@ A test written in C++
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  Test runs are summarized by the `["shell/test", "summarizer"]` that is also used by shell tests. |
 | `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
 
+### Rule `["shell", "defaults"]`
+
+A rule to provide defaults for the usage of the shell 
+
+ All targets using invocations of the shell use the target `["shel", "defaults"]` to determine which shell to use and how to invoke it. The definition of this default target is probably the only meaningful use of this rule.
+
+| Field | Description |
+| ----- | ----------- |
+| `"sh"` | The name of the sh binary; if the the field `"toolchain"` is not empty, the value is interpreted as relative to the toolchain directory. |
+| `"PATH"` | Paths for looking up system tools. Specifying this field extends values from `"base"`. |
+| `"bin dirs"` | Directories of the toolchain that contain additional binaries. Shell-specific rules will add those into PATH. |
+| `"base"` | Other targets (using the same rule) to inherit values from. |
+| `"toolchain"` | Optional toolchain directory. A collection of artifacts that form the toolchain, in particular the shell itself, where not taken from the ambient host environment. Values provided from base are extended. This field is built for the host. |
+
+### Rule `["shell", "cmds"]`
+
+Execute comands using the shell 
+
+ This rule behaves similar to the built-in `"generic"` rule, however with the difference that the shell toolchain is honored.
+
+| Field | Description |
+| ----- | ----------- |
+| `"cmds"` | The command to be executed. Individual entries are joined by newline characters; the whole script is then prefixed by commands necessary to set up the work environment using the shell tool chain. |
+| `"outs"` | The expected file outputs |
+| `"out_dirs"` | The expected output directories |
+| `"deps"` | Any  inputs to the argument. Both, artifacts and rufiles of the dependecies are staged into the (effective) working directory of the action. Conflicts are resolved by giving artifacts priority to runfiles, and within each of those priority to ones brought by the latest dependency. |
+
 ### Rule `["shell/test", "script"]`
 
 Shell test, given by a test script
