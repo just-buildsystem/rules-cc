@@ -18,6 +18,7 @@
       { "test-just": "just"
       , "test-rules": "test-rules"
       , "test-libs": "test-libs"
+      , "rules": "rules"
       }
     }
   , "imports": {"repository": {"type": "file", "path": "etc/imports"}}
