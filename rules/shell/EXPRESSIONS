@@ -99,4 +99,73 @@
     , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
     }
   }
+, "prolog":
+  { "vars": ["fieldname", "TOOLCHAIN_DIR"]
+  , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["provider", "bin dirs"]
+      , ["bin dirs", {"type": "CALL_EXPRESSION", "name": "list_provider"}]
+      , [ "relative paths"
+        , { "type": "foreach"
+          , "range": {"type": "var", "name": "bin dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ "."
+              , { "type": "var"
+                , "name": "TOOLCHAIN_DIR"
+                , "default": "toolchain"
+                }
+              , {"type": "var", "name": "_"}
+              ]
+            }
+          }
+        ]
+      , [ "pwd paths"
+        , { "type": "foreach"
+          , "range": {"type": "var", "name": "bin dirs"}
+          , "body":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ "$(pwd)"
+              , { "type": "var"
+                , "name": "TOOLCHAIN_DIR"
+                , "default": "toolchain"
+                }
+              , {"type": "var", "name": "_"}
+              ]
+            }
+          }
+        ]
+      ]
+    , "body":
+      [ "__PATH=$PATH"
+      , { "type": "join"
+        , "$1":
+          [ "export PATH="
+          , { "type": "join"
+            , "separator": ":"
+            , "$1": {"type": "var", "name": "relative paths"}
+            }
+          , "${PATH:+:}${PATH}"
+          ]
+        }
+      , { "type": "join"
+        , "$1":
+          [ "export PATH="
+          , { "type": "join"
+            , "separator": ":"
+            , "$1": {"type": "var", "name": "pwd paths"}
+            }
+          , "${__PATH:+:}${__PATH}"
+          ]
+        }
+      , "unset __PATH"
+      ]
+    }
+  }
 }
