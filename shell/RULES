@@ -157,4 +157,189 @@
       }
     }
   }
+, "cmds":
+  { "doc":
+    [ "Execute comands using the shell"
+    , ""
+    , "This rule behaves similar to the built-in \"generic\" rule, however"
+    , "with the difference that the shell toolchain is honored."
+    ]
+  , "target_fields": ["deps"]
+  , "string_fields": ["cmds", "outs", "out_dirs"]
+  , "implicit": {"defaults": ["defaults"]}
+  , "field_doc":
+    { "deps":
+      [ "Any  inputs to the argument."
+      , "Both, artifacts and rufiles of the dependecies are staged into"
+      , "the (effective) working directory of the action. Conflicts are"
+      , "resolved by giving artifacts priority to runfiles, and within"
+      , "each of those priority to ones brought by the latest dependency."
+      ]
+    , "cmds":
+      [ "The command to be executed."
+      , "Individual entries are joined by newline characters; the whole"
+      , "script is then prefixed by commands necessary to set up the"
+      , "work environment using the shell tool chain."
+      ]
+    , "defaults": ["The shell toolchain to use."]
+    , "outs": ["The expected file outputs"]
+    , "out_dirs": ["The expected output directories"]
+    }
+  , "imports":
+    { "artifacts_list": ["", "field_artifacts_list"]
+    , "runfiles_list": ["", "field_runfiles_list"]
+    , "map_provider": ["", "field_map_provider"]
+    , "prolog": "prolog"
+    , "sh": "sh"
+    , "PATH": "PATH"
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["fieldname", "deps"]
+      , [ "deps"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "CALL_EXPRESSION", "name": "runfiles_list"}
+              , {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+              ]
+            }
+          }
+        ]
+      , ["fieldname", "defaults"]
+      , ["TOOLCHAIN_DIR", "toolchain"]
+      , [ "toolchain"
+        , { "type": "to_subdir"
+          , "subdir": {"type": "var", "name": "TOOLCHAIN_DIR"}
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [["provider", "TOOLCHAIN"], ["default", {"type": "empty_map"}]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+            }
+          }
+        ]
+      , ["WRKDIR", "work"]
+      , [ "cmds"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "CALL_EXPRESSION", "name": "prolog"}
+            , [ { "type": "join_cmd"
+                , "$1": ["cd", {"type": "var", "name": "WRKDIR"}]
+                }
+              ]
+            , {"type": "FIELD", "name": "cmds"}
+            ]
+          }
+        ]
+      , ["sh", {"type": "CALL_EXPRESSION", "name": "sh"}]
+      , [ "cmdfile"
+        , { "type": "singleton_map"
+          , "key": "cmd"
+          , "value":
+            { "type": "BLOB"
+            , "data":
+              { "type": "join"
+              , "separator": "\n"
+              , "$1": {"type": "var", "name": "cmds"}
+              }
+            }
+          }
+        ]
+      , ["PATH", {"type": "CALL_EXPRESSION", "name": "PATH"}]
+      , [ "env"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "PATH"}
+          , "then":
+            { "type": "singleton_map"
+            , "key": "PATH"
+            , "value": {"type": "var", "name": "PATH"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
+      , [ "outs in WRKDIR"
+        , { "type": "foreach"
+          , "range": {"type": "FIELD", "name": "outs"}
+          , "body":
+            { "type": "join"
+            , "$1":
+              [ {"type": "var", "name": "WRKDIR"}
+              , "/"
+              , {"type": "var", "name": "_"}
+              ]
+            }
+          }
+        ]
+      , [ "out_dirs in WRKDIR"
+        , { "type": "foreach"
+          , "range": {"type": "FIELD", "name": "out_dirs"}
+          , "body":
+            { "type": "join"
+            , "$1":
+              [ {"type": "var", "name": "WRKDIR"}
+              , "/"
+              , {"type": "var", "name": "_"}
+              ]
+            }
+          }
+        ]
+      , [ "artifacts"
+        , { "type": "ACTION"
+          , "inputs":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "toolchain"}
+              , {"type": "var", "name": "cmdfile"}
+              , { "type": "to_subdir"
+                , "subdir": {"type": "var", "name": "WRKDIR"}
+                , "$1": {"type": "var", "name": "deps"}
+                }
+              ]
+            }
+          , "cmd": [{"type": "var", "name": "sh"}, "cmd"]
+          , "outs": {"type": "var", "name": "outs in WRKDIR"}
+          , "out_dirs": {"type": "var", "name": "out_dirs in WRKDIR"}
+          , "env": {"type": "var", "name": "env"}
+          }
+        ]
+      , [ "staged artifacts"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "foreach"
+            , "range":
+              { "type": "++"
+              , "$1":
+                [ {"type": "FIELD", "name": "outs"}
+                , {"type": "FIELD", "name": "out_dirs"}
+                ]
+              }
+            , "body":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "_"}
+              , "value":
+                { "type": "lookup"
+                , "map": {"type": "var", "name": "artifacts"}
+                , "key":
+                  { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "WRKDIR"}
+                    , "/"
+                    , {"type": "var", "name": "_"}
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts": {"type": "var", "name": "staged artifacts"}
+      }
+    }
+  }
 }
