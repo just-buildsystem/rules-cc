@@ -236,10 +236,7 @@
                 , "value": {"type": "var", "name": "ATTEMPT"}
                 }
               }
-            , { "type": "var"
-              , "name": "TEST_ENV"
-              , "default": {"type": "empty_map"}
-              }
+            , {"type": "var", "name": "test_env"}
             ]
           }
         ]
