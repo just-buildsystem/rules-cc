@@ -255,7 +255,11 @@
           , "then":
             { "type": "singleton_map"
             , "key": "PATH"
-            , "value": {"type": "var", "name": "PATH"}
+            , "value":
+              { "type": "join"
+              , "separator": ":"
+              , "$1": {"type": "var", "name": "PATH"}
+              }
             }
           , "else": {"type": "empty_map"}
           }
