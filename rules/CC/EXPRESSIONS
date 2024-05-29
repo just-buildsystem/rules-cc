@@ -2213,7 +2213,14 @@
     }
   }
 , "install-with-deps stage":
-  { "vars": ["pc-install-dir", "targets", "prefix", "flat-libs", "hdrs-only"]
+  { "vars":
+    [ "pc-install-dir"
+    , "targets"
+    , "prefix"
+    , "flat-libs"
+    , "hdrs-only"
+    , "skip-debug-stage"
+    ]
   , "imports":
     { "compile-deps": "compile-deps"
     , "compile-args-deps": "compile-args-deps"
@@ -2259,10 +2266,15 @@
                     }
                   ]
                 , [ "debug-srcs"
-                  , { "type": "DEP_PROVIDES"
-                    , "dep": {"type": "var", "name": "target"}
-                    , "provider": "debug-srcs"
-                    , "default": {"type": "empty_map"}
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "skip-debug-stage"}
+                    , "then": {"type": "empty_map"}
+                    , "else":
+                      { "type": "DEP_PROVIDES"
+                      , "dep": {"type": "var", "name": "target"}
+                      , "provider": "debug-srcs"
+                      , "default": {"type": "empty_map"}
+                      }
                     }
                   ]
                 ]
@@ -2449,7 +2461,14 @@
     }
   }
 , "install-with-deps result":
-  { "vars": ["pc-install-dir", "targets", "prefix", "flat-libs", "hdrs-only"]
+  { "vars":
+    [ "pc-install-dir"
+    , "targets"
+    , "prefix"
+    , "flat-libs"
+    , "hdrs-only"
+    , "skip-debug-stage"
+    ]
   , "imports": {"install stage": "install-with-deps stage"}
   , "expression":
     { "type": "RESULT"
