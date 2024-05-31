@@ -1,10 +1,81 @@
-{ "system_library":
+{ "defaults":
+  { "doc": ["A rule to provide defaults for pkgconfig"]
+  , "string_fields": ["pkg-config", "PATH", "PKG_CONFIG_PATH"]
+  , "target_fields": ["base"]
+  , "field_doc":
+    { "pkg-config":
+      ["The name of the pkg-config binary to use, potentially with full path."]
+    , "PATH": ["Additional paths to add to \"PATH\" when calling pkg-config"]
+    , "PKG_CONFIG_PATH":
+      [ "Additional paths to add to \"PKG_CONFIG_PATH\" when calling pkg-config"
+      ]
+    , "base": ["Other targets (using the same rule) to inherit from."]
+    }
+  , "imports":
+    { "base-provides": ["./", "..", "defaults-base-provides"]
+    , "base-provides-++": ["./", "..", "defaults-base-provides-++"]
+    , "nub_left": ["", "nub_left"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["pkg-config", {"type": "FIELD", "name": "pkg-config"}]
+      , ["provider", "pkg-config"]
+      , [ "pkg-config"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "pkg-config"}
+          , "then": {"type": "var", "name": "pkg-config"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
+          }
+        ]
+      , ["PATH", {"type": "FIELD", "name": "PATH"}]
+      , ["provider", "PATH"]
+      , [ "PATH"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "PATH"}
+            , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
+            ]
+          }
+        ]
+      , [ "PATH"
+        , { "type": "let*"
+          , "bindings": [["list", {"type": "var", "name": "PATH"}]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+          }
+        ]
+      , ["PKG_CONFIG_PATH", {"type": "FIELD", "name": "PKG_CONFIG_PATH"}]
+      , ["provider", "PKG_CONFIG_PATH"]
+      , [ "PKG_CONFIG_PATH"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "PKG_CONFIG_PATH"}
+            , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
+            ]
+          }
+        ]
+      , [ "PKG_CONFIG_PATH"
+        , { "type": "let*"
+          , "bindings": [["list", {"type": "var", "name": "PKG_CONFIG_PATH"}]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "provides":
+        {"type": "env", "vars": ["pkg-config", "PATH", "PKG_CONFIG_PATH"]}
+      }
+    }
+  }
+, "system_library":
   { "doc": ["A system library via pkg-config"]
   , "string_fields": ["name", "args", "stage"]
   , "implicit":
     { "defaults": [["./", "..", "defaults"]]
     , "shell defaults": [["shell", "defaults"]]
     , "add_rpath": ["add_rpath"]
+    , "pkgconfig defaults": ["defaults"]
     }
   , "config_vars": ["PKG_CONFIG_ARGS", "ENV"]
   , "field_doc":
@@ -15,6 +86,7 @@
       ]
     , "stage": ["The stage of the internally created flag files."]
     , "defaults": ["The C/C++ toolchain to use"]
+    , "pkgconfig defaults": ["The pkgconfig configuration to use"]
     }
   , "config_doc":
     { "PKG_CONFIG_ARGS":
@@ -23,7 +95,9 @@
       ]
     , "ENV":
       [ "The environment for any action generated. May contain colon-separated"
-      , "\"PKG_CONFIG_PATH\" for looking up pkg-config files."
+      , "\"PKG_CONFIG_PATH\" for looking up pkg-config files; this variable,"
+      , "as well as \"PATH\", is prefixed by the values provided in"
+      , "the \"defaults\"."
       ]
     }
   , "imports": {"pkgconfig result": "pkgconfig result"}

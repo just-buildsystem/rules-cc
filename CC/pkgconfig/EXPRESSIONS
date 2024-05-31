@@ -4,6 +4,7 @@
     { "default-ENV": ["./", "..", "default-ENV"]
     , "default-PATH": ["./", "..", "default-PATH"]
     , "stage": ["", "stage_singleton_field"]
+    , "list_provider": ["", "field_list_provider"]
     , "map_provider": ["", "field_map_provider"]
     , "sh": ["shell", "sh"]
     , "sh-PATH": ["shell", "PATH"]
@@ -25,32 +26,86 @@
           , "key": "PATH"
           }
         ]
+      , [ "ENV_PKG_CONFIG_PATH"
+        , { "type": "lookup"
+          , "map": {"type": "var", "name": "ENV"}
+          , "key": "PKG_CONFIG_PATH"
+          }
+        ]
       , [ "sh-PATH"
         , { "type": "let*"
           , "bindings": [["fieldname", "shell defaults"]]
           , "body": {"type": "CALL_EXPRESSION", "name": "sh-PATH"}
           }
         ]
+      , [ "pkgconfig PATH"
+        , { "type": "let*"
+          , "bindings":
+            [["fieldname", "pkgconfig defaults"], ["provider", "PATH"]]
+          , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          }
+        ]
+      , [ "PKG_CONFIG_PATH"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "pkgconfig defaults"]
+            , ["provider", "PKG_CONFIG_PATH"]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          }
+        ]
+      , [ "final PATH"
+        , { "type": "join"
+          , "separator": ":"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "pkgconfig PATH"}
+              , {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+              , {"type": "var", "name": "sh-PATH"}
+              , { "type": "if"
+                , "cond": {"type": "var", "name": "ENV_PATH"}
+                , "then": [{"type": "var", "name": "ENV_PATH"}]
+                }
+              ]
+            }
+          }
+        ]
+      , [ "final PKG_CONFIG_PATH"
+        , { "type": "join"
+          , "separator": ":"
+          , "$1":
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "PKG_CONFIG_PATH"}
+              , { "type": "if"
+                , "cond": {"type": "var", "name": "ENV_PKG_CONFIG_PATH"}
+                , "then": [{"type": "var", "name": "ENV_PKG_CONFIG_PATH"}]
+                }
+              ]
+            }
+          }
+        ]
       , [ "ENV"
         , { "type": "map_union"
           , "$1":
             [ {"type": "var", "name": "ENV"}
-            , { "type": "singleton_map"
-              , "key": "PATH"
-              , "value":
-                { "type": "join"
-                , "separator": ":"
-                , "$1":
-                  { "type": "++"
-                  , "$1":
-                    [ {"type": "CALL_EXPRESSION", "name": "default-PATH"}
-                    , {"type": "var", "name": "sh-PATH"}
-                    , { "type": "if"
-                      , "cond": {"type": "var", "name": "ENV_PATH"}
-                      , "then": [{"type": "var", "name": "ENV_PATH"}]
-                      }
-                    ]
-                  }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "final PATH"}
+              , "else": {"type": "empty_map"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "PATH"
+                , "value": {"type": "var", "name": "final PATH"}
+                }
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "final PKG_CONFIG_PATH"}
+              , "else": {"type": "empty_map"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "PKG_CONFIG_PATH"
+                , "value": {"type": "var", "name": "final PKG_CONFIG_PATH"}
                 }
               }
             ]
@@ -77,6 +132,23 @@
           , "body": {"type": "CALL_EXPRESSION", "name": "sh"}
           }
         ]
+      , [ "pkg-config"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings":
+              [["fieldname", "pkgconfig defaults"], ["provider", "pkg-config"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+            }
+          }
+        ]
+      , [ "pkg-config"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "pkg-config"}
+          , "then": {"type": "var", "name": "pkg-config"}
+          , "else": "pkg-config"
+          }
+        ]
       , [ "cflags-filename"
         , {"type": "join", "$1": [{"type": "var", "name": "name"}, ".cflags"]}
         ]
@@ -94,7 +166,7 @@
                 , "$1":
                   { "type": "++"
                   , "$1":
-                    [ ["pkg-config"]
+                    [ [{"type": "var", "name": "pkg-config"}]
                     , [ { "type": "join_cmd"
                         , "$1":
                           { "type": "++"
@@ -141,7 +213,7 @@
               , "$1":
                 { "type": "++"
                 , "$1":
-                  [ ["pkg-config"]
+                  [ [{"type": "var", "name": "pkg-config"}]
                   , [ { "type": "join_cmd"
                       , "$1":
                         { "type": "++"
