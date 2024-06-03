@@ -200,13 +200,14 @@ A system library via pkg-config
 
 ### Rule `["CC", "install-with-deps"]`
 
-Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"lib/pkgconfig"`. In debug mode, sources needed for local debugging will be installed to subdirectory `"debug-src"`.
+Install target's artifacts with transitive dependencies. Depending on the target, artifacts and dependencies will be installed to subdirectories `"bin"`, `"include"`, and `"lib"`. For library targets, a pkg-config file is generated and provided in `"lib/pkgconfig"`. In debug mode, depending on the target, additional artifacts needed for local debugging are gathered and installed, depending on target, to `"work"` and `"include"`.
 
 | Field | Description |
 | ----- | ----------- |
 | `"flat-libs"` | Install libraries flat to the `"lib"` subdirectory. Be aware that conflicts may occur if any of the (transitive) libraries happen to have the same base name. |
 | `"prefix"` | The prefix used for pkg-config files. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"hdrs-only"` | Only collect headers from deps (without subdirectory). |
+| `"skip-debug-stage"` | If in debug mode, skip installing additional artifacts gathered if no local debugging is needed, but debug targets are nonetheless desired. |
 | `"targets"` | Targets to install artifacts from. |
 
 | Config variable | Description |
