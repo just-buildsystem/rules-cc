@@ -1,5 +1,11 @@
 { "test_case":
-  { "doc": ["Define a test case for rule tests."]
+  { "doc":
+    [ "Define a test case for rule tests."
+    , "The config variables \"ENV\", \"ARCH\", \"HOST_ARCH\", \"TARGET_ARCH\","
+    , "\"BUILD_ARCH\", \"OS\" are collected in a file named \"conf_vars.json\"."
+    , "The test runner will pass that file as argument to \"-c\" to the \"just\""
+    , "binary, which is internally called."
+    ]
   , "string_fields": ["name", "libs", "targets", "asserts"]
   , "target_fields": ["data"]
   , "field_doc":
@@ -24,6 +30,8 @@
       ["The directory that contains the project with the targets to test."]
     }
   , "tainted": ["test"]
+  , "config_vars":
+    ["ENV", "ARCH", "HOST_ARCH", "TARGET_ARCH", "BUILD_ARCH", "OS"]
   , "implicit":
     { "runner": ["test_runner.py"]
     , "rules": [["@", "test-rules", "", "tree"]]
@@ -165,6 +173,28 @@
             }
           }
         ]
+      , [ "conf_vars"
+        , { "type": "singleton_map"
+          , "key": "conf_vars.json"
+          , "value":
+            { "type": "BLOB"
+            , "data":
+              { "type": "json_encode"
+              , "$1":
+                { "type": "env"
+                , "vars":
+                  [ "ENV"
+                  , "ARCH"
+                  , "HOST_ARCH"
+                  , "TARGET_ARCH"
+                  , "BUILD_ARCH"
+                  , "OS"
+                  ]
+                }
+              }
+            }
+          }
+        ]
       , [ "results"
         , { "type": "ACTION"
           , "inputs":
@@ -178,6 +208,7 @@
               , {"type": "var", "name": "repos"}
               , {"type": "var", "name": "work"}
               , {"type": "var", "name": "config"}
+              , {"type": "var", "name": "conf_vars"}
               ]
             }
           , "outs": ["stdout", "stderr", "result", "time-start", "time-stop"]

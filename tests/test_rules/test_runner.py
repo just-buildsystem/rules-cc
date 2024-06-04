@@ -53,7 +53,8 @@ for t in config.get('targets', []):
     should_fail = t[0] == "-"
     ret = subprocess.run([
         "./bin/just", "install", "--local-build-root", "./build_root", "-C",
-        "repos.json", "-o", "/".join(["./outs", target]), target
+        "repos.json", "-o", "/".join(["./outs", target]),
+        "-c", "conf_vars.json", target
     ],
                          capture_output=True)
     success = ret.returncode != 0 if should_fail else ret.returncode == 0
