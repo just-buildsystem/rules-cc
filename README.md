@@ -82,6 +82,8 @@ A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "default
 | Field | Description |
 | ----- | ----------- |
 | `"PROTOC"` | The proto compiler. If `"toolchain"` is empty, this field's value is considered the proto compiler name that is looked up in `"PATH"`. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the proto compiler in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
+| `"PROTOCFLAGS"` | Protobuf compiler flags. Specifying this field overwrites values from `"base"`. |
+| `"ADD_PROTOCFLAGS"` | Additional protobuf compiler flags. Specifying this field extends values from `"base"`. |
 | `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
 | `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
 | `"GRPC_PLUGIN"` | The GRPC plugin for the proto compiler. If `"toolchain"` is empty, this field's value is considered to be the absolute system path to the plugin. If `"toolchain"` is non-empty, this field's value is assumed to be the relative path to the plugin in `"toolchain"`. Specifying this field overwrites values from `"base"`. |
