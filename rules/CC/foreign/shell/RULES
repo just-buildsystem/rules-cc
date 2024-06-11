@@ -29,6 +29,7 @@
   , "implicit":
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "shell defaults": [["shell", "defaults"]]
     , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
@@ -268,6 +269,7 @@
   , "implicit":
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
+    , "shell defaults": [["shell", "defaults"]]
     , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
     , "expand_exec": [["./", "..", "expand_exec"]]
     }
