@@ -310,11 +310,60 @@
                     , "export TMPDIR=\"$(pwd)/scratch\""
                     , "export TOOLCHAIN=\"$(pwd)/toolchain\""
                     , "export LOCALBASE=\"$(pwd)/localbase\""
-                    , "export CC=$([ -x \"${CC}\" ] && echo $(pwd)/${CC} || echo ${CC})"
-                    , "export CXX=$([ -x \"${CXX}\" ] && echo $(pwd)/${CXX} || echo ${CXX})"
-                    , "export AR=$([ -x \"${AR}\" ] && echo $(pwd)/${AR} || echo ${AR})"
-                    , "export MAKE=$([ -x \"${MAKE}\" ] && echo $(pwd)/${MAKE} || echo ${MAKE})"
-                    , "export CMAKE=$([ -x \"${CMAKE}\" ] && echo $(pwd)/${CMAKE} || echo ${CMAKE})"
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "lookup"
+                        , "key": "CC"
+                        , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                        }
+                      , "then": "export CC=$(pwd)/${CC}"
+                      , "else": ""
+                      }
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "lookup"
+                        , "key": "CXX"
+                        , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                        }
+                      , "then": "export CXX=$(pwd)/${CXX}"
+                      , "else": ""
+                      }
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "lookup"
+                        , "key": "AR"
+                        , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                        }
+                      , "then": "export AR=$(pwd)/${AR}"
+                      , "else": ""
+                      }
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "lookup"
+                        , "key": "MAKE"
+                        , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                        }
+                      , "then": "export MAKE=$(pwd)/${MAKE}"
+                      , "else": ""
+                      }
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "lookup"
+                        , "key": "CMAKE"
+                        , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                        }
+                      , "then": "export CMAKE=$(pwd)/${CMAKE}"
+                      , "else": ""
+                      }
+                    , { "type": "join"
+                      , "$1":
+                        [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
+                        , { "type": "join_cmd"
+                          , "$1": [{"type": "var", "name": "PATH"}]
+                          }
+                        , ")${PATH:+:}${PATH}\""
+                        ]
+                      }
                     , { "type": "join"
                       , "$1":
                         [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
