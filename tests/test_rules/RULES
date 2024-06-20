@@ -31,7 +31,14 @@
     }
   , "tainted": ["test"]
   , "config_vars":
-    ["ENV", "ARCH", "HOST_ARCH", "TARGET_ARCH", "BUILD_ARCH", "OS"]
+    [ "ENV"
+    , "ARCH"
+    , "HOST_ARCH"
+    , "TARGET_ARCH"
+    , "BUILD_ARCH"
+    , "OS"
+    , "TOOLCHAIN_CONFIG"
+    ]
   , "implicit":
     { "runner": ["test_runner.py"]
     , "rules": [["@", "test-rules", "", "tree"]]
@@ -189,6 +196,7 @@
                   , "TARGET_ARCH"
                   , "BUILD_ARCH"
                   , "OS"
+                  , "TOOLCHAIN_CONFIG"
                   ]
                 }
               }
