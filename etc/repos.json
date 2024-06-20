@@ -72,8 +72,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.4.0-alpha+20240515"
-      , "commit": "aea775ed362a1d8e3c6a1e7d87a793bfdcddfb0f"
+      , "branch": "v1.4.0-alpha+20240619"
+      , "commit": "96158f57c36bbc649abcd9a213bf04df6cf8a1f5"
       }
     , "bindings":
       { "rules": "just/rules-just"
@@ -310,8 +310,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.4.0-alpha+20240515"
-      , "commit": "aea775ed362a1d8e3c6a1e7d87a793bfdcddfb0f"
+      , "branch": "v1.4.0-alpha+20240619"
+      , "commit": "96158f57c36bbc649abcd9a213bf04df6cf8a1f5"
       , "subdir": "etc/patches"
       }
     }
@@ -352,8 +352,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.4.0-alpha+20240515"
-      , "commit": "aea775ed362a1d8e3c6a1e7d87a793bfdcddfb0f"
+      , "branch": "v1.4.0-alpha+20240619"
+      , "commit": "96158f57c36bbc649abcd9a213bf04df6cf8a1f5"
       , "subdir": "rules"
       }
     , "target_root": "just/defaults"
@@ -461,8 +461,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.4.0-alpha+20240515"
-      , "commit": "aea775ed362a1d8e3c6a1e7d87a793bfdcddfb0f"
+      , "branch": "v1.4.0-alpha+20240619"
+      , "commit": "96158f57c36bbc649abcd9a213bf04df6cf8a1f5"
       , "subdir": "etc/toolchain"
       }
     , "rule_root": "just/rules"
@@ -484,8 +484,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.4.0-alpha+20240515"
-      , "commit": "aea775ed362a1d8e3c6a1e7d87a793bfdcddfb0f"
+      , "branch": "v1.4.0-alpha+20240619"
+      , "commit": "96158f57c36bbc649abcd9a213bf04df6cf8a1f5"
       , "subdir": "etc/defaults"
       }
     }
@@ -493,8 +493,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.4.0-alpha+20240515"
-      , "commit": "aea775ed362a1d8e3c6a1e7d87a793bfdcddfb0f"
+      , "branch": "v1.4.0-alpha+20240619"
+      , "commit": "96158f57c36bbc649abcd9a213bf04df6cf8a1f5"
       , "subdir": "etc/import"
       }
     }
