@@ -274,14 +274,14 @@
   }
 , "library":
   { "doc":
-    [ "A library C++ library, generated from proto files."
+    [ "A C++ library, generated from proto files."
     , ""
     , "This rule usually is used to bind anonymous targets generated from"
     , "proto libraries."
     ]
   , "string_fields": ["name", "stage"]
   , "target_fields": ["srcs", "deps"]
-  , "config_vars": ["CXX", "CXXFLAGS", "ADD_CXXFLAGS", "AR", "ENV"]
+  , "config_vars": ["CXX", "CXXFLAGS", "ADD_CXXFLAGS", "AR", "ENV", "DEBUG"]
   , "implicit":
     {"defaults": [["./", "..", "defaults"]], "proto-defaults": ["defaults"]}
   , "imports": {"protoc-compile": "protoc-compile"}
@@ -303,14 +303,14 @@
   }
 , "service library":
   { "doc":
-    [ "A service library C++ library, generated from proto files."
+    [ "A service C++ library, generated from proto files."
     , ""
     , "Calls protoc with gRPC plugin to additionally generate gRPC services"
     , "from proto libraries."
     ]
   , "string_fields": ["name", "stage"]
   , "target_fields": ["srcs", "deps"]
-  , "config_vars": ["CXX", "CXXFLAGS", "ADD_CXXFLAGS", "AR", "ENV"]
+  , "config_vars": ["CXX", "CXXFLAGS", "ADD_CXXFLAGS", "AR", "ENV", "DEBUG"]
   , "implicit":
     { "defaults": [["./", "..", "defaults"]]
     , "proto-defaults": ["service defaults"]
