@@ -75,6 +75,13 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. If the toolchain supports cross-compilation, it should perform a dispatch on the configuration variable `"BUILD_ARCH"` to determine for which architecture to generate code for. |
 | `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
 
+| Config variable | Description |
+| --------------- | ----------- |
+| `"ARCH"` | The unqualified architecture. Is taken as a default for `"HOST_ARCH"` and `"TARGET_ARCH"` if not set. |
+| `"HOST_ARCH"` | The architecture on which the build actions are carried out. |
+| `"TARGET_ARCH"` | The architecture for which to build. |
+| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+
 ### Rule `["CC/proto", "defaults"]`
 
 A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "defaults"]` for CC proto libraries and `["CC/proto", "service defaults"]` for CC proto service libraries (GRPC).
@@ -91,6 +98,12 @@ A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "default
 | `"base"` | Other targets (using the same rule) to inherit values from. If multiple targets are specified, for values that are overwritten (see documentation of other fields) the last specified value wins. |
 | `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the protobuf compiler and the GRPC plugin (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. |
 | `"deps"` | Optional CC libraries the resulting CC proto libraries implicitly depend on. Those are typically `"libprotobuf"` for CC proto libraries and `"libgrpc++"` for CC proto service libraries. Specifying this field extends dependencies from `"base"`. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"ARCH"` | The unqualified architecture. Is taken as a default for `"HOST_ARCH"` and `"TARGET_ARCH"` if not set. |
+| `"HOST_ARCH"` | The architecture on which the build actions are carried out. |
+| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
 
 ### Rule `["CC/foreign", "defaults"]`
 
