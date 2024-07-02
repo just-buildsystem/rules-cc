@@ -20,6 +20,7 @@
       ["./", "../../CC", "default-NON_SYSTEM_TOOLS"]
     , "default-PATH": ["./", "../../CC", "default-PATH"]
     , "default-sh": ["./", "..", "default-sh"]
+    , "sh prolog": ["shell", "prolog"]
     }
   , "expression":
     { "type": "let*"
@@ -59,6 +60,20 @@
       , [ "NON_SYSTEM_TOOLS"
         , {"type": "CALL_EXPRESSION", "name": "default-NON_SYSTEM_TOOLS"}
         ]
+      , [ "sh from outside"
+        , { "type": "if"
+          , "cond":
+            { "type": "lookup"
+            , "key": "sh"
+            , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+            }
+          , "then":
+            { "type": "join"
+            , "$1": ["./toolchain/", {"type": "var", "name": "sh"}]
+            }
+          , "else": {"type": "var", "name": "sh"}
+          }
+        ]
       , [ "sh from workdir"
         , { "type": "if"
           , "cond":
@@ -71,6 +86,36 @@
             , "$1": ["../toolchain/", {"type": "var", "name": "sh"}]
             }
           , "else": {"type": "var", "name": "sh"}
+          }
+        ]
+      , [ "with-env"
+        , { "type": "singleton_map"
+          , "key": "with-env"
+          , "value":
+            { "type": "BLOB"
+            , "data":
+              { "type": "join"
+              , "separator": "\n"
+              , "$1":
+                { "type": "++"
+                , "$1":
+                  [ { "type": "let*"
+                    , "bindings": [["fieldname", "defaults"]]
+                    , "body": {"type": "CALL_EXPRESSION", "name": "sh prolog"}
+                    }
+                  , [ ""
+                    , { "type": "join_cmd"
+                      , "$1":
+                        { "type": "++"
+                        , "$1": [["./runner"], {"type": "var", "name": "keep"}]
+                        }
+                      }
+                    , ""
+                    ]
+                  ]
+                }
+              }
+            }
           }
         ]
       , [ "invocation cmd"
@@ -210,6 +255,7 @@
               , "value": {"type": "var", "name": "run-libs"}
               }
             , {"type": "var", "name": "toolchain"}
+            , {"type": "var", "name": "with-env"}
             , {"type": "var", "name": "runner"}
             , {"type": "var", "name": "invocation"}
             , {"type": "var", "name": "test.sh"}
@@ -217,9 +263,7 @@
             ]
           }
         ]
-      , [ "cmd"
-        , {"type": "++", "$1": [["./runner"], {"type": "var", "name": "keep"}]}
-        ]
+      , ["cmd", [{"type": "var", "name": "sh from outside"}, "with-env"]]
       , [ "test_env"
         , { "type": "map_union"
           , "$1":
