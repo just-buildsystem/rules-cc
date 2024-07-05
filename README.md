@@ -253,6 +253,7 @@ A test written in C++
 | `"CC_TEST_LAUNCHER"` | List of strings representing the launcher that is prepend to the command line for running the test binary. |
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  Test runs are summarized by the `["shell/test", "summarizer"]` that is also used by shell tests. |
 | `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
+| `"TEST_SUMMARY_EXECUTION_PROPERTIES"` | Additional remote-execution properties for the test-summarizing action in case RUNS_PER_TEST is set; defaults to the empty map. |
 
 ### Rule `["shell", "defaults"]`
 
@@ -299,6 +300,7 @@ Shell test, given by a test script
 | `"TIMEOUT_SCALE"` | Factor on how to scale the timeout for this test. Defaults to 1.0. |
 | `"TARGET_ARCH"` | The architecture to build the test for.  Will only be honored, if that architecture is available in the ARCH_DISPATCH map. Otherwise, the test will be built for and run on the host architecture. |
 | `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
+| `"TEST_SUMMARY_EXECUTION_PROPERTIES"` | Additional remote-execution properties for the test-summarizing action in case RUNS_PER_TEST is set; defaults to the empty map. |
 
 ### Rule `["CC/foreign/cmake", "library"]`
 
