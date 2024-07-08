@@ -114,6 +114,7 @@
     , "stage": ["./", "../..", "stage_singleton_field"]
     , "host transition": ["transitions", "maybe for host"]
     , "target properties": ["transitions", "target properties"]
+    , "default-PATH": ["./", "../../CC", "default-PATH"]
     }
   , "config_transitions":
     { "deps": [{"type": "CALL_EXPRESSION", "name": "host transition"}]
@@ -209,6 +210,12 @@
                 }
               }
             ]
+          , [ "summary PATH"
+            , { "type": "join"
+              , "separator": ":"
+              , "$1": {"type": "CALL_EXPRESSION", "name": "default-PATH"}
+              }
+            ]
           , [ "summary"
             , { "type": "ACTION"
               , "inputs":
@@ -225,6 +232,16 @@
                 { "type": "var"
                 , "name": "TEST_SUMMARY_EXECUTION_PROPERTIES"
                 , "default": {"type": "empty_map"}
+                }
+              , "env":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "summary PATH"}
+                , "then":
+                  { "type": "singleton_map"
+                  , "key": "PATH"
+                  , "value": {"type": "var", "name": "summary PATH"}
+                  }
+                , "else": {"type": "empty_map"}
                 }
               }
             ]
