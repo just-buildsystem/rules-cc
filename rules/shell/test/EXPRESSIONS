@@ -275,7 +275,7 @@
                 }
               , "then": {"type": "empty_map"}
               , "else":
-                { "type": "singelton_map"
+                { "type": "singleton_map"
                 , "key": "TEST_RUN_NUMBER"
                 , "value": {"type": "var", "name": "ATTEMPT"}
                 }

@@ -54,6 +54,7 @@
     , "host transition": ["transitions", "for host"]
     , "target properties": ["transitions", "target properties"]
     , "stage": ["./", "../..", "stage_singleton_field"]
+    , "list_provider": ["./", "../..", "field_list_provider"]
     }
   , "expression":
     { "type": "let*"
@@ -276,6 +277,17 @@
                 }
               }
             ]
+          , [ "summary PATH"
+            , { "type": "join"
+              , "separator": ":"
+              , "$1":
+                { "type": "let*"
+                , "bindings":
+                  [["fieldname", "shell-defaults"], ["provider", "PATH"]]
+                , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+                }
+              }
+            ]
           , [ "summary"
             , { "type": "ACTION"
               , "inputs":
@@ -292,6 +304,16 @@
                 { "type": "var"
                 , "name": "TEST_SUMMARY_EXECUTION_PROPERTIES"
                 , "default": {"type": "empty_map"}
+                }
+              , "env":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "summary PATH"}
+                , "then":
+                  { "type": "singleton_map"
+                  , "key": "PATH"
+                  , "value": {"type": "var", "name": "summary PATH"}
+                  }
+                , "else": {"type": "empty_map"}
                 }
               }
             ]

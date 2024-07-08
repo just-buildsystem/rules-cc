@@ -34,6 +34,7 @@
     ]
   , "implicit":
     { "defaults": [["./", "..", "defaults"]]
+    , "shell-defaults": [["./", "../../shell", "defaults"]]
     , "runner": ["runner"]
     , "summarizer": [["./", "../../shell/test", "summarizer"]]
     }
@@ -77,6 +78,8 @@
       ]
     , "data": ["Any files the test binary needs access to when running"]
     , "defaults": ["The C/C++ toolchain to use"]
+    , "shell-defaults":
+      ["The shell toolchain to use PATH from for calling the summary action"]
     , "runner":
       [ "The test runner which starts the actual test binary after providing"
       , "the respective environment. The runner also takes care of capturing"
