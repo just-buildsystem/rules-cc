@@ -51,6 +51,27 @@
     , "$1":
       [ {"type": "CALL_EXPRESSION", "name": "with fPIC"}
       , {"type": "singleton_map", "key": "BUILD_OBJECT_ONLY", "value": null}
+      , { "type": "singleton_map"
+        , "key": "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
+        , "value": null
+        }
+      ]
+    }
+  }
+, "with fPIC, object-only":
+  { "doc":
+    ["Like \"with fPIC\", but also unconditionally setting BUILD_OBJECT_ONLY"]
+  , "var": ["BUILD_OBJECT_ONLY"]
+  , "imports": {"with fPIC": "with fPIC"}
+  , "expression":
+    { "type": "map_union"
+    , "$1":
+      [ {"type": "CALL_EXPRESSION", "name": "with fPIC"}
+      , {"type": "singleton_map", "key": "BUILD_OBJECT_ONLY", "value": true}
+      , { "type": "singleton_map"
+        , "key": "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
+        , "value": true
+        }
       ]
     }
   }

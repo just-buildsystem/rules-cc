@@ -384,6 +384,7 @@
     , "private-deps"
     , "proto"
     , "private-proto"
+    , "components"
     ]
   , "string_fields":
     [ "name"
@@ -412,6 +413,7 @@
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
     , "BUILD_OBJECT_ONLY"
+    , "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
     , "DEBUG"
     ]
   , "implicit": {"defaults": ["defaults"]}
@@ -423,6 +425,11 @@
     , "private-hdrs":
       [ "Any header files that only need to be present when compiling the"
       , "source files, but are not needed for any consumer of the library."
+      ]
+    , "components":
+      [ "Any other libraries that are considered part of this library;"
+      , "all object files of those are included unconditionally into this"
+      , "library."
       ]
     , "stage":
       [ "The logical location of all header and source files, as well as the"
@@ -543,6 +550,12 @@
       , "configuration is set, the \"shared\" option is ignored. This"
       , "variable is cleared for all dependencies."
       ]
+    , "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING":
+      [ "If true, do not include the objects in the provided \"link-args\"."
+      , "This allows consuming libraries that pick on the objects themselves"
+      , "to still forward the \"link-args\" of that library, and thus getting"
+      , "correct linking instructions for the resulting library."
+      ]
     }
   , "artifacts_doc":
     ["The actual library (libname.a) staged in the specified directory"]
@@ -583,10 +596,12 @@
     }
   , "imports":
     { "artifacts": ["./", "..", "field_artifacts"]
+    , "runfiles": ["./", "..", "field_runfiles"]
     , "static result": "lib result"
     , "shared result": "shared result"
     , "object result": "object result"
     , "fPIC transition": ["transitions", "with fPIC, not object-only"]
+    , "component transition": ["transitions", "with fPIC, object-only"]
     }
   , "config_transitions":
     { "deps": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
@@ -595,6 +610,8 @@
     , "private-proto-deps":
       [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
     , "defaults": [{"type": "CALL_EXPRESSION", "name": "fPIC transition"}]
+    , "components":
+      [{"type": "CALL_EXPRESSION", "name": "component transition"}]
     }
   , "expression":
     { "type": "let*"
@@ -653,6 +670,27 @@
             }
           }
         ]
+      , [ "component transition"
+        , {"type": "CALL_EXPRESSION", "name": "component transition"}
+        ]
+      , [ "component hdrs"
+        , { "type": "let*"
+          , "bindings":
+            [ ["fieldname", "components"]
+            , ["transition", {"type": "var", "name": "component transition"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "runfiles"}
+          }
+        ]
+      , [ "hdrs"
+        , { "type": "disjoint_map_union"
+          , "msg": "Staging conflict between component and own header files"
+          , "$1":
+            [ {"type": "var", "name": "hdrs"}
+            , {"type": "var", "name": "component hdrs"}
+            ]
+          }
+        ]
       , [ "private-hdrs"
         , { "type": "to_subdir"
           , "subdir": {"type": "var", "name": "stage"}
@@ -687,7 +725,15 @@
           , "proto-deps"
           , "private-proto-deps"
           , "defaults"
+          , "components"
           ]
+        ]
+      , ["component-fieldnames", ["components"]]
+      , [ "modified-transitions"
+        , { "type": "singleton_map"
+          , "key": "components"
+          , "value": {"type": "var", "name": "component transition"}
+          }
         ]
       , [ "shared"
         , { "type": "and"
