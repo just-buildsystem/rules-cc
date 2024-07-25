@@ -215,13 +215,20 @@
 , "debug-deps":
   { "doc":
     ["Collect debug dependencies (sources/headers) from given target_fields"]
-  , "vars": ["deps-provider", "deps-fieldnames", "deps-transition"]
+  , "vars":
+    [ "deps-provider"
+    , "deps-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    ]
   , "vars_doc":
     { "deps-provider": ["Name of provider to use (debug-srcs/debug-hdrs)."]
     , "deps-fieldnames":
       ["List of target_field names to collect dependencies from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
   , "expression":
@@ -238,7 +245,17 @@
             { "type": "let*"
             , "bindings":
               [ ["provider", {"type": "var", "name": "deps-provider"}]
-              , ["transition", {"type": "var", "name": "deps-transition"}]
+              , [ "transition"
+                , { "type": "lookup"
+                  , "map":
+                    { "type": "var"
+                    , "name": "modified-transitions"
+                    , "default": {"type": "empty_map"}
+                    }
+                  , "key": {"type": "var", "name": "fieldname"}
+                  , "default": {"type": "var", "name": "deps-transition"}
+                  }
+                ]
               , ["default", {"type": "empty_map"}]
               ]
             , "body": [{"type": "CALL_EXPRESSION", "name": "provider_list"}]
@@ -250,12 +267,14 @@
   }
 , "compile-deps":
   { "doc": ["Collect compile dependencies (headers) from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect dependencies from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports":
     { "runfiles_list": ["./", "..", "field_runfiles_list"]
@@ -275,7 +294,17 @@
             { "type": "let*"
             , "bindings":
               [ ["provider", "compile-deps"]
-              , ["transition", {"type": "var", "name": "deps-transition"}]
+              , [ "transition"
+                , { "type": "lookup"
+                  , "map":
+                    { "type": "var"
+                    , "name": "modified-transitions"
+                    , "default": {"type": "empty_map"}
+                    }
+                  , "key": {"type": "var", "name": "fieldname"}
+                  , "default": {"type": "var", "name": "deps-transition"}
+                  }
+                ]
               , ["default", {"type": "empty_map"}]
               ]
             , "body":
@@ -290,12 +319,14 @@
   }
 , "compile-args-deps":
   { "doc": ["Collect compile arguments from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect arguments from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
   , "expression":
@@ -308,7 +339,17 @@
         { "type": "let*"
         , "bindings":
           [ ["provider", "compile-args"]
-          , ["transition", {"type": "var", "name": "deps-transition"}]
+          , [ "transition"
+            , { "type": "lookup"
+              , "map":
+                { "type": "var"
+                , "name": "modified-transitions"
+                , "default": {"type": "empty_map"}
+                }
+              , "key": {"type": "var", "name": "fieldname"}
+              , "default": {"type": "var", "name": "deps-transition"}
+              }
+            ]
           ]
         , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
         }
@@ -317,38 +358,75 @@
   }
 , "link-deps":
   { "doc": ["Collect link dependencies (libraries) from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars":
+    [ "deps-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    , "component-fieldnames"
+    ]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect dependencies from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports":
     { "artifacts_list": ["./", "..", "field_artifacts_list"]
     , "provider_list": ["./", "..", "field_provider_list"]
     }
   , "expression":
-    { "type": "disjoint_map_union"
-    , "$1":
-      { "type": "++"
-      , "$1":
-        { "type": "foreach"
-        , "var": "fieldname"
-        , "range": {"type": "var", "name": "deps-fieldnames"}
-        , "body":
-          { "type": "++"
+    { "type": "let*"
+    , "bindings":
+      [ [ "drop_artifacts"
+        , { "type": "set"
           , "$1":
-            { "type": "let*"
-            , "bindings":
-              [ ["provider", "link-deps"]
-              , ["default", {"type": "empty_map"}]
-              , ["transition", {"type": "var", "name": "deps-transition"}]
-              ]
-            , "body":
-              [ {"type": "CALL_EXPRESSION", "name": "provider_list"}
-              , {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
-              ]
+            {"type": "var", "name": "component-fieldnames", "default": []}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "disjoint_map_union"
+      , "$1":
+        { "type": "++"
+        , "$1":
+          { "type": "foreach"
+          , "var": "fieldname"
+          , "range": {"type": "var", "name": "deps-fieldnames"}
+          , "body":
+            { "type": "++"
+            , "$1":
+              { "type": "let*"
+              , "bindings":
+                [ ["provider", "link-deps"]
+                , ["default", {"type": "empty_map"}]
+                , [ "transition"
+                  , { "type": "lookup"
+                    , "map":
+                      { "type": "var"
+                      , "name": "modified-transitions"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , "key": {"type": "var", "name": "fieldname"}
+                    , "default": {"type": "var", "name": "deps-transition"}
+                    }
+                  ]
+                ]
+              , "body":
+                [ {"type": "CALL_EXPRESSION", "name": "provider_list"}
+                , { "type": "if"
+                  , "cond":
+                    { "type": "lookup"
+                    , "map": {"type": "var", "name": "drop_artifacts"}
+                    , "key": {"type": "var", "name": "fieldname"}
+                    }
+                  , "then": []
+                  , "else":
+                    {"type": "CALL_EXPRESSION", "name": "artifacts_list"}
+                  }
+                ]
+              }
             }
           }
         }
@@ -357,12 +435,14 @@
   }
 , "link-args-deps":
   { "doc": ["Collect linker arguments from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect arguments from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
   , "expression":
@@ -375,7 +455,17 @@
         { "type": "let*"
         , "bindings":
           [ ["provider", "link-args"]
-          , ["transition", {"type": "var", "name": "deps-transition"}]
+          , [ "transition"
+            , { "type": "lookup"
+              , "map":
+                { "type": "var"
+                , "name": "modified-transitions"
+                , "default": {"type": "empty_map"}
+                }
+              , "key": {"type": "var", "name": "fieldname"}
+              , "default": {"type": "var", "name": "deps-transition"}
+              }
+            ]
           ]
         , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
         }
@@ -384,12 +474,14 @@
   }
 , "run-libs-deps":
   { "doc": ["Collect runtime libraries from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect dependencies from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
   , "expression":
@@ -408,7 +500,17 @@
             , "bindings":
               [ ["provider", "run-libs"]
               , ["default", {"type": "empty_map"}]
-              , ["transition", {"type": "var", "name": "deps-transition"}]
+              , [ "transition"
+                , { "type": "lookup"
+                  , "map":
+                    { "type": "var"
+                    , "name": "modified-transitions"
+                    , "default": {"type": "empty_map"}
+                    }
+                  , "key": {"type": "var", "name": "fieldname"}
+                  , "default": {"type": "var", "name": "deps-transition"}
+                  }
+                ]
               ]
             , "body": {"type": "CALL_EXPRESSION", "name": "provider_list"}
             }
@@ -420,12 +522,14 @@
 , "run-libs-args-deps":
   { "doc":
     ["Collect runtime libraries link arguments from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect arguments from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
   , "expression":
@@ -438,7 +542,17 @@
         { "type": "let*"
         , "bindings":
           [ ["provider", "run-libs-args"]
-          , ["transition", {"type": "var", "name": "deps-transition"}]
+          , [ "transition"
+            , { "type": "lookup"
+              , "map":
+                { "type": "var"
+                , "name": "modified-transitions"
+                , "default": {"type": "empty_map"}
+                }
+              , "key": {"type": "var", "name": "fieldname"}
+              , "default": {"type": "var", "name": "deps-transition"}
+              }
+            ]
           ]
         , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
         }
@@ -447,12 +561,15 @@
   }
 , "pkg-map-provider-deps":
   { "doc": ["Collect maps from provider \"package\" for given target_fields"]
-  , "vars": ["pkg-key", "deps-fieldnames", "deps-transition"]
+  , "vars":
+    ["pkg-key", "deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "pkg-key": ["Key to lookup in provider \"package\"."]
     , "deps-fieldnames": ["List of target_field names to collect maps from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"provider_list": ["./", "..", "field_provider_list"]}
   , "expression":
@@ -468,7 +585,17 @@
           , "bindings":
             [ ["provider", "package"]
             , ["default", {"type": "empty_map"}]
-            , ["transition", {"type": "var", "name": "deps-transition"}]
+            , [ "transition"
+              , { "type": "lookup"
+                , "map":
+                  { "type": "var"
+                  , "name": "modified-transitions"
+                  , "default": {"type": "empty_map"}
+                  }
+                , "key": {"type": "var", "name": "fieldname"}
+                , "default": {"type": "var", "name": "deps-transition"}
+                }
+              ]
             ]
           , "body":
             { "type": "foreach"
@@ -488,11 +615,13 @@
   }
 , "cflags-files-deps":
   { "doc": ["Collect cflags files from target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames": ["List of target_field names to collect files from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"pkg-provider": "pkg-map-provider-deps"}
   , "expression":
@@ -503,11 +632,13 @@
   }
 , "ldflags-files-deps":
   { "doc": ["Collect cflags files from target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition"]
+  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
   , "vars_doc":
     { "deps-fieldnames": ["List of target_field names to collect files from."]
     , "deps-transition":
       ["The optional configuration transition for the targets."]
+    , "modified-transitions":
+      ["Map telling fields that need to be transitioned differently"]
     }
   , "imports": {"pkg-provider": "pkg-map-provider-deps"}
   , "expression":
@@ -729,7 +860,11 @@
     , "private-hdrs"
     , "compile-deps"
     , "cflags-files"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
     ]
+  , "imports": {"field_artifacts": ["./", "..", "field_artifacts"]}
   , "expression":
     { "type": "let*"
     , "bindings":
@@ -757,93 +892,129 @@
             ]
           }
         ]
-      ]
-    , "body":
-      { "type": "map_union"
-      , "$1":
-        { "type": "foreach_map"
-        , "var_key": "src_name"
-        , "var_val": "src_val"
-        , "range": {"type": "var", "name": "srcs"}
-        , "body":
-          { "type": "let*"
-          , "bindings":
-            [ [ "work src_name"
-              , { "type": "join"
-                , "separator": "/"
-                , "$1": ["work", {"type": "var", "name": "src_name"}]
-                }
-              ]
-            , [ "inputs"
-              , { "type": "map_union"
-                , "$1":
-                  [ {"type": "var", "name": "all hdrs"}
-                  , { "type": "singleton_map"
-                    , "key": {"type": "var", "name": "work src_name"}
-                    , "value": {"type": "var", "name": "src_val"}
-                    }
-                  , { "type": "var"
-                    , "name": "cflags-files"
-                    , "default": {"type": "empty_map"}
-                    }
-                  , { "type": "var"
-                    , "name": "TOOLCHAIN"
-                    , "default": {"type": "empty_map"}
+      , [ "my objects"
+        , { "type": "map_union"
+          , "$1":
+            { "type": "foreach_map"
+            , "var_key": "src_name"
+            , "var_val": "src_val"
+            , "range": {"type": "var", "name": "srcs"}
+            , "body":
+              { "type": "let*"
+              , "bindings":
+                [ [ "work src_name"
+                  , { "type": "join"
+                    , "separator": "/"
+                    , "$1": ["work", {"type": "var", "name": "src_name"}]
                     }
                   ]
-                }
-              ]
-            , [ "out"
-              , { "type": "change_ending"
-                , "$1": {"type": "var", "name": "src_name"}
-                , "ending": ".o"
-                }
-              ]
-            , [ "work out"
-              , { "type": "join"
-                , "separator": "/"
-                , "$1": ["work", {"type": "var", "name": "out"}]
-                }
-              ]
-            , [ "action output"
-              , { "type": "ACTION"
-                , "outs": [{"type": "var", "name": "work out"}]
-                , "inputs": {"type": "var", "name": "inputs"}
-                , "env":
-                  { "type": "var"
-                  , "name": "ENV"
-                  , "default": {"type": "empty_map"}
-                  }
-                , "cmd":
-                  { "type": "++"
-                  , "$1":
-                    [ [{"type": "var", "name": "COMPILER"}]
-                    , {"type": "var", "name": "COMPILE_FLAGS"}
-                    , ["-I", "work", "-isystem", "include"]
-                    , ["-c", {"type": "var", "name": "work src_name"}]
-                    , ["-o", {"type": "var", "name": "work out"}]
-                    ]
-                  }
-                }
-              ]
-            , [ "staged output artifact"
-              , { "type": "map_union"
-                , "$1":
-                  { "type": "foreach_map"
-                  , "range": {"type": "var", "name": "action output"}
-                  , "var_val": "object"
-                  , "body":
-                    { "type": "singleton_map"
-                    , "key": {"type": "var", "name": "out"}
-                    , "value": {"type": "var", "name": "object"}
+                , [ "inputs"
+                  , { "type": "map_union"
+                    , "$1":
+                      [ {"type": "var", "name": "all hdrs"}
+                      , { "type": "singleton_map"
+                        , "key": {"type": "var", "name": "work src_name"}
+                        , "value": {"type": "var", "name": "src_val"}
+                        }
+                      , { "type": "var"
+                        , "name": "cflags-files"
+                        , "default": {"type": "empty_map"}
+                        }
+                      , { "type": "var"
+                        , "name": "TOOLCHAIN"
+                        , "default": {"type": "empty_map"}
+                        }
+                      ]
                     }
-                  }
-                }
-              ]
-            ]
-          , "body": {"type": "var", "name": "staged output artifact"}
+                  ]
+                , [ "out"
+                  , { "type": "change_ending"
+                    , "$1": {"type": "var", "name": "src_name"}
+                    , "ending": ".o"
+                    }
+                  ]
+                , [ "work out"
+                  , { "type": "join"
+                    , "separator": "/"
+                    , "$1": ["work", {"type": "var", "name": "out"}]
+                    }
+                  ]
+                , [ "action output"
+                  , { "type": "ACTION"
+                    , "outs": [{"type": "var", "name": "work out"}]
+                    , "inputs": {"type": "var", "name": "inputs"}
+                    , "env":
+                      { "type": "var"
+                      , "name": "ENV"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , "cmd":
+                      { "type": "++"
+                      , "$1":
+                        [ [{"type": "var", "name": "COMPILER"}]
+                        , {"type": "var", "name": "COMPILE_FLAGS"}
+                        , ["-I", "work", "-isystem", "include"]
+                        , ["-c", {"type": "var", "name": "work src_name"}]
+                        , ["-o", {"type": "var", "name": "work out"}]
+                        ]
+                      }
+                    }
+                  ]
+                , [ "staged output artifact"
+                  , { "type": "map_union"
+                    , "$1":
+                      { "type": "foreach_map"
+                      , "range": {"type": "var", "name": "action output"}
+                      , "var_val": "object"
+                      , "body":
+                        { "type": "singleton_map"
+                        , "key": {"type": "var", "name": "out"}
+                        , "value": {"type": "var", "name": "object"}
+                        }
+                      }
+                    }
+                  ]
+                ]
+              , "body": {"type": "var", "name": "staged output artifact"}
+              }
+            }
           }
-        }
+        ]
+      , [ "component artifacts"
+        , { "type": "disjoint_map_union"
+          , "$1":
+            { "type": "foreach"
+            , "var": "fieldname"
+            , "range":
+              {"type": "var", "name": "component-fieldnames", "default": []}
+            , "body":
+              { "type": "let*"
+              , "bindings":
+                [ [ "transition"
+                  , { "type": "lookup"
+                    , "map":
+                      { "type": "var"
+                      , "name": "modified-transitions"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , "key": {"type": "var", "name": "fieldname"}
+                    , "default": {"type": "var", "name": "deps-transition"}
+                    }
+                  ]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "field_artifacts"}
+              }
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "disjoint_map_union"
+      , "msg": "Stating conflict between own objects and objects of components"
+      , "$1":
+        [ {"type": "var", "name": "my objects"}
+        , {"type": "var", "name": "component artifacts"}
+        ]
       }
     }
   }
@@ -999,6 +1170,9 @@
     , "compile-args"
     , "cflags-files"
     , "defaults-transition"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
     ]
   , "imports":
     { "compiler": "compiler"
@@ -1184,6 +1358,10 @@
     , "extra-provides"
     , "public-fieldnames"
     , "private-fieldnames"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    , "defaults-transition"
     ]
   , "imports":
     { "compile-deps": "compile-deps"
@@ -1354,6 +1532,9 @@
     , "cflags-files"
     , "ldflags-files"
     , "defaults-transition"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
     ]
   , "imports":
     { "compiler": "compiler"
@@ -1559,8 +1740,10 @@
     , "extra-provides"
     , "defaults-transition"
     , "deps-transition"
+    , "modified-transitions"
     , "public-fieldnames"
     , "private-fieldnames"
+    , "component-fieldnames"
     ]
   , "imports":
     { "compile-deps": "compile-deps"
@@ -1761,6 +1944,7 @@
     , "compile-args"
     , "cflags-files"
     , "defaults-transition"
+    , "component-fieldnames"
     ]
   , "imports":
     { "compiler": "compiler"
@@ -1848,6 +2032,7 @@
     , "AR"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
     , "DEBUG"
     , "name"
     , "pure C"
@@ -1863,6 +2048,10 @@
     , "extra-provides"
     , "public-fieldnames"
     , "private-fieldnames"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    , "defaults-transition"
     ]
   , "imports":
     { "compile-deps": "compile-deps"
@@ -1903,7 +2092,15 @@
           , "$1":
             { "type": "++"
             , "$1":
-              [ {"type": "keys", "$1": {"type": "var", "name": "objects"}}
+              [ { "type": "if"
+                , "cond":
+                  { "type": "var"
+                  , "name": "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
+                  }
+                , "then": []
+                , "else":
+                  {"type": "keys", "$1": {"type": "var", "name": "objects"}}
+                }
               , {"type": "var", "name": "ldflags", "default": []}
               , {"type": "var", "name": "private-ldflags", "default": []}
               , {"type": "CALL_EXPRESSION", "name": "link-args-deps"}
@@ -2209,6 +2406,7 @@
     , "private-ldflags"
     , "stage"
     , "private-fieldnames"
+    , "component-fieldnames"
     ]
   , "imports":
     { "compile-deps": "compile-deps"

@@ -24,15 +24,55 @@
     [ "Transition that enables BUILD_POSITION_INDEPENDENT if config_field"
     , "\"shared\" is not empty."
     ]
+  , "var": ["BUILD_OBJECT_ONLY"]
   , "expression":
     { "type": "if"
-    , "cond": {"type": "FIELD", "name": "shared"}
+    , "cond":
+      { "type": "and"
+      , "$1":
+        [ {"type": "FIELD", "name": "shared"}
+        , {"type": "not", "$1": {"type": "var", "name": "BUILD_OBJECT_ONLY"}}
+        ]
+      }
     , "then":
       { "type": "singleton_map"
       , "key": "BUILD_POSITION_INDEPENDENT"
       , "value": true
       }
     , "else": {"type": "empty_map"}
+    }
+  }
+, "with fPIC, not object-only":
+  { "doc": ["Like \"with fPIC\", but also clearing BUILD_OBJECT_ONLY"]
+  , "var": ["BUILD_OBJECT_ONLY"]
+  , "imports": {"with fPIC": "with fPIC"}
+  , "expression":
+    { "type": "map_union"
+    , "$1":
+      [ {"type": "CALL_EXPRESSION", "name": "with fPIC"}
+      , {"type": "singleton_map", "key": "BUILD_OBJECT_ONLY", "value": null}
+      , { "type": "singleton_map"
+        , "key": "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
+        , "value": null
+        }
+      ]
+    }
+  }
+, "with fPIC, object-only":
+  { "doc":
+    ["Like \"with fPIC\", but also unconditionally setting BUILD_OBJECT_ONLY"]
+  , "var": ["BUILD_OBJECT_ONLY"]
+  , "imports": {"with fPIC": "with fPIC"}
+  , "expression":
+    { "type": "map_union"
+    , "$1":
+      [ {"type": "CALL_EXPRESSION", "name": "with fPIC"}
+      , {"type": "singleton_map", "key": "BUILD_OBJECT_ONLY", "value": true}
+      , { "type": "singleton_map"
+        , "key": "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
+        , "value": true
+        }
+      ]
     }
   }
 , "target properties":
