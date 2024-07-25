@@ -8,8 +8,14 @@
   , "stage": ["foo"]
   }
 , "bar":
+  { "type": "configure"
+  , "target": "bar (plain)"
+  , "config":
+    {"type": "singleton_map", "key": "BUILD_OBJECT_ONLY", "value": "true"}
+  }
+, "bar (plain)":
   { "type": ["@", "rules", "CC", "library"]
-  , "object_only": ["yes"]
+  , "name": ["bar"]
   , "hdrs": ["bar.hpp"]
   , "srcs": ["bar.cpp"]
   , "stage": ["bar"]
