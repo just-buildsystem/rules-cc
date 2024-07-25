@@ -175,11 +175,13 @@ A C++ library
 | `"private-deps"` | Any other libraries this library depends upon but does not include in its public headers. |
 | `"proto"` | Any `["proto", "library"]` this target depends upon directly. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
 | `"private-proto"` | Any `["proto", "library"]` this target depends upon privately. The creation of C++ bindings for this proto library as well as of its dependencies will be taken care of (as anonymous targets, so no duplicate work will be carried out, even if the same proto library is used at various places). |
-| `"shared"` | If non-empty, produce a shared instead of a static library. Setting this option is mutually exclusive to the `"object_only"` option. |
-| `"object_only"` | If non-empty, produce an object library, resulting in object files added to the linker line of all depending targets. Setting this option is mutually exclusive to the `"shared"` option. |
+| `"components"` | Any other libraries that are considered part of this library; all object files of those are included unconditionally into this library. |
+| `"shared"` | If non-empty, produce a shared instead of a static library. |
 
 | Config variable | Description |
 | --------------- | ----------- |
+| `"BUILD_OBJECT_ONLY"` | If true, produce an object library, resulting in object files added to the linker line of all depending targets. If this configuration is set, the `"shared"` option is ignored. This variable is cleared for all dependencies. |
+| `"BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"` | If true, do not include the objects in the provided `"link-args"`. This allows consuming libraries that pick on the objects themselves to still forward the `"link-args"` of that library, and thus getting correct linking instructions for the resulting library. |
 | `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
 
 ### Rule `["CC/prebuilt", "library"]`
