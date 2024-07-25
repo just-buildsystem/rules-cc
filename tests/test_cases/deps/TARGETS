@@ -278,10 +278,59 @@
     ]
   , "data": [["TREE", null, "install"]]
   }
+, "components":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_components"]
+  , "targets":
+    [ "+foo"
+    , "+bar"
+    , "+combined_static_lib"
+    , "+combined_shared_lib"
+    , "+main"
+    , "+main-dynamic"
+    ]
+  , "asserts":
+    [ "test -f foo/foo.hpp"
+    , "test -f foo/libfoo.a"
+    , "! test -e foo/libfoo.so"
+    , "test -f bar/bar.hpp"
+    , "test -f bar/libbar.a"
+    , "! test -e bar/libbar.so"
+    , "test -f combined_static_lib/libcombstatic.a"
+    , "test -f combined_static_lib/foo.hpp"
+    , "test -f combined_static_lib/bar.hpp"
+    , "! test -f combined_static_lib/libfoo.a"
+    , "! test -f combined_static_lib/libbar.a"
+    , "test -f combined_shared_lib/libcombshared.so"
+    , "test -f combined_shared_lib/foo.hpp"
+    , "test -f combined_shared_lib/bar.hpp"
+    , "! test -f combined_shared_lib/libfoo.a"
+    , "! test -f combined_shared_lib/libbar.a"
+    , "! test -f combined_shared_lib/libfoo.so"
+    , "! test -f combined_shared_lib/libbar.so"
+    , "./main/main"
+    , "./main/main | grep 'Hello-from-main'"
+    , "./main/main | grep 'bar.3'"
+    , "./main/main | grep 'foo.15'"
+    , "./main-dynamic/bin/main"
+    , "./main-dynamic/bin/main | grep 'Hello-from-main'"
+    , "./main-dynamic/bin/main | grep 'bar.3'"
+    , "./main-dynamic/bin/main | grep 'foo.15'"
+    ]
+  , "data": [["TREE", null, "components"]]
+  }
 , "ALL":
   { "type": "install"
   , "deps":
-    ["private", "public", "shared", "object", "prebuilt", "cmake", "install"]
+    [ "private"
+    , "public"
+    , "shared"
+    , "object"
+    , "prebuilt"
+    , "cmake"
+    , "install"
+    , "components"
+    ]
   , "tainted": ["test"]
   }
 }

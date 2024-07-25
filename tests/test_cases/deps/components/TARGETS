@@ -1,0 +1,47 @@
+{ "combined_static_lib":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["combstatic"]
+  , "components": ["foo", "bar"]
+  }
+, "combined_shared_lib":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["combshared"]
+  , "shared": [""]
+  , "components": ["foo", "bar"]
+  }
+, "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "deps": ["foodep"]
+  }
+, "foodep":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foodep"]
+  , "hdrs": ["foodep.hpp"]
+  , "srcs": ["foodep.cpp"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  }
+, "main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["combined_static_lib"]
+  }
+, "main-shared":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["combined_shared_lib"]
+  }
+, "main-dynamic":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["main-shared"]
+  }
+}
