@@ -291,6 +291,7 @@ Shell test, given by a test script
 | Field | Description |
 | ----- | ----------- |
 | `"keep"` | List of names (relative to the test working directory) of files that the test might generate that should be kept as part of the output. This might be useful for further analysis of the test |
+| `"keep-dirs"` | List of names (relative to the test working directory) of directories that the test might generate that should be kept as part of the output. This might be useful for further analysis of the test |
 | `"name"` | A name for the test, used in reporting, as well as for staging the test result tree in the runfiles |
 | `"deps"` | Any targets that should be staged (with artifacts and runfiles) into the tests working directory |
 | `"test"` | The shell script for the test, launched with sh.  An empty directory is created to store any temporary files needed by the test, and it is made available in the environment variable TEST_TMPDIR. The test should not assume write permissions outside the working directory and the TEST_TMPDIR. For convenience, the environment variable TMPDIR is also set to TEST_TMPDIR.  If the configuration variable RUNS_PER_TEST is set, the environment variable TEST_RUN_NUMBER will also be set to the number of the attempt, counting from 0.  This running of the test is carried out by the implicit dependency on the target `"runner"`. By setting this target in the target layer of this rues repository (instead of letting it default to the respective file), the shell test environment can be modified globally. |
