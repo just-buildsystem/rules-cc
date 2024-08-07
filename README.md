@@ -64,6 +64,7 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"CFLAGS"` | Flags for C compilation. Specifying this field overwrites values from `"base"`. |
 | `"CXXFLAGS"` | Flags for C++ compilation. Specifying this field overwrites values from `"base"`. |
 | `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
+| `"ARFLAGS"` | Arguments to tell the archiver to create an archive with the specified object files. If the `"ARFLAGS"` specified in the defaults target are empty, the rules will use `["cqs"]`. |
 | `"ADD_COMPILE_FLAGS"` | Additional compilation flags for C and C++. Specifying this field extends values from `"base"` for both, `"CFLAGS"` and `"CXXFLAGS"`. |
 | `"ADD_CFLAGS"` | Additional compilation flags specific for C. Specifying this field extends values from `"base"`. |
 | `"ADD_CXXFLAGS"` | Additional compilation flags specific for C++. Specifying this field extends values from `"base"`. |
