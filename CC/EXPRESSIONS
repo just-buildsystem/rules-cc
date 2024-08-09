@@ -288,7 +288,12 @@
   }
 , "compile-deps":
   { "doc": ["Collect compile dependencies (headers) from given target_fields"]
-  , "vars": ["deps-fieldnames", "deps-transition", "modified-transitions"]
+  , "vars":
+    [ "deps-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    , "component-fieldnames"
+    ]
   , "vars_doc":
     { "deps-fieldnames":
       ["List of target_field names to collect dependencies from."]
@@ -306,35 +311,67 @@
     , "$1":
       { "type": "++"
       , "$1":
-        { "type": "foreach"
-        , "var": "fieldname"
-        , "range": {"type": "var", "name": "deps-fieldnames"}
-        , "body":
-          { "type": "++"
+        [ { "type": "++"
           , "$1":
-            { "type": "let*"
-            , "bindings":
-              [ ["provider", "compile-deps"]
-              , [ "transition"
-                , { "type": "lookup"
-                  , "map":
-                    { "type": "var"
-                    , "name": "modified-transitions"
-                    , "default": {"type": "empty_map"}
-                    }
-                  , "key": {"type": "var", "name": "fieldname"}
-                  , "default": {"type": "var", "name": "deps-transition"}
+            { "type": "foreach"
+            , "var": "fieldname"
+            , "range":
+              { "type": "++"
+              , "$1":
+                [ {"type": "var", "name": "deps-fieldnames"}
+                , { "type": "var"
+                  , "name": "component-fieldnames"
+                  , "default": []
                   }
                 ]
-              , ["default", {"type": "empty_map"}]
-              ]
+              }
             , "body":
-              [ {"type": "CALL_EXPRESSION", "name": "provider_list"}
-              , {"type": "CALL_EXPRESSION", "name": "runfiles_list"}
-              ]
+              { "type": "let*"
+              , "bindings":
+                [ ["provider", "compile-deps"]
+                , [ "transition"
+                  , { "type": "lookup"
+                    , "map":
+                      { "type": "var"
+                      , "name": "modified-transitions"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , "key": {"type": "var", "name": "fieldname"}
+                    , "default": {"type": "var", "name": "deps-transition"}
+                    }
+                  ]
+                , ["default", {"type": "empty_map"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "provider_list"}
+              }
             }
           }
-        }
+        , { "type": "++"
+          , "$1":
+            { "type": "foreach"
+            , "var": "fieldname"
+            , "range": {"type": "var", "name": "deps-fieldnames"}
+            , "body":
+              { "type": "let*"
+              , "bindings":
+                [ [ "transition"
+                  , { "type": "lookup"
+                    , "map":
+                      { "type": "var"
+                      , "name": "modified-transitions"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , "key": {"type": "var", "name": "fieldname"}
+                    , "default": {"type": "var", "name": "deps-transition"}
+                    }
+                  ]
+                , ["default", {"type": "empty_map"}]
+                ]
+              , "body": {"type": "CALL_EXPRESSION", "name": "runfiles_list"}
+              }
+            }
+          }
+        ]
       }
     }
   }
