@@ -3,7 +3,7 @@
 #include <iostream>
 #include <ostream>
 
-int foodep(int x) {
+foo_t foodep(foo_t x) {
   std::cout << "foodep(" << x << ")" << std::endl;
   return x + 2;
 }

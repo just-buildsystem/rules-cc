@@ -44,4 +44,12 @@
   { "type": ["@", "rules", "CC", "install-with-deps"]
   , "targets": ["main-shared"]
   }
+, "installed_static":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["combined_static_lib"]
+  }
+, "installed_shared":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["combined_shared_lib"]
+  }
 }
