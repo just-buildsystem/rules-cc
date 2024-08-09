@@ -344,6 +344,39 @@
     ]
   , "data": [["TREE", null, "components"]]
   }
+, "transitive-components":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["deps_transitive_components"]
+  , "targets":
+    ["+baz", "+bar", "+foo", "+main", "+shared-foo", "+installed-shared-main"]
+  , "asserts":
+    [ "test -f foo/libfoo.a"
+    , "test -f foo/foo.hpp"
+    , "test -f foo/bar.hpp"
+    , "test -f foo/baz.hpp"
+    , "! test -f foo/foodep.hpp"
+    , "! test -f foo/bardep.hpp"
+    , "! test -f foo/bazdep.hpp"
+    , "./main/main"
+    , "./main/main | grep main"
+    , "./main/main | grep foodep"
+    , "./main/main | grep bardep"
+    , "./main/main | grep bazdep"
+    , "test -f shared-foo/libfoo.so"
+    , "test -f shared-foo/foo.hpp"
+    , "test -f shared-foo/bar.hpp"
+    , "test -f shared-foo/baz.hpp"
+    , "! test -f shared-foo/foodep.hpp"
+    , "! test -f shared-foo/bardep.hpp"
+    , "! test -f shared-foo/bazdep.hpp"
+    , "./installed-shared-main/bin/main"
+    , "./installed-shared-main/bin/main | grep main"
+    , "./installed-shared-main/bin/main | grep foodep"
+    , "./installed-shared-main/bin/main | grep bardep"
+    , "./installed-shared-main/bin/main | grep bazdep"
+    ]
+  , "data": [["TREE", null, "transitive-components"]]
+  }
 , "ALL":
   { "type": "install"
   , "deps":
@@ -355,6 +388,7 @@
     , "cmake"
     , "install"
     , "components"
+    , "transitive-components"
     ]
   , "tainted": ["test"]
   }

@@ -1,0 +1,64 @@
+{ "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "deps": ["foodep"]
+  , "components": ["bar"]
+  }
+, "foodep":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foodep"]
+  , "hdrs": ["foodep.hpp"]
+  , "srcs": ["foodep.cpp"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "deps": ["bardep"]
+  , "components": ["baz"]
+  }
+, "bardep":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bardep"]
+  , "hdrs": ["bardep.hpp"]
+  , "srcs": ["bardep.cpp"]
+  }
+, "baz":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["baz"]
+  , "hdrs": ["baz.hpp"]
+  , "srcs": ["baz.cpp"]
+  , "deps": ["bazdep"]
+  }
+, "bazdep":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bazdep"]
+  , "hdrs": ["bazdep.hpp"]
+  , "srcs": ["bazdep.cpp"]
+  }
+, "main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["foo"]
+  }
+, "shared-foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "shared": [""]
+  , "components": ["foo"]
+  }
+, "shared-main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["foo"]
+  }
+, "installed-shared-main":
+  { "type": ["@", "rules", "CC", "install-with-deps"]
+  , "targets": ["shared-main"]
+  }
+}
