@@ -2036,6 +2036,7 @@
     , "compile-args"
     , "cflags-files"
     , "defaults-transition"
+    , "modified-transitions"
     , "component-fieldnames"
     ]
   , "imports":
