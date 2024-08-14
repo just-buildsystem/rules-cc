@@ -431,6 +431,7 @@
     , "BUILD_OBJECT_ONLY"
     , "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
     , "DEBUG"
+    , "LINT"
     ]
   , "implicit": {"defaults": ["defaults"]}
   , "field_doc":
@@ -571,6 +572,11 @@
       , "This allows consuming libraries that pick on the objects themselves"
       , "to still forward the \"link-args\" of that library, and thus getting"
       , "correct linking instructions for the resulting library."
+      ]
+    , "LINT":
+      [ "Also provide nodes describing compile actions and header files;"
+      , "those can be used by lint rules (doing also the config transition)"
+      , "for additional checks."
       ]
     }
   , "artifacts_doc":
@@ -799,6 +805,7 @@
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
     , "DEBUG"
+    , "LINT"
     ]
   , "implicit": {"defaults": ["defaults"]}
   , "field_doc":
@@ -866,6 +873,11 @@
     , "ENV": ["The environment for any action generated."]
     , "BUILD_POSITION_INDEPENDENT": ["Build with -fPIC."]
     , "DEBUG": ["Compute the debug-stage, needed for local debugging."]
+    , "LINT":
+      [ "Also provide nodes describing compile actions and header files;"
+      , "those can be used by lint rules (doing also the config transition)"
+      , "for additional checks."
+      ]
     }
   , "artifacts_doc": ["The final binary, staged to the given directory"]
   , "runfiles_doc": ["None"]
