@@ -151,6 +151,7 @@ A binary written in C++
 | Config variable | Description |
 | --------------- | ----------- |
 | `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+| `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["CC", "library"]`
 
@@ -184,6 +185,7 @@ A C++ library
 | `"BUILD_OBJECT_ONLY"` | If true, produce an object library, resulting in object files added to the linker line of all depending targets. If this configuration is set, the `"shared"` option is ignored. This variable is cleared for all dependencies. |
 | `"BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"` | If true, do not include the objects in the provided `"link-args"`. This allows consuming libraries that pick on the objects themselves to still forward the `"link-args"` of that library, and thus getting correct linking instructions for the resulting library. |
 | `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+| `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["CC/prebuilt", "library"]`
 
