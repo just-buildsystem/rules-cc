@@ -55,7 +55,7 @@
   { "type": ["@", "rules", "CC", "binary"]
   , "name": ["main"]
   , "srcs": ["main.cpp"]
-  , "private-deps": ["foo"]
+  , "private-deps": ["shared-foo"]
   }
 , "installed-shared-main":
   { "type": ["@", "rules", "CC", "install-with-deps"]
