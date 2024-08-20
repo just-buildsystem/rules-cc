@@ -354,6 +354,7 @@
     , "deps-fieldname"
     , "deps-transition"
     , "target properties"
+    , "lint"
     ]
   , "imports": {"action": "test-action"}
   , "expression":
@@ -372,6 +373,7 @@
       { "type": "RESULT"
       , "artifacts": {"type": "var", "name": "test-results"}
       , "runfiles": {"type": "var", "name": "runfiles"}
+      , "provides": {"type": "env", "vars": ["lint"]}
       }
     }
   }

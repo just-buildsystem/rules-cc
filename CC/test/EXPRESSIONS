@@ -39,6 +39,7 @@
     , "test-data"
     , "summarizer"
     , "summary artifacts"
+    , "LINT"
     ]
   , "imports":
     { "artifacts": ["./", "../..", "field_artifacts"]
@@ -56,6 +57,7 @@
     , "target properties": ["transitions", "target properties"]
     , "stage": ["./", "../..", "stage_singleton_field"]
     , "list_provider": ["./", "../..", "field_list_provider"]
+    , "lint": ["./", "..", "lint information"]
     }
   , "expression":
     { "type": "let*"
@@ -96,6 +98,21 @@
         , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
         ]
       , ["binary", {"type": "CALL_EXPRESSION", "name": "binary"}]
+      , [ "lint"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "LINT"}
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ ["hdrs", {"type": "empty_map"}]
+              , [ "lint-deps fieldnames"
+                , ["private-hdrs", "srcs", "private-deps"]
+                ]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "lint"}
+            }
+          }
+        ]
       , [ "staged test binary"
         , { "type": "map_union"
           , "$1":
@@ -212,6 +229,7 @@
           { "type": "RESULT"
           , "artifacts": {"type": "var", "name": "test-results"}
           , "runfiles": {"type": "var", "name": "runfiles"}
+          , "provides": {"type": "env", "vars": ["lint"]}
           }
         }
       , "then":
@@ -386,6 +404,7 @@
           { "type": "RESULT"
           , "artifacts": {"type": "var", "name": "artifacts"}
           , "runfiles": {"type": "var", "name": "runfiles"}
+          , "provides": {"type": "env", "vars": ["lint"]}
           }
         }
       }
