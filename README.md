@@ -259,6 +259,7 @@ A test written in C++
 | `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  Test runs are summarized by the `["shell/test", "summarizer"]` that is also used by shell tests. |
 | `"ARCH_DISPATCH"` | Map of architectures to execution properties that ensure execution on that architecture. Only the actual test binary will be run with the specified execution properties (i.e., on the target architecture); all building will be done on the host architecture. |
 | `"TEST_SUMMARY_EXECUTION_PROPERTIES"` | Additional remote-execution properties for the test-summarizing action in case RUNS_PER_TEST is set; defaults to the empty map. |
+| `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["shell", "defaults"]`
 
