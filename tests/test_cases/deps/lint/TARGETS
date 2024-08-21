@@ -1,0 +1,78 @@
+{ "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "deps": ["foodep"]
+  , "components": ["bar"]
+  }
+, "foodep":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foodep"]
+  , "hdrs": ["foodep.hpp"]
+  , "srcs": ["foodep.cpp"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "deps": ["bardep"]
+  }
+, "bardep":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bardep"]
+  , "hdrs": ["bardep.hpp"]
+  , "srcs": ["bardep.cpp"]
+  }
+, "plain":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["plain"]
+  , "arguments_config": ["TEST_SHARED"]
+  , "shared":
+    { "type": "if"
+    , "cond": {"type": "var", "name": "TEST_SHARED"}
+    , "then": ["yes"]
+    }
+  , "hdrs": ["plain.hpp"]
+  , "srcs": ["plain.cpp"]
+  , "deps": ["foo"]
+  }
+, "main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["plain"]
+  }
+, "test":
+  { "type": ["@", "rules", "shell/test", "script"]
+  , "name": ["test"]
+  , "test": ["check-main.sh"]
+  , "deps": ["main"]
+  }
+, "suite":
+  { "type": ["@", "rules", "test", "suite"]
+  , "deps": ["test"]
+  , "stage": ["suite"]
+  }
+, "lint":
+  { "type": ["@", "rules", "lint", "targets"]
+  , "targets": ["suite"]
+  , "tainted": ["test"]
+  , "linter": ["pretend_lint.py"]
+  , "summarizer": ["summary.py"]
+  }
+, "lint-shared":
+  { "type": "configure"
+  , "target": "lint"
+  , "tainted": ["lint", "test"]
+  , "config": {"type": "singleton_map", "key": "TEST_SHARED", "value": true}
+  }
+, "test-shared":
+  { "type": "configure"
+  , "target": "test"
+  , "tainted": ["test"]
+  , "config": {"type": "singleton_map", "key": "TEST_SHARED", "value": true}
+  }
+, "verifier": {"type": "install", "files": {"expect": "expect.py"}}
+}

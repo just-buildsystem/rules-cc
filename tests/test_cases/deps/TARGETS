@@ -377,6 +377,18 @@
     ]
   , "data": [["TREE", null, "transitive-components"]]
   }
+, "lint":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["lint"]
+  , "targets": ["+test", "+test-shared", "+verifier", "+lint", "+lint-shared"]
+  , "asserts":
+    [ "cat lint/report"
+    , "cat lint-shared/report"
+    , "./verifier/expect lint/out/invocations.json foo.hpp foo.cpp foodep.hpp foodep.cpp bar.hpp bar.cpp bardep.hpp bardep.cpp plain.hpp  plain.cpp main.cpp"
+    , "./verifier/expect lint-shared/out/invocations.json foo.hpp foo.cpp foodep.hpp foodep.cpp bar.hpp bar.cpp bardep.hpp bardep.cpp plain.hpp  plain.cpp main.cpp"
+    ]
+  , "data": [["TREE", null, "lint"]]
+  }
 , "ALL":
   { "type": "install"
   , "deps":
@@ -389,6 +401,7 @@
     , "install"
     , "components"
     , "transitive-components"
+    , "lint"
     ]
   , "tainted": ["test"]
   }
