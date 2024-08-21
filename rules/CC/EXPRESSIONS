@@ -1087,6 +1087,7 @@
     , "deps-transition"
     , "compile-args"
     , "defaults-transition"
+    , "modified-transitions"
     ]
   , "imports":
     { "objects": "objects"
@@ -1262,7 +1263,17 @@
               { "type": "let*"
               , "bindings":
                 [ ["provider", "lint"]
-                , ["transition", {"type": "var", "name": "deps-transition"}]
+                , [ "transition"
+                  , { "type": "lookup"
+                    , "map":
+                      { "type": "var"
+                      , "name": "modified-transitions"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , "key": {"type": "var", "name": "fieldname"}
+                    , "default": {"type": "var", "name": "deps-transition"}
+                    }
+                  ]
                 ]
               , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
               }
@@ -1700,7 +1711,7 @@
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
       , ["lib", {"type": "CALL_EXPRESSION", "name": "lib artifact"}]
-      , ["lint-deps fieldnames", ["deps", "private-deps"]]
+      , ["lint-deps fieldnames", ["deps", "private-deps", "components"]]
       , [ "lint"
         , { "type": "if"
           , "cond": {"type": "var", "name": "LINT"}
@@ -1805,6 +1816,7 @@
               , "package"
               , "debug-srcs"
               , "debug-hdrs"
+              , "lint"
               ]
             }
           , { "type": "var"
@@ -2036,6 +2048,7 @@
     , "ADD_LDFLAGS"
     , "ENV"
     , "DEBUG"
+    , "LINT"
     , "name"
     , "pure C"
     , "srcs"
@@ -2066,6 +2079,7 @@
     , "ldflags-files-deps": "ldflags-files-deps"
     , "shared artifact": "shared artifact"
     , "debug-deps": "debug-deps"
+    , "lint": "lint information"
     }
   , "expression":
     { "type": "let*"
@@ -2122,6 +2136,13 @@
               ]
             }
           , "else": {"type": "empty_map"}
+          }
+        ]
+      , ["lint-deps fieldnames", ["deps", "private-deps", "components"]]
+      , [ "lint"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "LINT"}
+          , "then": {"type": "CALL_EXPRESSION", "name": "lint"}
           }
         ]
       , [ "debug-hdrs"
@@ -2222,6 +2243,7 @@
               , "package"
               , "debug-srcs"
               , "debug-hdrs"
+              , "lint"
               ]
             }
           , { "type": "var"
@@ -2345,6 +2367,7 @@
     , "BUILD_POSITION_INDEPENDENT"
     , "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
     , "DEBUG"
+    , "LINT"
     , "name"
     , "pure C"
     , "srcs"
@@ -2375,6 +2398,7 @@
     , "ldflags-files-deps": "ldflags-files-deps"
     , "object artifacts": "object artifacts"
     , "debug-deps": "debug-deps"
+    , "lint": "lint information"
     }
   , "expression":
     { "type": "let*"
@@ -2398,6 +2422,13 @@
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
       , ["objects", {"type": "CALL_EXPRESSION", "name": "object artifacts"}]
+      , ["lint-deps fieldnames", ["deps", "private-deps", "components"]]
+      , [ "lint"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "LINT"}
+          , "then": {"type": "CALL_EXPRESSION", "name": "lint"}
+          }
+        ]
       , [ "link-args"
         , { "type": "nub_right"
           , "$1":
