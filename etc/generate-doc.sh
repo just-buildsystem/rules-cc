@@ -78,4 +78,7 @@ rm -f "$OUTFILE"
   doc2md rules patch file
   doc2md rules CC/auto config
   doc2md rules CC/auto config_file
+  doc2md rules test suite
+  doc2md rules lint targets
+  doc2md rules lint defaults
 ) >> "$OUTFILE"

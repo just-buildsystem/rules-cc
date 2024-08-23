@@ -565,3 +565,35 @@ Generate a C/C++ config header from a given template
 | --------------- | ----------- |
 | `"defines"` | Set a define to a specific value unless its value is `"null"`. Must contain a list of pairs. The first element of each pair is the define name and the second argument is the value to set. Strings must be properly escaped. Defines generated from this field are added last, so that they can refer to defines from other `"defines*"` values. |
 
+### Rule `["test", "suite"]`
+
+Form a compound target out of many test targets. 
+
+ More precisely, take the runfiles of the given `"deps"`, take their disjoint union and stage the result. Also propagate relevant providers.
+
+| Field | Description |
+| ----- | ----------- |
+| `"stage"` | The logical location this test suite is to be placed. Individual entries will be joined with `"/"`. |
+| `"deps"` | The targets that suite is composed of. |
+
+### Rule `["lint", "targets"]`
+
+Run a given linter on the lint information provided by the given targets.
+
+| Field | Description |
+| ----- | ----------- |
+| `"linter"` | Single artifact running the lint checks.  This artifact with - argv`[1]` the file to lint, and - argv`[2:]` the original command line. This invocation happens in an environment with - CONFIG pointing to the directory with all the artifacts given   by the field `"config"`. - OUT pointing to a directory to which files with the lint result   can be written. The linter is supposed to indicate by the exit code whether the indicated file complies with the given linting policy, with 0 meaning compliant. Stdout and stderr, as well as the directory $`{OUT}` can be used to provide additional information. |
+| `"config"` | Any configuration or other files needed by the linter. |
+| `"summarizer"` | Single artifact generating a summary of the individual lint results. It will be called in a directory where all subdirectories with names consisting entirely of digits are the results of the individual lint actions. Those are given as  - a file result with content PASS if and only if the lint action    exited 0,  - files stdout and stderr with stdout and stderr of the lint    action, and  - a directory out with the additional information provided by the    lint action. The summarizer is required to indicate the overall result by the exit code, produce a human-readable summary on stdout, and optionally additional information in the directory $`{OUT}`. |
+
+### Rule `["lint", "defaults"]`
+
+A rule to provide default paths common to all lint targets. 
+
+ While lint targets bring their own host directory via the field `"config"`, it can still be necessary to bring some default paths, e.g., for finding the compiler, or the interpreter for the runner.
+
+| Field | Description |
+| ----- | ----------- |
+| `"PATH"` | Paths for looking up system tools. Specifying this field extends values from `"base"`. |
+| `"base"` | Other targets to inherit values from. |
+
