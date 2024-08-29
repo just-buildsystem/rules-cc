@@ -597,6 +597,20 @@
       ]
     , "debug-srcs": ["Map of all sources needed for debugging."]
     , "debug-hdrs": ["Map of all additional headers needed for debugging."]
+    , "run-libs":
+      [ "Map of artifacts specifying libraries that have to be present at"
+      , "runtime (as well as during linking)."
+      ]
+    , "run-libs-args":
+      [ "Additional arguments for linking that are related to the run-libs."
+      , "Those are added on the linker command line after the regular link-args."
+      ]
+    , "package":
+      [ "Information related to packaging the library. This provider is a map,"
+      , "specifying \"name\" and \"version\" of the package, as well as"
+      , "additional stages \"cflags-files\" and \"ldflags-files\" for files"
+      , "with compile-flags or link-flags, respctively."
+      ]
     }
   , "anonymous":
     { "proto-deps":
