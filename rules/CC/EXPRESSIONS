@@ -2177,8 +2177,8 @@
       , [ "cflags-files"
         , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
         ]
-      , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
-      , ["link-args", {"type": "CALL_EXPRESSION", "name": "link-args-deps"}]
+      , ["link-deps", {"type": "empty_map"}]
+      , ["link-args", []]
       , [ "run-libs"
         , { "type": "map_union"
           , "$1":
@@ -2194,7 +2194,6 @@
             , "$1":
               [ {"type": "keys", "$1": {"type": "var", "name": "lib"}}
               , {"type": "var", "name": "ldflags", "default": []}
-              , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
               ]
             }
           }
