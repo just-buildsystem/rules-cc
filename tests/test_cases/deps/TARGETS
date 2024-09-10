@@ -389,6 +389,16 @@
     ]
   , "data": [["TREE", null, "lint"]]
   }
+, "chain":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["chain"]
+  , "targets": ["+main", "+main-with-deps"]
+  , "asserts":
+    [ "./main-with-deps/bin/main | grep 'foo.*fine'"
+    , "./main-with-deps/bin/main | grep 'qux.*ok'"
+    ]
+  , "data": [["TREE", null, "chain"]]
+  }
 , "ALL":
   { "type": "install"
   , "deps":
@@ -402,6 +412,7 @@
     , "components"
     , "transitive-components"
     , "lint"
+    , "chain"
     ]
   , "tainted": ["test"]
   }

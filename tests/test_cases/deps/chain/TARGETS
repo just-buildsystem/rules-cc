@@ -1,0 +1,38 @@
+{ "foo":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["foo"]
+  , "shared": ["yes"]
+  , "hdrs": ["foo.hpp"]
+  , "srcs": ["foo.cpp"]
+  , "deps": ["bar"]
+  }
+, "bar":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["bar"]
+  , "shared": ["yes"]
+  , "hdrs": ["bar.hpp"]
+  , "srcs": ["bar.cpp"]
+  , "deps": ["baz"]
+  }
+, "baz":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["baz"]
+  , "hdrs": ["baz.hpp"]
+  , "srcs": ["baz.cpp"]
+  , "deps": ["qux"]
+  }
+, "qux":
+  { "type": ["@", "rules", "CC", "library"]
+  , "name": ["qux"]
+  , "hdrs": ["qux.hpp"]
+  , "srcs": ["qux.cpp"]
+  }
+, "main":
+  { "type": ["@", "rules", "CC", "binary"]
+  , "name": ["main"]
+  , "srcs": ["main.cpp"]
+  , "private-deps": ["foo", "qux"]
+  }
+, "main-with-deps":
+  {"type": ["@", "rules", "CC", "install-with-deps"], "targets": ["main"]}
+}
