@@ -599,26 +599,29 @@
   , "expression":
     { "type": "nub_right"
     , "$1":
-      { "type": "foreach"
-      , "var": "fieldname"
-      , "range": {"type": "var", "name": "deps-fieldnames"}
-      , "body":
-        { "type": "let*"
-        , "bindings":
-          [ ["provider", "run-libs-args"]
-          , [ "transition"
-            , { "type": "lookup"
-              , "map":
-                { "type": "var"
-                , "name": "modified-transitions"
-                , "default": {"type": "empty_map"}
+      { "type": "++"
+      , "$1":
+        { "type": "foreach"
+        , "var": "fieldname"
+        , "range": {"type": "var", "name": "deps-fieldnames"}
+        , "body":
+          { "type": "let*"
+          , "bindings":
+            [ ["provider", "run-libs-args"]
+            , [ "transition"
+              , { "type": "lookup"
+                , "map":
+                  { "type": "var"
+                  , "name": "modified-transitions"
+                  , "default": {"type": "empty_map"}
+                  }
+                , "key": {"type": "var", "name": "fieldname"}
+                , "default": {"type": "var", "name": "deps-transition"}
                 }
-              , "key": {"type": "var", "name": "fieldname"}
-              , "default": {"type": "var", "name": "deps-transition"}
-              }
+              ]
             ]
-          ]
-        , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          }
         }
       }
     }
@@ -1739,9 +1742,7 @@
         ]
       , ["run-libs", {"type": "CALL_EXPRESSION", "name": "run-libs-deps"}]
       , [ "run-libs-args"
-        , { "type": "nub_right"
-          , "$1": {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
-          }
+        , {"type": "CALL_EXPRESSION", "name": "run-libs-args-deps"}
         ]
       , [ "ldflags-files"
         , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
