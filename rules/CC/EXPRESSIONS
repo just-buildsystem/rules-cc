@@ -388,28 +388,31 @@
     }
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
   , "expression":
-    { "type": "++"
+    { "type": "nub_right"
     , "$1":
-      { "type": "foreach"
-      , "var": "fieldname"
-      , "range": {"type": "var", "name": "deps-fieldnames"}
-      , "body":
-        { "type": "let*"
-        , "bindings":
-          [ ["provider", "compile-args"]
-          , [ "transition"
-            , { "type": "lookup"
-              , "map":
-                { "type": "var"
-                , "name": "modified-transitions"
-                , "default": {"type": "empty_map"}
+      { "type": "++"
+      , "$1":
+        { "type": "foreach"
+        , "var": "fieldname"
+        , "range": {"type": "var", "name": "deps-fieldnames"}
+        , "body":
+          { "type": "let*"
+          , "bindings":
+            [ ["provider", "compile-args"]
+            , [ "transition"
+              , { "type": "lookup"
+                , "map":
+                  { "type": "var"
+                  , "name": "modified-transitions"
+                  , "default": {"type": "empty_map"}
+                  }
+                , "key": {"type": "var", "name": "fieldname"}
+                , "default": {"type": "var", "name": "deps-transition"}
                 }
-              , "key": {"type": "var", "name": "fieldname"}
-              , "default": {"type": "var", "name": "deps-transition"}
-              }
+              ]
             ]
-          ]
-        , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          }
         }
       }
     }
@@ -504,28 +507,31 @@
     }
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
   , "expression":
-    { "type": "++"
+    { "type": "nub_right"
     , "$1":
-      { "type": "foreach"
-      , "var": "fieldname"
-      , "range": {"type": "var", "name": "deps-fieldnames"}
-      , "body":
-        { "type": "let*"
-        , "bindings":
-          [ ["provider", "link-args"]
-          , [ "transition"
-            , { "type": "lookup"
-              , "map":
-                { "type": "var"
-                , "name": "modified-transitions"
-                , "default": {"type": "empty_map"}
+      { "type": "++"
+      , "$1":
+        { "type": "foreach"
+        , "var": "fieldname"
+        , "range": {"type": "var", "name": "deps-fieldnames"}
+        , "body":
+          { "type": "let*"
+          , "bindings":
+            [ ["provider", "link-args"]
+            , [ "transition"
+              , { "type": "lookup"
+                , "map":
+                  { "type": "var"
+                  , "name": "modified-transitions"
+                  , "default": {"type": "empty_map"}
+                  }
+                , "key": {"type": "var", "name": "fieldname"}
+                , "default": {"type": "var", "name": "deps-transition"}
                 }
-              , "key": {"type": "var", "name": "fieldname"}
-              , "default": {"type": "var", "name": "deps-transition"}
-              }
+              ]
             ]
-          ]
-        , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          , "body": {"type": "CALL_EXPRESSION", "name": "list_provider"}
+          }
         }
       }
     }
@@ -591,7 +597,7 @@
     }
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
   , "expression":
-    { "type": "++"
+    { "type": "nub_right"
     , "$1":
       { "type": "foreach"
       , "var": "fieldname"
