@@ -30,7 +30,6 @@
     { "defaults": [["CC", "defaults"]]
     , "foreign-defaults": [["CC/foreign", "defaults"]]
     , "shell defaults": [["shell", "defaults"]]
-    , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
     { "project":
@@ -125,7 +124,6 @@
   , "config_transitions":
     { "defaults":
       [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
-    , "expand_exec": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -184,16 +182,6 @@
               , {"type": "var", "name": "dir_path"}
               ]
             }
-          }
-        ]
-      , [ "expand_exec"
-        , { "type": "let*"
-          , "bindings":
-            [ ["fieldname", "expand_exec"]
-            , ["location", "expand_exec"]
-            , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
-            ]
-          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
           }
         ]
       , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
@@ -271,7 +259,6 @@
     , "foreign-defaults": [["CC/foreign", "defaults"]]
     , "shell defaults": [["shell", "defaults"]]
     , "config_reader": [["CC", "prebuilt/read_pkgconfig.py"]]
-    , "expand_exec": [["./", "..", "expand_exec"]]
     }
   , "field_doc":
     { "project":
@@ -419,7 +406,6 @@
   , "config_transitions":
     { "defaults":
       [{"type": "empty_map"}, {"type": "CALL_EXPRESSION", "name": "for host"}]
-    , "expand_exec": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "expression":
     { "type": "let*"
@@ -555,16 +541,6 @@
       , ["cmds", {"type": "FIELD", "name": "cmds"}]
       , ["resolve_symlinks", {"type": "FIELD", "name": "resolve_symlinks"}]
       , ["defaults-transition", {"type": "empty_map"}]
-      , [ "expand_exec"
-        , { "type": "let*"
-          , "bindings":
-            [ ["fieldname", "expand_exec"]
-            , ["location", "expand_exec"]
-            , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
-            ]
-          , "body": {"type": "CALL_EXPRESSION", "name": "stage_field"}
-          }
-        ]
       , ["install_dir", {"type": "CALL_EXPRESSION", "name": "shell-build"}]
       , [ "hdrs"
         , { "type": "++"
