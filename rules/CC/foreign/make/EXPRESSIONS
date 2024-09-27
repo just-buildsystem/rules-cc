@@ -326,11 +326,11 @@
                       }
                     , { "type": "join"
                       , "$1":
-                        [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
+                        [ "export PATH="
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "PATH"}]
                           }
-                        , ")${PATH:+:}${PATH}\""
+                        , "${PATH:+:}\"${PATH}\""
                         ]
                       }
                     ]

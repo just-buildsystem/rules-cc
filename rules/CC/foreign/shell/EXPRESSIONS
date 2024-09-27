@@ -18,7 +18,6 @@
     , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
-    , "expand_exec"
     , "resolve_symlinks"
     ]
   , "imports":
@@ -316,11 +315,11 @@
                       }
                     , { "type": "join"
                       , "$1":
-                        [ "export PATH=\"$(./expand_exec TOOLCHAIN -- echo "
+                        [ "export PATH="
                         , { "type": "join_cmd"
                           , "$1": [{"type": "var", "name": "PATH"}]
                           }
-                        , ")${PATH:+:}${PATH}\""
+                        , "${PATH:+:}\"${PATH}\""
                         ]
                       }
                     ]
@@ -349,7 +348,6 @@
               , {"type": "var", "name": "work_dir"}
               , {"type": "var", "name": "localbase"}
               , {"type": "var", "name": "script"}
-              , {"type": "var", "name": "expand_exec"}
               ]
             }
           , "cmd": [{"type": "var", "name": "sh"}, "run_cmds.sh"]
