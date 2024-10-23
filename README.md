@@ -25,7 +25,7 @@ your `repos.json`.
     { "repository":
       { "type": "git"
       , "branch": "master"
-      , "commit": "2ea50063460a3e11dfcbb71651540c0d61fddc1a"
+      , "commit": "b8ae7e38c0c51467ead55361362a0fd0da3666d5"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "subdir": "rules"
       }
