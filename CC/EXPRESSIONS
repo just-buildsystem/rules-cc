@@ -1151,17 +1151,28 @@
         , { "type": "to_subdir"
           , "subdir": "include"
           , "$1":
-            { "type": "let*"
-            , "bindings":
-              [["transition", {"type": "var", "name": "deps-transition"}]]
-            , "body":
-              { "type": "map_union"
+            { "type": "map_union"
+            , "$1":
+              { "type": "++"
               , "$1":
-                { "type": "++"
-                , "$1":
-                  { "type": "foreach"
-                  , "var": "fieldname"
-                  , "range": {"type": "var", "name": "deps-fieldnames"}
+                { "type": "foreach"
+                , "var": "fieldname"
+                , "range": {"type": "var", "name": "deps-fieldnames"}
+                , "body":
+                  { "type": "let*"
+                  , "bindings":
+                    [ [ "transition"
+                      , { "type": "lookup"
+                        , "map":
+                          { "type": "var"
+                          , "name": "modified-transitions"
+                          , "default": {"type": "empty_map"}
+                          }
+                        , "key": {"type": "var", "name": "fieldname"}
+                        , "default": {"type": "var", "name": "deps-transition"}
+                        }
+                      ]
+                    ]
                   , "body":
                     {"type": "CALL_EXPRESSION", "name": "runfiles_list"}
                   }
