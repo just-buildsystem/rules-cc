@@ -126,7 +126,7 @@
   , "expression":
     { "type": "map_union"
     , "$1":
-      [ {"type": "singleton_map", "key": "PATH", "value": "/bin:/usr/bin"}
+      [ {"type": "'", "$1": {"PATH": "/bin:/usr/bin"}}
       , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
       ]
     }
@@ -224,20 +224,6 @@
       { "type": "disjoint_map_union"
       , "$1": {"type": "++", "$1": {"type": "var", "name": "staged_artifact"}}
       }
-    }
-  }
-, "nub_left":
-  { "doc": ["Removes all but the leftmost duplicate from the list."]
-  , "vars": ["list"]
-  , "vars_doc": {"list": ["The list to remove duplicates from."]}
-  , "expression":
-    { "type": "let*"
-    , "bindings":
-      [ ["list", {"type": "reverse", "$1": {"type": "var", "name": "list"}}]
-      , ["list", {"type": "nub_right", "$1": {"type": "var", "name": "list"}}]
-      , ["list", {"type": "reverse", "$1": {"type": "var", "name": "list"}}]
-      ]
-    , "body": {"type": "var", "name": "list"}
     }
   }
 }
