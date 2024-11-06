@@ -30,7 +30,6 @@
     ]
   , "imports":
     { "artifacts": ["", "field_artifacts"]
-    , "nub_left": ["", "nub_left"]
     , "flags-cc": ["CC", "flags-cc"]
     , "flags-cxx": ["CC", "flags-cxx"]
     , "compiler-cc": ["CC", "compiler-cc"]
@@ -205,18 +204,14 @@
         , { "type": "join"
           , "separator": ":"
           , "$1":
-            { "type": "let*"
-            , "bindings":
-              [ [ "list"
-                , { "type": "++"
-                  , "$1":
-                    [ {"type": "CALL_EXPRESSION", "name": "foreign-PATH"}
-                    , {"type": "CALL_EXPRESSION", "name": "default-PATH"}
-                    ]
-                  }
+            { "type": "nub_left"
+            , "$1":
+              { "type": "++"
+              , "$1":
+                [ {"type": "CALL_EXPRESSION", "name": "foreign-PATH"}
+                , {"type": "CALL_EXPRESSION", "name": "default-PATH"}
                 ]
-              ]
-            , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+              }
             }
           }
         ]
