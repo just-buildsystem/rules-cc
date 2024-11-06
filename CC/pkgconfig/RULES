@@ -14,7 +14,6 @@
   , "imports":
     { "base-provides": ["./", "..", "defaults-base-provides"]
     , "base-provides-++": ["./", "..", "defaults-base-provides-++"]
-    , "nub_left": ["", "nub_left"]
     }
   , "expression":
     { "type": "let*"
@@ -31,33 +30,27 @@
       , ["PATH", {"type": "FIELD", "name": "PATH"}]
       , ["provider", "PATH"]
       , [ "PATH"
-        , { "type": "++"
+        , { "type": "nub_left"
           , "$1":
-            [ {"type": "var", "name": "PATH"}
-            , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
-            ]
-          }
-        ]
-      , [ "PATH"
-        , { "type": "let*"
-          , "bindings": [["list", {"type": "var", "name": "PATH"}]]
-          , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "PATH"}
+              , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
+              ]
+            }
           }
         ]
       , ["PKG_CONFIG_PATH", {"type": "FIELD", "name": "PKG_CONFIG_PATH"}]
       , ["provider", "PKG_CONFIG_PATH"]
       , [ "PKG_CONFIG_PATH"
-        , { "type": "++"
+        , { "type": "nub_left"
           , "$1":
-            [ {"type": "var", "name": "PKG_CONFIG_PATH"}
-            , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
-            ]
-          }
-        ]
-      , [ "PKG_CONFIG_PATH"
-        , { "type": "let*"
-          , "bindings": [["list", {"type": "var", "name": "PKG_CONFIG_PATH"}]]
-          , "body": {"type": "CALL_EXPRESSION", "name": "nub_left"}
+            { "type": "++"
+            , "$1":
+              [ {"type": "var", "name": "PKG_CONFIG_PATH"}
+              , {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
+              ]
+            }
           }
         ]
       ]
