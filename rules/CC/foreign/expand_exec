@@ -46,9 +46,9 @@ parse_arg() {
   local PARSE_VAR_NAME=false
 
   while [ ${#ARG} -gt 0 ]; do
-    local NEXT=${ARG#?}
-    c="${ARG%$NEXT}"
-    ARG=$NEXT
+    local NEXT="${ARG#?}"
+    c="${ARG%"${NEXT}"}"
+    ARG="${NEXT}"
 
     if $PARSE_VAR_NAME; then
       # parse <var> from $(<var>)
@@ -91,9 +91,9 @@ parse_arg() {
 
   PARSED_ARG="'"
   while [ ${#RESULT} -gt 0 ]; do
-    local NEXT=${RESULT#?}
-    c="${RESULT%$NEXT}"
-    RESULT=$NEXT
+    local NEXT="${RESULT#?}"
+    c="${RESULT%"${NEXT}"}"
+    RESULT="${NEXT}"
     if [ "$c" = "'" ]; then
       PARSED_ARG="${PARSED_ARG}'\\''"
     else
