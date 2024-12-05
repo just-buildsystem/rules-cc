@@ -6,7 +6,7 @@
     , "use of this rule. As targets form a different root, the defaults"
     , "can be provided without changing this directory."
     ]
-  , "target_fields": ["base", "toolchain", "deps"]
+  , "target_fields": ["base", "toolchain", "deps", "include_scanner"]
   , "string_fields":
     [ "CC"
     , "CXX"
@@ -83,6 +83,16 @@
       [ "Path for looking up the compilers. Individual paths are joined"
       , "with \":\". Specifying this field extends values from \"base\"."
       ]
+    , "include_scanner":
+      [ "Specify an include scanner to be run before each compile action, which"
+      , "removes unused headers from the include tree. The given target must"
+      , "contain a single executable artifact, a script or binary. The tool"
+      , "specified must accept as first argument the <out_dir> path and as"
+      , "remaining arguments the argv of the preprocessor command (-E -M)."
+      , "The input headers are located in the local directory \"include\" and"
+      , "the scanner should copy all used headers to \"<out_dir>/include\"."
+      , "Specifying this field overwrites values from \"base\"."
+      ]
     }
   , "config_doc":
     { "ARCH":
@@ -99,6 +109,7 @@
     , "base-provides-++": "defaults-base-provides-++"
     , "base-provides-list": "defaults-base-provides-list"
     , "artifacts_list": ["./", "..", "field_artifacts_list"]
+    , "artifacts": ["./", "..", "field_artifacts"]
     , "compile-deps": "compile-deps"
     , "compile-args-deps": "compile-args-deps"
     , "link-deps": "link-deps"
@@ -111,7 +122,9 @@
     , "debug-deps": "debug-deps"
     }
   , "config_transitions":
-    {"toolchain": [{"type": "CALL_EXPRESSION", "name": "for host"}]}
+    { "toolchain": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "include_scanner": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    }
   , "expression":
     { "type": "let*"
     , "bindings":
@@ -194,6 +207,25 @@
       , ["provider", "ENV"]
       , ["default", {"type": "empty_map"}]
       , ["ENV", {"type": "CALL_EXPRESSION", "name": "base-provides"}]
+      , ["provider", "INCLUDE_SCANNER"]
+      , ["default", {"type": "empty_map"}]
+      , [ "INCLUDE_SCANNER"
+        , { "type": "if"
+          , "cond": {"type": "FIELD", "name": "include_scanner"}
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ ["fieldname", "include_scanner"]
+              , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "artifacts"}
+            }
+          , "else":
+            { "type": "disjoint_map_union"
+            , "$1": {"type": "CALL_EXPRESSION", "name": "base-provides-list"}
+            }
+          }
+        ]
       , ["provider", "NON_SYSTEM_TOOLS"]
       , ["default", {"type": "empty_map"}]
       , [ "NON_SYSTEM_TOOLS"
@@ -370,6 +402,7 @@
           , "ARFLAGS"
           , "PATH"
           , "ENV"
+          , "INCLUDE_SCANNER"
           , "TOOLCHAIN"
           , "NON_SYSTEM_TOOLS"
           , "compile-deps"
