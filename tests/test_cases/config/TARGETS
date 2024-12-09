@@ -1,0 +1,57 @@
+{ "both":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["config_both"]
+  , "targets": ["+header_both"]
+  , "asserts":
+    [ "test -f header_both/foo.h"
+    , "cat header_both/foo.h"
+    , "grep '// comment 1$' header_both/foo.h"
+    , "grep '#define FOO 1$' header_both/foo.h"
+    , "grep '#define BAX 0$' header_both/foo.h"
+    , "grep '#define BAR \"foofoo bar foo\"$' header_both/foo.h"
+    , "grep '/\\* #undef BAZ \\*/$' header_both/foo.h"
+    , "grep '/\\* #undef BAX \\*/$' header_both/foo.h"
+    , "grep '#define FOO$' header_both/foo.h"
+    , "grep '// comment 2$' header_both/foo.h"
+    , "grep 'magic_at$' header_both/foo.h"
+    , "grep 'magic_curly$' header_both/foo.h"
+    , "grep 'undefined_at--$' header_both/foo.h"
+    , "grep 'undefined_curly--$' header_both/foo.h"
+    ]
+  , "data": [["TREE", null, "data"]]
+  }
+, "@only":
+  { "type": ["test_rules", "test_case"]
+  , "name": ["config_@only"]
+  , "targets": ["+header_@only"]
+  , "asserts":
+    [ "test -f header_@only/foo.h"
+    , "cat header_@only/foo.h"
+    , "grep '// comment 1$' header_@only/foo.h"
+    , "grep '#define FOO 1$' header_@only/foo.h"
+    , "grep '#define BAX 0$' header_@only/foo.h"
+    , "grep '#define BAR \"foofoo bar \\${FOO}\"$' header_@only/foo.h"
+    , "grep '/\\* #undef BAZ \\*/$' header_@only/foo.h"
+    , "grep '/\\* #undef BAX \\*/$' header_@only/foo.h"
+    , "grep '#define FOO$' header_@only/foo.h"
+    , "grep '// comment 2$' header_@only/foo.h"
+    , "grep 'magic_at$' header_@only/foo.h"
+    , "grep '\\${NO_MAGIC_CURLY}' header_@only/foo.h"
+    , "grep 'undefined_at--$' header_@only/foo.h"
+    , "grep 'undefined_curly-\\${UNDEFINED}-$' header_@only/foo.h"
+    ]
+  , "data": [["TREE", null, "data"]]
+  }
+, "runner.py":
+  { "type": "install"
+  , "files": {"runner.py": ["@", "rules", "CC/auto", "runner"]}
+  }
+, "pytest":
+  { "type": ["@", "rules", "shell/test", "script"]
+  , "name": ["config_pytest"]
+  , "test": ["run_pytest.sh"]
+  , "deps": ["runner.py", "runner_test.py"]
+  }
+, "ALL":
+  {"type": "install", "deps": ["both", "@only", "pytest"], "tainted": ["test"]}
+}

@@ -1,0 +1,48 @@
+{ "blueprint":
+  { "type": ["@", "rules", "CC/auto", "config_file"]
+  , "input": ["foo.in"]
+  , "output": ["foo.h"]
+  , "magic_string": ["cmakedefine"]
+  }
+, "blueprint_@only":
+  { "type": ["@", "rules", "CC/auto", "config_file"]
+  , "input": ["foo.in"]
+  , "output": ["foo.h"]
+  , "magic_string": ["cmakedefine"]
+  , "@only": ["true"]
+  }
+, "header_both":
+  { "type": "configure"
+  , "target": "blueprint"
+  , "config":
+    { "type": "let*"
+    , "bindings":
+      [ [ "defines"
+        , [ ["FOO", "foo"]
+          , ["BAR", "bar"]
+          , ["NO_MAGIC_AT", "magic_at"]
+          , ["NO_MAGIC_CURLY", "magic_curly"]
+          ]
+        ]
+      ]
+    , "body": {"type": "env", "vars": ["defines"]}
+    }
+  }
+, "header_@only":
+  { "type": "configure"
+  , "target": "blueprint_@only"
+  , "config":
+    { "type": "let*"
+    , "bindings":
+      [ [ "defines"
+        , [ ["FOO", "foo"]
+          , ["BAR", "bar"]
+          , ["NO_MAGIC_AT", "magic_at"]
+          , ["NO_MAGIC_CURLY", "magic_curly"]
+          ]
+        ]
+      ]
+    , "body": {"type": "env", "vars": ["defines"]}
+    }
+  }
+}

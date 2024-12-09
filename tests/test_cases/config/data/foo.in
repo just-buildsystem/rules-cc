@@ -1,0 +1,13 @@
+// comment 1
+#cmakedefine01 FOO
+#cmakedefine01 BAX
+#cmakedefine FOO "@FOO@"
+#cmakedefine BAR "@FOO@@FOO@ bar ${FOO}"
+#cmakedefine BAZ "baz"
+#cmakedefine BAX
+#cmakedefine FOO
+// comment 2
+@NO_MAGIC_AT@
+${NO_MAGIC_CURLY}
+undefined_at-@UNDEFINED@-
+undefined_curly-${UNDEFINED}-
