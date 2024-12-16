@@ -454,7 +454,7 @@ Library produced by generic shell commands with toolchain support.
 | `"lib_prefix"` | Prefix where libraries will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib"` if not set. |
 | `"pc_prefix"` | Prefix where pkg-config files will be installed by Make. Individual directory components are joined with `"/"`. Defaults to `"lib/pkgconfig"` if not set. |
 | `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after `"cmds"` were executed. |
-| `"project"` | The project directory. It should contain a single tree artifact. It's path can be accessed via the `"WORKDIR"` variable. |
+| `"project"` | The project directory. The disjoint union of the artifacts of the targets specified here are taken as project directory. Its path can be accessed via the `"WORKDIR"` variable. |
 | `"localbase"` | Artifacts to stage to `"LOCALBASE"`. |
 | `"deps"` | Public dependency on other CC libraries. |
 
@@ -475,7 +475,7 @@ Data produced by generic shell commands with toolchain support.
 | `"outs"` | Paths to the produced output files in `"DESTDIR"`. |
 | `"out_dirs"` | Paths to the produced output directories in `"DESTDIR"`. |
 | `"resolve_symlinks"` | Resolve all symlinks in the install directory. This operation is performed immediately after `"cmds"` were executed. |
-| `"project"` | The project directory. It should contain a single tree artifact. It's path can be accessed via the `"WORKDIR"` variable. |
+| `"project"` | The project directory. The disjoint union of the artifacts of the targets specified here are taken as project directory. Its path can be accessed via the `"WORKDIR"` variable. |
 | `"localbase"` | Artifacts to stage to `"LOCALBASE"`. |
 | `"deps"` | CC targets to install to `"LOCALBASE"`. |
 
