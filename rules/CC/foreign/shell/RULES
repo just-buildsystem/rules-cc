@@ -33,8 +33,9 @@
     }
   , "field_doc":
     { "project":
-      [ "The project directory. It should contain a single tree artifact."
-      , "It's path can be accessed via the \"WORKDIR\" variable."
+      [ "The project directory. The disjoint union of the artifacts of the"
+      , "targets specified here are taken as project directory."
+      , "Its path can be accessed via the \"WORKDIR\" variable."
       ]
     , "localbase": ["Artifacts to stage to \"LOCALBASE\"."]
     , "deps": ["CC targets to install to \"LOCALBASE\"."]
@@ -262,8 +263,9 @@
     }
   , "field_doc":
     { "project":
-      [ "The project directory. It should contain a single tree artifact."
-      , "It's path can be accessed via the \"WORKDIR\" variable."
+      [ "The project directory. The disjoint union of the artifacts of the"
+      , "targets specified here are taken as project directory."
+      , "Its path can be accessed via the \"WORKDIR\" variable."
       ]
     , "name":
       [ "The name of the library (without leading \"lib\" or trailing file name"
