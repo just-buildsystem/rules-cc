@@ -75,6 +75,7 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"base"` | Other targets (using the same rule) to inherit values from. |
 | `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. If the toolchain supports cross-compilation, it should perform a dispatch on the configuration variable `"BUILD_ARCH"` to determine for which architecture to generate code for. |
 | `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
+| `"include_scanner"` | Specify an include scanner to be run before each compile action, which removes unused headers from the include tree. The given target must contain a single executable artifact, a script or binary. The tool specified must accept as first argument the <out_dir> path and as remaining arguments the argv of the preprocessor command (-E -M). The input headers are located in the local directory `"include"` and the scanner should copy all used headers to `"<out_dir>/include"`. Specifying this field overwrites values from `"base"`. |
 
 | Config variable | Description |
 | --------------- | ----------- |
