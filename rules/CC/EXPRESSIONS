@@ -61,6 +61,19 @@
     , "body": {"type": "var", "name": "AR"}
     }
   }
+, "default-INCLUDE_SCANNER":
+  { "vars": ["defaults-transition"]
+  , "imports": {"map_provider": ["./", "..", "field_map_provider"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["fieldname", "defaults"]
+      , ["provider", "INCLUDE_SCANNER"]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
+      ]
+    , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
+    }
+  }
 , "default-ARFLAGS":
   { "vars": ["defaults-transition"]
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
@@ -928,10 +941,14 @@
     , "compile-deps"
     , "cflags-files"
     , "component-fieldnames"
+    , "defaults-transition"
     , "deps-transition"
     , "modified-transitions"
     ]
-  , "imports": {"field_artifacts": ["./", "..", "field_artifacts"]}
+  , "imports":
+    { "field_artifacts": ["./", "..", "field_artifacts"]
+    , "default-INCLUDE_SCANNER": "default-INCLUDE_SCANNER"
+    }
   , "expression":
     { "type": "let*"
     , "bindings":
@@ -959,6 +976,25 @@
             ]
           }
         ]
+      , [ "include_scan_tool"
+        , { "type": "disjoint_map_union"
+          , "msg": "Include scanner should be single artifact"
+          , "$1":
+            { "type": "foreach"
+            , "var": "artifact"
+            , "range":
+              { "type": "values"
+              , "$1":
+                {"type": "CALL_EXPRESSION", "name": "default-INCLUDE_SCANNER"}
+              }
+            , "body":
+              { "type": "singleton_map"
+              , "key": "include_scan"
+              , "value": {"type": "var", "name": "artifact"}
+              }
+            }
+          }
+        ]
       , [ "my objects"
         , { "type": "map_union"
           , "$1":
@@ -973,6 +1009,28 @@
                   , { "type": "join"
                     , "separator": "/"
                     , "$1": ["work", {"type": "var", "name": "src_name"}]
+                    }
+                  ]
+                , [ "out"
+                  , { "type": "change_ending"
+                    , "$1": {"type": "var", "name": "src_name"}
+                    , "ending": ".o"
+                    }
+                  ]
+                , [ "work out"
+                  , { "type": "join"
+                    , "separator": "/"
+                    , "$1": ["work", {"type": "var", "name": "out"}]
+                    }
+                  ]
+                , [ "cmdline"
+                  , { "type": "++"
+                    , "$1":
+                      [ [{"type": "var", "name": "COMPILER"}]
+                      , {"type": "var", "name": "COMPILE_FLAGS"}
+                      , ["-I", "work", "-isystem", "include"]
+                      , ["-c", {"type": "var", "name": "work src_name"}]
+                      ]
                     }
                   ]
                 , [ "inputs"
@@ -994,22 +1052,53 @@
                       ]
                     }
                   ]
-                , [ "out"
-                  , { "type": "change_ending"
-                    , "$1": {"type": "var", "name": "src_name"}
-                    , "ending": ".o"
+                , [ "minimal include tree"
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "include_scan_tool"}
+                    , "then":
+                      { "type": "from_subdir"
+                      , "subdir": "out"
+                      , "$1":
+                        { "type": "ACTION"
+                        , "out_dirs": ["out/include"]
+                        , "inputs":
+                          { "type": "map_union"
+                          , "$1":
+                            [ {"type": "var", "name": "inputs"}
+                            , {"type": "var", "name": "include_scan_tool"}
+                            ]
+                          }
+                        , "env":
+                          { "type": "var"
+                          , "name": "ENV"
+                          , "default": {"type": "empty_map"}
+                          }
+                        , "cmd":
+                          { "type": "++"
+                          , "$1":
+                            [ ["./include_scan"]
+                            , ["out"]
+                            , {"type": "var", "name": "cmdline"}
+                            , ["-E", "-M"]
+                            ]
+                          }
+                        }
+                      }
+                    , "else": {"type": "var", "name": "include tree"}
                     }
                   ]
-                , [ "work out"
-                  , { "type": "join"
-                    , "separator": "/"
-                    , "$1": ["work", {"type": "var", "name": "out"}]
+                , [ "minimal inputs"
+                  , { "type": "map_union"
+                    , "$1":
+                      [ {"type": "var", "name": "inputs"}
+                      , {"type": "var", "name": "minimal include tree"}
+                      ]
                     }
                   ]
                 , [ "action output"
                   , { "type": "ACTION"
                     , "outs": [{"type": "var", "name": "work out"}]
-                    , "inputs": {"type": "var", "name": "inputs"}
+                    , "inputs": {"type": "var", "name": "minimal inputs"}
                     , "env":
                       { "type": "var"
                       , "name": "ENV"
@@ -1018,10 +1107,7 @@
                     , "cmd":
                       { "type": "++"
                       , "$1":
-                        [ [{"type": "var", "name": "COMPILER"}]
-                        , {"type": "var", "name": "COMPILE_FLAGS"}
-                        , ["-I", "work", "-isystem", "include"]
-                        , ["-c", {"type": "var", "name": "work src_name"}]
+                        [ {"type": "var", "name": "cmdline"}
                         , ["-o", {"type": "var", "name": "work out"}]
                         ]
                       }
