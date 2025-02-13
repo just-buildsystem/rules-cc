@@ -343,6 +343,7 @@ Library produced by CMake configure, build, and install.
 | Config variable | Description |
 | --------------- | ----------- |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+| `"FOREIGN_EXECUTION_PROPERTIES"` | A map with extra remote-execution properties to be added to the foreign build action. |
 
 ### Rule `["CC/foreign/cmake", "data"]`
 
@@ -367,6 +368,7 @@ Data produced by CMake configure, build, and install.
 | Config variable | Description |
 | --------------- | ----------- |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+| `"FOREIGN_EXECUTION_PROPERTIES"` | A map with extra remote-execution properties to be added to the foreign build action. |
 
 ### Rule `["CC/foreign/make", "library"]`
 
@@ -405,6 +407,7 @@ Library produced by Configure and Make build and install.
 | --------------- | ----------- |
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+| `"FOREIGN_EXECUTION_PROPERTIES"` | A map with extra remote-execution properties to be added to the foreign build action. |
 
 ### Rule `["CC/foreign/make", "data"]`
 
@@ -432,6 +435,7 @@ Data produced by Configure and Make build and install.
 | --------------- | ----------- |
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+| `"FOREIGN_EXECUTION_PROPERTIES"` | A map with extra remote-execution properties to be added to the foreign build action. |
 
 ### Rule `["CC/foreign/shell", "library"]`
 
@@ -463,6 +467,7 @@ Library produced by generic shell commands with toolchain support.
 | --------------- | ----------- |
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+| `"FOREIGN_EXECUTION_PROPERTIES"` | A map with extra remote-execution properties to be added to the foreign build action. |
 
 ### Rule `["CC/foreign/shell", "data"]`
 
@@ -484,6 +489,7 @@ Data produced by generic shell commands with toolchain support.
 | --------------- | ----------- |
 | `"PREFIX"` | The absolute path that is used as prefix inside generated pkg-config files. The default value for this variable is `"/"`. This variable is ignored if the field `"prefix"` is set. |
 | `"TIMEOUT_SCALE"` | The scaling of the timeout for the invocation of the foreign build. Defaults to 10. |
+| `"FOREIGN_EXECUTION_PROPERTIES"` | A map with extra remote-execution properties to be added to the foreign build action. |
 
 ### Rule `["proto", "library"]`
 
