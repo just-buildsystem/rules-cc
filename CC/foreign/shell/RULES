@@ -25,6 +25,7 @@
     , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
+    , "FOREIGN_EXECUTION_PROPERTIES"
     ]
   , "implicit":
     { "defaults": [["CC", "defaults"]]
@@ -112,6 +113,9 @@
     , "TIMEOUT_SCALE":
       [ "The scaling of the timeout for the invocation of the foreign build."
       , "Defaults to 10."
+      ]
+    , "FOREIGN_EXECUTION_PROPERTIES":
+      [ "A map with extra remote-execution properties to be added to the foreign build action."
       ]
     }
   , "imports":
@@ -254,6 +258,7 @@
     , "PREFIX"
     , "BUILD_POSITION_INDEPENDENT"
     , "TIMEOUT_SCALE"
+    , "FOREIGN_EXECUTION_PROPERTIES"
     ]
   , "implicit":
     { "defaults": [["CC", "defaults"]]
@@ -394,6 +399,9 @@
     , "TIMEOUT_SCALE":
       [ "The scaling of the timeout for the invocation of the foreign build."
       , "Defaults to 10."
+      ]
+    , "FOREIGN_EXECUTION_PROPERTIES":
+      [ "A map with extra remote-execution properties to be added to the foreign build action."
       ]
     }
   , "imports":

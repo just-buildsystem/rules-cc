@@ -25,6 +25,7 @@
     , "defaults-transition"
     , "expand_exec"
     , "TIMEOUT_SCALE"
+    , "FOREIGN_EXECUTION_PROPERTIES"
     , "resolve_symlinks"
     ]
   , "imports":
@@ -475,6 +476,8 @@
       , "env": {"type": "var", "name": "ENV"}
       , "timeout scaling":
         {"type": "var", "name": "TIMEOUT_SCALE", "default": 10.0}
+      , "execution properties":
+        {"type": "var", "name": "FOREIGN_EXECUTION_PROPERTIES"}
       }
     }
   }
