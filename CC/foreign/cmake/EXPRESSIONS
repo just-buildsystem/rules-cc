@@ -24,6 +24,7 @@
     , "BUILD_POSITION_INDEPENDENT"
     , "defaults-transition"
     , "expand_exec"
+    , "TIMEOUT_SCALE"
     , "resolve_symlinks"
     ]
   , "imports":
