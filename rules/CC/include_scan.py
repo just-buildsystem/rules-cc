@@ -33,15 +33,13 @@ import shutil
 
 def include_scan(out_dir: str, cmd: list[str]):
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    if not proc.stdout:
-        proc.poll()
+    stdout, _ = proc.communicate()
+    if not stdout or proc.returncode != 0:
         exit(proc.returncode)
 
-    includes: set[str] = set()
-    for line in proc.stdout:
-        items = line.decode('utf-8').replace('\n', ' ')
-        paths = {os.path.normpath(i) for i in items.split(' ')}
-        includes |= {p for p in paths if p.startswith('include/')}
+    items = stdout.decode('utf-8').replace('\n', ' ')
+    paths = {os.path.normpath(i) for i in items.split(' ')}
+    includes = {p for p in paths if p.startswith('include/')}
 
     for path in includes:
         out_path = os.path.join(out_dir, path)
@@ -54,10 +52,6 @@ def include_scan(out_dir: str, cmd: list[str]):
             except Exception as e:
                 print(e, file=sys.stderr)
                 exit(1)
-
-    proc.poll()
-    if proc.returncode != 0:
-        exit(proc.returncode)
 
 
 if __name__ == '__main__':
