@@ -30,7 +30,8 @@ set -eu
 readonly OUT_DIR="$1"
 shift
 
-for FILE in $("$@" | tr ' ' '\n' | sort | uniq); do
+STDOUT="$("$@")" || exit $?
+for FILE in $(echo "$STDOUT" | tr ' ' '\n' | sort | uniq); do
   FILE="$(realpath -s -m --relative-to=. "${FILE}")"
   if expr match "${FILE}" 'include/' >/dev/null; then
     OUT_PATH="${OUT_DIR}/${FILE}"
