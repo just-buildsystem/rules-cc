@@ -65,13 +65,16 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"CXXFLAGS"` | Flags for C++ compilation. Specifying this field overwrites values from `"base"`. |
 | `"LDFLAGS"` | Linker flags for linking the final CC library. Specifying this field overwrites values from `"base"`. |
 | `"ARFLAGS"` | Arguments to tell the archiver to create an archive with the specified object files. If the `"ARFLAGS"` specified in the defaults target are empty, the rules will use `["cqs"]`. |
+| `"DEBUGFLAGS"` | Flags to be used for the debug-stage for both C and C++, instead of the resulting CFLAGS and CXXFLAGS, respectively. Specifying this field overwrites values from `"base"`. |
 | `"ADD_COMPILE_FLAGS"` | Additional compilation flags for C and C++. Specifying this field extends values from `"base"` for both, `"CFLAGS"` and `"CXXFLAGS"`. |
 | `"ADD_CFLAGS"` | Additional compilation flags specific for C. Specifying this field extends values from `"base"`. |
 | `"ADD_CXXFLAGS"` | Additional compilation flags specific for C++. Specifying this field extends values from `"base"`. |
 | `"ADD_LDFLAGS"` | Additional linker flags for linking the final CC library. Specifying this field extends values from `"base"`. |
+| `"ADD_DEBUGFLAGS"` | Additional compilation flags for the debug-stage. Specifying this field extends values from `"base"` for both, `"CFLAGS"` and `"CXXFLAGS"`. |
 | `"AR"` | The archiver tool to use |
+| `"DWP"` | The DWARF format packaging tool to use. Required by debug builds that enable debug fission. |
 | `"PATH"` | Path for looking up the compilers. Individual paths are joined with `":"`. Specifying this field extends values from `"base"`. |
-| `"SYSTEM_TOOLS"` | List of tools (`"CC"`, `"CXX"`, or `"AR"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
+| `"SYSTEM_TOOLS"` | List of tools (`"CC"`, `"CXX"`, `"AR"`, or `"DWP"`) that should be taken from the system instead of from `"toolchain"` (if specified). |
 | `"base"` | Other targets (using the same rule) to inherit values from. |
 | `"toolchain"` | Optional toolchain directory. A collection of artifacts that provide the tools CC, CXX, and AR (if needed). Note that only artifacts of the specified targets are considered (no runfiles etc.). Specifying this field extends artifacts from `"base"`. If the toolchain supports cross-compilation, it should perform a dispatch on the configuration variable `"BUILD_ARCH"` to determine for which architecture to generate code for. |
 | `"deps"` | Optional CC libraries any CC library and CC binary implicitly depend on. Those are typically `"libstdc++"` or `"libc++"` for C++ targets. Specifying this field extends dependencies from `"base"`. |
@@ -82,7 +85,7 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"ARCH"` | The unqualified architecture. Is taken as a default for `"HOST_ARCH"` and `"TARGET_ARCH"` if not set. |
 | `"HOST_ARCH"` | The architecture on which the build actions are carried out. |
 | `"TARGET_ARCH"` | The architecture for which to build. |
-| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag. |
 
 ### Rule `["CC/proto", "defaults"]`
 
@@ -105,7 +108,7 @@ A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "default
 | --------------- | ----------- |
 | `"ARCH"` | The unqualified architecture. Is taken as a default for `"HOST_ARCH"` and `"TARGET_ARCH"` if not set. |
 | `"HOST_ARCH"` | The architecture on which the build actions are carried out. |
-| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables debug fission, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag. |
 
 ### Rule `["CC/foreign", "defaults"]`
 
@@ -151,7 +154,8 @@ A binary written in C++
 
 | Config variable | Description |
 | --------------- | ----------- |
-| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+| `"DWP"` | The DWARF format packaging tool to use in debug builds that enable debug fission. If None, the respective value from `["CC", "defaults"]` will be taken. |
+| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag.  If no compile flags are otherwise configured, `["-g"]` will be taken. |
 | `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["CC", "library"]`
@@ -183,9 +187,10 @@ A C++ library
 
 | Config variable | Description |
 | --------------- | ----------- |
+| `"DWP"` | The DWARF format packaging tool to use in debug builds that enable debug fission. If None, the respective value from `["CC", "defaults"]` will be taken. |
 | `"BUILD_OBJECT_ONLY"` | If true, produce an object library, resulting in object files added to the linker line of all depending targets. If this configuration is set, the `"shared"` option is ignored. This variable is cleared for all dependencies. |
 | `"BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"` | If true, do not include the objects in the provided `"link-args"`. This allows consuming libraries that pick on the objects themselves to still forward the `"link-args"` of that library, and thus getting correct linking instructions for the resulting library. |
-| `"DEBUG"` | Compute the debug-stage, needed for local debugging. |
+| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag.  If no compile flags are otherwise configured, `["-g"]` will be taken. |
 | `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["CC/prebuilt", "library"]`
@@ -590,7 +595,7 @@ Run a given linter on the lint information provided by the given targets.
 | Field | Description |
 | ----- | ----------- |
 | `"name"` | Name of the kind of lint check performed, to be reported when an action is failing. |
-| `"linter"` | Single artifact running the lint checks.  This program is invoked with - argv`[1]` the file to lint, and - argv`[2:]` the original command line. This invocation happens in an environment with - CONFIG pointing to the directory with all the artifacts given   by the field `"config"`, and - OUT pointing to a directory to which files with the lint result   can be written. - META pointing to a json file contaning   - at key `"direct deps artifact names"` a list of all input     artifacts that come from the target itself or are runfiles of a     direct dependency. - TMPDIR pointing to a directory location that can be used to   create additional temporary files. It is supposed to indicate by the exit code whether the file to lint complies with the given linting policy, with 0 meaning compliant. Stdout and stderr, as well as the directory $`{OUT}` can be used to provide additional information. |
+| `"linter"` | Single artifact running the lint checks.  This program is invoked with - argv`[1]` the file to lint, and - argv`[2:]` the original command line. This invocation happens in an environment with - CONFIG pointing to the directory with all the artifacts given   by the field `"config"`, and - OUT pointing to a directory to which files with the lint result   can be written. - META pointing to a json file containing   - at key `"direct deps artifact names"` a list of all input     artifacts that come from the target itself or are runfiles of a     direct dependency.   - at key `"extra outs"` a list of extra output artifacts that the     command might produce, such as DWARF objects if debug fission is     enabled. - TMPDIR pointing to a directory location that can be used to   create additional temporary files. It is supposed to indicate by the exit code whether the file to lint complies with the given linting policy, with 0 meaning compliant. Stdout and stderr, as well as the directory $`{OUT}` can be used to provide additional information. |
 | `"config"` | Any configuration or other files needed by the linter. |
 | `"summarizer"` | Single artifact generating a summary of the individual lint results. It will be called in a directory where all subdirectories except . and .. represent the results of the individual lint actions. Those are given as  - a file `"result"` with content `"PASS"` if and only if the lint    action exited 0,  - files `"stdout"` and `"stderr"` with stdout and stderr of the lint    action, and  - a directory `"out"` with the additional information provided by the    lint action. The summarizer is required to indicate the overall result by the exit code, produce a human-readable summary on stdout, and optionally additional information in the directory $`{OUT}`. |
 
