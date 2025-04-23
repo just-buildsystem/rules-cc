@@ -74,6 +74,27 @@
     , "body": {"type": "CALL_EXPRESSION", "name": "map_provider"}
     }
   }
+, "default-DWP":
+  { "vars": ["defaults-transition"]
+  , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["fieldname", "defaults"]
+      , ["provider", "DWP"]
+      , ["transition", {"type": "var", "name": "defaults-transition"}]
+      , ["DWP", {"type": "CALL_EXPRESSION", "name": "list_provider"}]
+      , [ "DWP"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DWP"}
+          , "then": {"type": "var", "name": "DWP"}
+          , "else": ["dwp"]
+          }
+        ]
+      ]
+    , "body": {"type": "var", "name": "DWP"}
+    }
+  }
 , "default-ARFLAGS":
   { "vars": ["defaults-transition"]
   , "imports": {"list_provider": ["./", "..", "field_list_provider"]}
@@ -929,11 +950,283 @@
       }
     }
   }
+, "add-fission-compile-flags":
+  { "doc": ["Add debug fission flags, if enabled, to existing compile flags."]
+  , "vars": ["COMPILE_FLAGS", "DEBUG"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "fission-config"
+        , { "type": "if"
+          , "cond":
+            { "type": "lookup"
+            , "key": "USE_DEBUG_FISSION"
+            , "map":
+              { "type": "var"
+              , "name": "DEBUG"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          , "then":
+            { "type": "assert_non_empty"
+            , "msg":
+              [ "Debug fission requires non-empty debug map FISSION_CONFIG field"
+              ]
+            , "$1":
+              { "type": "lookup"
+              , "key": "FISSION_CONFIG"
+              , "map":
+                { "type": "var"
+                , "name": "DEBUG"
+                , "default": {"type": "empty_map"}
+                }
+              }
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
+      , [ "flags"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "COMPILE_FLAGS"}
+            , { "type": "if"
+              , "cond":
+                { "type": "lookup"
+                , "key": "USE_SPLIT_DWARF"
+                , "map": {"type": "var", "name": "fission-config"}
+                }
+              , "then": ["-gsplit-dwarf"]
+              }
+            , { "type": "let*"
+              , "bindings":
+                [ [ "version"
+                  , { "type": "lookup"
+                    , "key": "DWARF_VERSION"
+                    , "map": {"type": "var", "name": "fission-config"}
+                    }
+                  ]
+                ]
+              , "body":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "version"}
+                , "then":
+                  [ { "type": "join"
+                    , "$1": ["-gdwarf-", {"type": "var", "name": "version"}]
+                    }
+                  ]
+                }
+              }
+            , { "type": "if"
+              , "cond":
+                { "type": "lookup"
+                , "key": "USE_DEBUG_TYPES_SECTION"
+                , "map": {"type": "var", "name": "fission-config"}
+                }
+              , "then": ["-fdebug-types-section"]
+              }
+            ]
+          }
+        ]
+      ]
+    , "body": {"type": "var", "name": "flags"}
+    }
+  }
+, "add-fission-link-flags":
+  { "doc": ["Add debug fission flags, if enabled, to existing link flags."]
+  , "vars": ["LDFLAGS", "DEBUG"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "fission-config"
+        , { "type": "if"
+          , "cond":
+            { "type": "lookup"
+            , "key": "USE_DEBUG_FISSION"
+            , "map":
+              { "type": "var"
+              , "name": "DEBUG"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          , "then":
+            { "type": "assert_non_empty"
+            , "msg":
+              [ "Debug fission requires non-empty debug map FISSION_CONFIG field"
+              ]
+            , "$1":
+              { "type": "lookup"
+              , "key": "FISSION_CONFIG"
+              , "map":
+                { "type": "var"
+                , "name": "DEBUG"
+                , "default": {"type": "empty_map"}
+                }
+              }
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
+      , [ "flags"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "LDFLAGS"}
+            , { "type": "if"
+              , "cond":
+                { "type": "lookup"
+                , "key": "USE_GDB_INDEX"
+                , "map": {"type": "var", "name": "fission-config"}
+                }
+              , "then": ["-Wl,--gdb-index"]
+              }
+            ]
+          }
+        ]
+      ]
+    , "body": {"type": "var", "name": "flags"}
+    }
+  }
+, "dwarf package":
+  { "vars":
+    [ "DWP"
+    , "TOOLCHAIN"
+    , "TOOLCHAIN_DIR"
+    , "NON_SYSTEM_TOOLS"
+    , "ENV"
+    , "name"
+    , "dwarf objects"
+    , "dwarf deps"
+    , "stage"
+    ]
+  , "imports": {"default-DWP": "default-DWP"}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "DWP"
+        , { "type": "var"
+          , "name": "DWP"
+          , "default":
+            { "type": "join"
+            , "$1":
+              { "type": "++"
+              , "$1":
+                [ { "type": "if"
+                  , "cond":
+                    { "type": "lookup"
+                    , "key": "DWP"
+                    , "map": {"type": "var", "name": "NON_SYSTEM_TOOLS"}
+                    }
+                  , "then":
+                    ["./", {"type": "var", "name": "TOOLCHAIN_DIR"}, "/"]
+                  }
+                , {"type": "CALL_EXPRESSION", "name": "default-DWP"}
+                ]
+              }
+            }
+          }
+        ]
+      , [ "pkgname"
+        , {"type": "join", "$1": [{"type": "var", "name": "name"}, ".dwp"]}
+        ]
+      , [ "pkgpath"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "stage"}
+          , "then":
+            { "type": "join"
+            , "separator": "/"
+            , "$1":
+              [ {"type": "var", "name": "stage"}
+              , {"type": "var", "name": "pkgname"}
+              ]
+            }
+          , "else": {"type": "var", "name": "pkgname"}
+          }
+        ]
+      , [ "objects"
+        , { "type": "var"
+          , "name": "dwarf objects"
+          , "default": {"type": "empty_map"}
+          }
+        ]
+      , [ "objects"
+        , { "type": "disjoint_map_union"
+          , "$1":
+            [ {"type": "var", "name": "objects"}
+            , {"type": "var", "name": "dwarf deps"}
+            ]
+          }
+        ]
+      , [ "dwarf pkg"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "objects"}
+          , "else": {"type": "empty_map"}
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ [ "staged objects"
+                , { "type": "to_subdir"
+                  , "subdir": "work"
+                  , "$1": {"type": "var", "name": "objects"}
+                  }
+                ]
+              , [ "staged pkgpath"
+                , { "type": "join"
+                  , "$1": ["work/", {"type": "var", "name": "pkgpath"}]
+                  }
+                ]
+              , [ "staged pkg"
+                , { "type": "ACTION"
+                  , "outs": [{"type": "var", "name": "staged pkgpath"}]
+                  , "inputs":
+                    { "type": "map_union"
+                    , "$1":
+                      [ {"type": "var", "name": "TOOLCHAIN"}
+                      , {"type": "var", "name": "staged objects"}
+                      ]
+                    }
+                  , "env":
+                    { "type": "var"
+                    , "name": "ENV"
+                    , "default": {"type": "empty_map"}
+                    }
+                  , "cmd":
+                    { "type": "++"
+                    , "$1":
+                      [ [ {"type": "var", "name": "DWP", "default": "dwp"}
+                        , "-o"
+                        , {"type": "var", "name": "staged pkgpath"}
+                        ]
+                      , { "type": "keys"
+                        , "$1": {"type": "var", "name": "staged objects"}
+                        }
+                      ]
+                    }
+                  }
+                ]
+              , [ "pkg artifact"
+                , { "type": "lookup"
+                  , "map": {"type": "var", "name": "staged pkg"}
+                  , "key": {"type": "var", "name": "staged pkgpath"}
+                  }
+                ]
+              ]
+            , "body":
+              { "type": "singleton_map"
+              , "key": {"type": "var", "name": "pkgpath"}
+              , "value": {"type": "var", "name": "pkg artifact"}
+              }
+            }
+          }
+        ]
+      ]
+    , "body": {"type": "var", "name": "dwarf pkg"}
+    }
+  }
 , "objects":
   { "vars":
     [ "COMPILER"
     , "COMPILE_FLAGS"
     , "ENV"
+    , "DEBUG"
     , "TOOLCHAIN"
     , "srcs"
     , "hdrs"
@@ -948,6 +1241,7 @@
   , "imports":
     { "field_artifacts": ["./", "..", "field_artifacts"]
     , "default-INCLUDE_SCANNER": "default-INCLUDE_SCANNER"
+    , "add-fission-compile-flags": "add-fission-compile-flags"
     }
   , "expression":
     { "type": "let*"
@@ -995,140 +1289,232 @@
             }
           }
         ]
+      , [ "compile flags"
+        , {"type": "CALL_EXPRESSION", "name": "add-fission-compile-flags"}
+        ]
+      , [ "my output artifacts"
+        , { "type": "foreach_map"
+          , "var_key": "src_name"
+          , "var_val": "src_val"
+          , "range": {"type": "var", "name": "srcs"}
+          , "body":
+            { "type": "let*"
+            , "bindings":
+              [ [ "work src_name"
+                , { "type": "join"
+                  , "separator": "/"
+                  , "$1": ["work", {"type": "var", "name": "src_name"}]
+                  }
+                ]
+              , [ "inputs"
+                , { "type": "map_union"
+                  , "$1":
+                    [ {"type": "var", "name": "all hdrs"}
+                    , { "type": "singleton_map"
+                      , "key": {"type": "var", "name": "work src_name"}
+                      , "value": {"type": "var", "name": "src_val"}
+                      }
+                    , { "type": "var"
+                      , "name": "cflags-files"
+                      , "default": {"type": "empty_map"}
+                      }
+                    , { "type": "var"
+                      , "name": "TOOLCHAIN"
+                      , "default": {"type": "empty_map"}
+                      }
+                    ]
+                  }
+                ]
+              , [ "out"
+                , { "type": "change_ending"
+                  , "$1": {"type": "var", "name": "src_name"}
+                  , "ending": ".o"
+                  }
+                ]
+              , [ "work out"
+                , { "type": "join"
+                  , "separator": "/"
+                  , "$1": ["work", {"type": "var", "name": "out"}]
+                  }
+                ]
+              , [ "dwarf out"
+                , { "type": "change_ending"
+                  , "$1": {"type": "var", "name": "src_name"}
+                  , "ending": ".dwo"
+                  }
+                ]
+              , [ "work dwarf out"
+                , { "type": "join"
+                  , "separator": "/"
+                  , "$1": ["work", {"type": "var", "name": "dwarf out"}]
+                  }
+                ]
+              , [ "cmdline"
+                , { "type": "++"
+                  , "$1":
+                    [ [{"type": "var", "name": "COMPILER"}]
+                    , {"type": "var", "name": "compile flags"}
+                    , ["-I", "work", "-isystem", "include"]
+                    , ["-c", {"type": "var", "name": "work src_name"}]
+                    ]
+                  }
+                ]
+              , [ "minimal include tree"
+                , { "type": "if"
+                  , "cond": {"type": "var", "name": "include_scan_tool"}
+                  , "then":
+                    { "type": "from_subdir"
+                    , "subdir": "out"
+                    , "$1":
+                      { "type": "ACTION"
+                      , "out_dirs": ["out/include"]
+                      , "inputs":
+                        { "type": "map_union"
+                        , "$1":
+                          [ {"type": "var", "name": "inputs"}
+                          , {"type": "var", "name": "include_scan_tool"}
+                          ]
+                        }
+                      , "env":
+                        { "type": "var"
+                        , "name": "ENV"
+                        , "default": {"type": "empty_map"}
+                        }
+                      , "cmd":
+                        { "type": "++"
+                        , "$1":
+                          [ ["./include_scan"]
+                          , ["out"]
+                          , {"type": "var", "name": "cmdline"}
+                          , ["-E", "-M"]
+                          ]
+                        }
+                      }
+                    }
+                  , "else": {"type": "var", "name": "include tree"}
+                  }
+                ]
+              , [ "minimal inputs"
+                , { "type": "map_union"
+                  , "$1":
+                    [ {"type": "var", "name": "inputs"}
+                    , {"type": "var", "name": "minimal include tree"}
+                    ]
+                  }
+                ]
+              , [ "action output"
+                , { "type": "ACTION"
+                  , "outs":
+                    { "type": "++"
+                    , "$1":
+                      [ { "type": "if"
+                        , "cond":
+                          { "type": "lookup"
+                          , "key": "USE_DEBUG_FISSION"
+                          , "map":
+                            { "type": "var"
+                            , "name": "DEBUG"
+                            , "default": {"type": "empty_map"}
+                            }
+                          }
+                        , "then": [{"type": "var", "name": "work dwarf out"}]
+                        , "else": []
+                        }
+                      , [{"type": "var", "name": "work out"}]
+                      ]
+                    }
+                  , "inputs": {"type": "var", "name": "minimal inputs"}
+                  , "env":
+                    { "type": "var"
+                    , "name": "ENV"
+                    , "default": {"type": "empty_map"}
+                    }
+                  , "cmd":
+                    { "type": "++"
+                    , "$1":
+                      [ {"type": "var", "name": "cmdline"}
+                      , ["-o", {"type": "var", "name": "work out"}]
+                      ]
+                    }
+                  }
+                ]
+              , [ "staged output artifacts"
+                , { "type": "++"
+                  , "$1":
+                    [ [ { "type": "singleton_map"
+                        , "key": {"type": "var", "name": "out"}
+                        , "value":
+                          { "type": "lookup"
+                          , "key": {"type": "var", "name": "work out"}
+                          , "map": {"type": "var", "name": "action output"}
+                          }
+                        }
+                      ]
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "lookup"
+                        , "key": "USE_DEBUG_FISSION"
+                        , "map":
+                          { "type": "var"
+                          , "name": "DEBUG"
+                          , "default": {"type": "empty_map"}
+                          }
+                        }
+                      , "else": []
+                      , "then":
+                        [ { "type": "singleton_map"
+                          , "key": {"type": "var", "name": "dwarf out"}
+                          , "value":
+                            { "type": "lookup"
+                            , "key": {"type": "var", "name": "work dwarf out"}
+                            , "map": {"type": "var", "name": "action output"}
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              ]
+            , "body": {"type": "var", "name": "staged output artifacts"}
+            }
+          }
+        ]
       , [ "my objects"
         , { "type": "map_union"
           , "$1":
-            { "type": "foreach_map"
-            , "var_key": "src_name"
-            , "var_val": "src_val"
-            , "range": {"type": "var", "name": "srcs"}
+            { "type": "foreach"
+            , "range": {"type": "var", "name": "my output artifacts"}
             , "body":
-              { "type": "let*"
-              , "bindings":
-                [ [ "work src_name"
-                  , { "type": "join"
-                    , "separator": "/"
-                    , "$1": ["work", {"type": "var", "name": "src_name"}]
-                    }
-                  ]
-                , [ "out"
-                  , { "type": "change_ending"
-                    , "$1": {"type": "var", "name": "src_name"}
-                    , "ending": ".o"
-                    }
-                  ]
-                , [ "work out"
-                  , { "type": "join"
-                    , "separator": "/"
-                    , "$1": ["work", {"type": "var", "name": "out"}]
-                    }
-                  ]
-                , [ "cmdline"
-                  , { "type": "++"
-                    , "$1":
-                      [ [{"type": "var", "name": "COMPILER"}]
-                      , {"type": "var", "name": "COMPILE_FLAGS"}
-                      , ["-I", "work", "-isystem", "include"]
-                      , ["-c", {"type": "var", "name": "work src_name"}]
-                      ]
-                    }
-                  ]
-                , [ "inputs"
-                  , { "type": "map_union"
-                    , "$1":
-                      [ {"type": "var", "name": "all hdrs"}
-                      , { "type": "singleton_map"
-                        , "key": {"type": "var", "name": "work src_name"}
-                        , "value": {"type": "var", "name": "src_val"}
-                        }
-                      , { "type": "var"
-                        , "name": "cflags-files"
-                        , "default": {"type": "empty_map"}
-                        }
-                      , { "type": "var"
-                        , "name": "TOOLCHAIN"
-                        , "default": {"type": "empty_map"}
-                        }
-                      ]
-                    }
-                  ]
-                , [ "minimal include tree"
-                  , { "type": "if"
-                    , "cond": {"type": "var", "name": "include_scan_tool"}
-                    , "then":
-                      { "type": "from_subdir"
-                      , "subdir": "out"
-                      , "$1":
-                        { "type": "ACTION"
-                        , "out_dirs": ["out/include"]
-                        , "inputs":
-                          { "type": "map_union"
-                          , "$1":
-                            [ {"type": "var", "name": "inputs"}
-                            , {"type": "var", "name": "include_scan_tool"}
-                            ]
-                          }
-                        , "env":
-                          { "type": "var"
-                          , "name": "ENV"
-                          , "default": {"type": "empty_map"}
-                          }
-                        , "cmd":
-                          { "type": "++"
-                          , "$1":
-                            [ ["./include_scan"]
-                            , ["out"]
-                            , {"type": "var", "name": "cmdline"}
-                            , ["-E", "-M"]
-                            ]
-                          }
-                        }
-                      }
-                    , "else": {"type": "var", "name": "include tree"}
-                    }
-                  ]
-                , [ "minimal inputs"
-                  , { "type": "map_union"
-                    , "$1":
-                      [ {"type": "var", "name": "inputs"}
-                      , {"type": "var", "name": "minimal include tree"}
-                      ]
-                    }
-                  ]
-                , [ "action output"
-                  , { "type": "ACTION"
-                    , "outs": [{"type": "var", "name": "work out"}]
-                    , "inputs": {"type": "var", "name": "minimal inputs"}
-                    , "env":
-                      { "type": "var"
-                      , "name": "ENV"
-                      , "default": {"type": "empty_map"}
-                      }
-                    , "cmd":
-                      { "type": "++"
-                      , "$1":
-                        [ {"type": "var", "name": "cmdline"}
-                        , ["-o", {"type": "var", "name": "work out"}]
-                        ]
-                      }
-                    }
-                  ]
-                , [ "staged output artifact"
-                  , { "type": "map_union"
-                    , "$1":
-                      { "type": "foreach_map"
-                      , "range": {"type": "var", "name": "action output"}
-                      , "var_val": "object"
-                      , "body":
-                        { "type": "singleton_map"
-                        , "key": {"type": "var", "name": "out"}
-                        , "value": {"type": "var", "name": "object"}
-                        }
-                      }
-                    }
-                  ]
-                ]
-              , "body": {"type": "var", "name": "staged output artifact"}
+              { "type": "[]"
+              , "index": "0"
+              , "list": {"type": "var", "name": "_"}
+              }
+            }
+          }
+        ]
+      , [ "my dwarf objects"
+        , { "type": "if"
+          , "cond":
+            { "type": "lookup"
+            , "key": "USE_DEBUG_FISSION"
+            , "map":
+              { "type": "var"
+              , "name": "DEBUG"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          , "else": {"type": "empty_map"}
+          , "then":
+            { "type": "map_union"
+            , "$1":
+              { "type": "foreach"
+              , "range": {"type": "var", "name": "my output artifacts"}
+              , "body":
+                { "type": "[]"
+                , "index": "1"
+                , "list": {"type": "var", "name": "_"}
+                }
               }
             }
           }
@@ -1162,11 +1548,23 @@
         ]
       ]
     , "body":
-      { "type": "disjoint_map_union"
-      , "msg": "Stating conflict between own objects and objects of components"
+      { "type": "map_union"
       , "$1":
-        [ {"type": "var", "name": "my objects"}
-        , {"type": "var", "name": "component artifacts"}
+        [ { "type": "singleton_map"
+          , "key": "objects"
+          , "value":
+            { "type": "disjoint_map_union"
+            , "msg": "Staging conflict between own objects and objects of components"
+            , "$1":
+              [ {"type": "var", "name": "my objects"}
+              , {"type": "var", "name": "component artifacts"}
+              ]
+            }
+          }
+        , { "type": "singleton_map"
+          , "key": "dwarf objects"
+          , "value": {"type": "var", "name": "my dwarf objects"}
+          }
         ]
       }
     }
@@ -1179,6 +1577,7 @@
     , "CXXFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "DEBUG"
     , "pure C"
     , "srcs"
     , "hdrs"
@@ -1193,13 +1592,13 @@
     , "modified-transitions"
     ]
   , "imports":
-    { "objects": "objects"
-    , "list_provider": ["./", "..", "field_list_provider"]
+    { "list_provider": ["./", "..", "field_list_provider"]
     , "runfiles_list": ["./", "..", "field_runfiles_list"]
     , "default-TOOLCHAIN": "default-TOOLCHAIN"
     , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
     , "compiler": "compiler"
     , "flags": "flags"
+    , "add-fission-compile-flags": "add-fission-compile-flags"
     }
   , "expression":
     { "type": "let*"
@@ -1223,6 +1622,9 @@
             , {"type": "var", "name": "compile-args"}
             ]
           }
+        ]
+      , [ "compile flags"
+        , {"type": "CALL_EXPRESSION", "name": "add-fission-compile-flags"}
         ]
       , [ "include tree"
         , { "type": "singleton_map"
@@ -1331,7 +1733,7 @@
                     , { "type": "++"
                       , "$1":
                         [ [{"type": "var", "name": "COMPILER"}]
-                        , {"type": "var", "name": "COMPILE_FLAGS"}
+                        , {"type": "var", "name": "compile flags"}
                         , [ "-I"
                           , "work"
                           , "-isystem"
@@ -1342,10 +1744,12 @@
                         ]
                       }
                     ]
+                  , ["extra outs", []]
                   ]
                 , "body":
                   { "type": "env"
-                  , "vars": ["cmd", "src", "direct deps artifact names"]
+                  , "vars":
+                    ["cmd", "src", "direct deps artifact names", "extra outs"]
                   }
                 }
               }
@@ -1397,11 +1801,38 @@
                   , "$1": ["work", {"type": "var", "name": "out"}]
                   }
                 ]
+              , [ "dwarf out"
+                , { "type": "change_ending"
+                  , "$1": {"type": "var", "name": "src_name"}
+                  , "ending": ".dwo"
+                  }
+                ]
+              , [ "work dwarf out"
+                , { "type": "join"
+                  , "separator": "/"
+                  , "$1": ["work", {"type": "var", "name": "dwarf out"}]
+                  }
+                ]
+              , [ "extra outs"
+                , { "type": "if"
+                  , "cond":
+                    { "type": "lookup"
+                    , "key": "USE_DEBUG_FISSION"
+                    , "map":
+                      { "type": "var"
+                      , "name": "DEBUG"
+                      , "default": {"type": "empty_map"}
+                      }
+                    }
+                  , "then": [{"type": "var", "name": "work dwarf out"}]
+                  , "else": []
+                  }
+                ]
               , [ "cmd"
                 , { "type": "++"
                   , "$1":
                     [ [{"type": "var", "name": "COMPILER"}]
-                    , {"type": "var", "name": "COMPILE_FLAGS"}
+                    , {"type": "var", "name": "compile flags"}
                     , ["-I", "work", "-isystem", "include"]
                     , ["-c", {"type": "var", "name": "work src_name"}]
                     , ["-o", {"type": "var", "name": "work out"}]
@@ -1420,7 +1851,12 @@
                     [["src", {"type": "var", "name": "work src_name"}]]
                   , "body":
                     { "type": "env"
-                    , "vars": ["cmd", "src", "direct deps artifact names"]
+                    , "vars":
+                      [ "cmd"
+                      , "src"
+                      , "direct deps artifact names"
+                      , "extra outs"
+                      ]
                     }
                   }
                 }
@@ -1590,20 +2026,38 @@
     , "CXXFLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
+    , "DEBUG"
     , "BUILD_POSITION_INDEPENDENT"
     , "pure C"
     , "defaults-transition"
     ]
   , "imports": {"flags-cc": "flags-cc", "flags-cxx": "flags-cxx"}
   , "expression":
-    { "type": "if"
-    , "cond": {"type": "var", "name": "pure C"}
-    , "then": {"type": "CALL_EXPRESSION", "name": "flags-cc"}
-    , "else": {"type": "CALL_EXPRESSION", "name": "flags-cxx"}
+    { "type": "let*"
+    , "bindings":
+      [ [ "flags"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "pure C"}
+          , "then": {"type": "CALL_EXPRESSION", "name": "flags-cc"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "flags-cxx"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "if"
+      , "cond": {"type": "var", "name": "flags"}
+      , "then": {"type": "var", "name": "flags"}
+      , "else":
+        { "type": "if"
+        , "cond": {"type": "var", "name": "DEBUG"}
+        , "then": ["-g"]
+        }
+      }
     }
   }
 , "lib artifact":
-  { "vars":
+  { "doc": ["Provides the library artifact."]
+  , "vars":
     [ "CC"
     , "CXX"
     , "CFLAGS"
@@ -1613,6 +2067,45 @@
     , "AR"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
+    , "name"
+    , "pure C"
+    , "srcs"
+    , "hdrs"
+    , "private-hdrs"
+    , "stage"
+    , "compile-deps"
+    , "compile-args"
+    , "cflags-files"
+    , "defaults-transition"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    ]
+  , "imports": {"lib action": "lib action"}
+  , "expression":
+    { "type": "lookup"
+    , "key": "library"
+    , "map": {"type": "CALL_EXPRESSION", "name": "lib action"}
+    , "default": {"type": "empty_map"}
+    }
+  }
+, "lib action":
+  { "doc":
+    [ "Run the action producing the library artifact and pass it together with"
+    , "related information to consumers."
+    ]
+  , "vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "AR"
+    , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -1723,7 +2216,17 @@
             ]
           }
         ]
-      , ["objects", {"type": "CALL_EXPRESSION", "name": "objects"}]
+      , ["objects result", {"type": "CALL_EXPRESSION", "name": "objects"}]
+      , [ "objects"
+        , { "type": "lookup"
+          , "key": "objects"
+          , "map":
+            { "type": "var"
+            , "name": "objects result"
+            , "default": {"type": "empty_map"}
+            }
+          }
+        ]
       , [ "base name"
         , { "type": "if"
           , "cond": {"type": "var", "name": "objects"}
@@ -1816,7 +2319,30 @@
           }
         ]
       ]
-    , "body": {"type": "var", "name": "lib"}
+    , "body":
+      { "type": "map_union"
+      , "$1":
+        [ { "type": "singleton_map"
+          , "key": "library"
+          , "value": {"type": "var", "name": "lib"}
+          }
+        , { "type": "singleton_map"
+          , "key": "dwarf objects"
+          , "value":
+            { "type": "lookup"
+            , "key": "dwarf objects"
+            , "map":
+              { "type": "var"
+              , "name": "objects result"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          }
+        , { "type": "env"
+          , "vars": ["TOOLCHAIN", "TOOLCHAIN_DIR", "NON_SYSTEM_TOOLS", "ENV"]
+          }
+        ]
+      }
     }
   }
 , "lib result":
@@ -1860,9 +2386,10 @@
     , "run-libs-args-deps": "run-libs-args-deps"
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
-    , "lib artifact": "lib artifact"
+    , "lib action": "lib action"
     , "debug-deps": "debug-deps"
     , "lint": "lint information"
+    , "dwarf package": "dwarf package"
     }
   , "expression":
     { "type": "let*"
@@ -1885,7 +2412,71 @@
         , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
-      , ["lib", {"type": "CALL_EXPRESSION", "name": "lib artifact"}]
+      , [ "lib action result"
+        , {"type": "CALL_EXPRESSION", "name": "lib action"}
+        ]
+      , [ "lib"
+        , { "type": "lookup"
+          , "key": "library"
+          , "map": {"type": "var", "name": "lib action result"}
+          }
+        ]
+      , [ "dwarf objects"
+        , { "type": "lookup"
+          , "key": "dwarf objects"
+          , "map": {"type": "var", "name": "lib action result"}
+          }
+        ]
+      , ["dwarf deps", {"type": "empty_map"}]
+      , [ "dwarf-pkg"
+        , { "type": "if"
+          , "cond":
+            { "type": "and"
+            , "$1":
+              [ {"type": "var", "name": "dwarf objects"}
+              , { "type": "lookup"
+                , "key": "USE_DEBUG_FISSION"
+                , "map":
+                  { "type": "var"
+                  , "name": "DEBUG"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              ]
+            }
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ [ "TOOLCHAIN"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              , [ "TOOLCHAIN_DIR"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN_DIR"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              , [ "NON_SYSTEM_TOOLS"
+                , { "type": "lookup"
+                  , "key": "NON_SYSTEM_TOOLS"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              , [ "ENV"
+                , { "type": "lookup"
+                  , "key": "ENV"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "dwarf package"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , ["lint-deps fieldnames", ["deps", "private-deps", "components"]]
       , [ "lint"
         , { "type": "if"
@@ -1990,6 +2581,7 @@
               , "debug-srcs"
               , "debug-hdrs"
               , "lint"
+              , "dwarf-pkg"
               ]
             }
           , { "type": "var"
@@ -2002,7 +2594,8 @@
     }
   }
 , "shared artifact":
-  { "vars":
+  { "doc": ["Provides the shared library artifact."]
+  , "vars":
     [ "CC"
     , "CXX"
     , "CFLAGS"
@@ -2012,6 +2605,50 @@
     , "ADD_CXXFLAGS"
     , "ADD_LDFLAGS"
     , "ENV"
+    , "DEBUG"
+    , "name"
+    , "pure C"
+    , "srcs"
+    , "hdrs"
+    , "private-hdrs"
+    , "soversion"
+    , "compile-deps"
+    , "compile-args"
+    , "link-deps"
+    , "link-args"
+    , "run-libs"
+    , "run-libs-args"
+    , "cflags-files"
+    , "ldflags-files"
+    , "defaults-transition"
+    , "component-fieldnames"
+    , "deps-transition"
+    , "modified-transitions"
+    ]
+  , "imports": {"shared action": "shared action"}
+  , "expression":
+    { "type": "lookup"
+    , "key": "library"
+    , "map": {"type": "CALL_EXPRESSION", "name": "shared action"}
+    , "default": {"type": "empty_map"}
+    }
+  }
+, "shared action":
+  { "doc":
+    [ "Run the action producing the shared artifact and pass it together with"
+    , "related information to consumers."
+    ]
+  , "vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -2040,6 +2677,8 @@
     , "default-LDFLAGS": "default-LDFLAGS"
     , "default-TOOLCHAIN": "default-TOOLCHAIN"
     , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
+    , "add-fission-compile-flags": "add-fission-compile-flags"
+    , "add-fission-link-flags": "add-fission-link-flags"
     }
   , "expression":
     { "type": "let*"
@@ -2115,7 +2754,23 @@
             ]
           }
         ]
-      , ["objects", {"type": "CALL_EXPRESSION", "name": "objects"}]
+      , ["objects result", {"type": "CALL_EXPRESSION", "name": "objects"}]
+      , [ "objects"
+        , { "type": "lookup"
+          , "key": "objects"
+          , "map":
+            { "type": "var"
+            , "name": "objects result"
+            , "default": {"type": "empty_map"}
+            }
+          }
+        ]
+      , [ "compile flags"
+        , {"type": "CALL_EXPRESSION", "name": "add-fission-compile-flags"}
+        ]
+      , [ "ld flags"
+        , {"type": "CALL_EXPRESSION", "name": "add-fission-link-flags"}
+        ]
       , [ "base name"
         , { "type": "if"
           , "cond":
@@ -2194,19 +2849,42 @@
                       ["-Wl,-soname,", {"type": "var", "name": "libname"}]
                     }
                   ]
-                , {"type": "var", "name": "COMPILE_FLAGS"}
+                , {"type": "var", "name": "compile flags"}
                 , ["-o", {"type": "var", "name": "libname"}]
                 , {"type": "keys", "$1": {"type": "var", "name": "objects"}}
                 , {"type": "var", "name": "link-args"}
                 , {"type": "var", "name": "run-libs-args"}
-                , {"type": "var", "name": "LDFLAGS"}
+                , {"type": "var", "name": "ld flags"}
                 ]
               }
             }
           }
         ]
       ]
-    , "body": {"type": "var", "name": "lib"}
+    , "body":
+      { "type": "map_union"
+      , "$1":
+        [ { "type": "singleton_map"
+          , "key": "library"
+          , "value": {"type": "var", "name": "lib"}
+          }
+        , { "type": "singleton_map"
+          , "key": "dwarf objects"
+          , "value":
+            { "type": "lookup"
+            , "key": "dwarf objects"
+            , "map":
+              { "type": "var"
+              , "name": "objects result"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          }
+        , { "type": "env"
+          , "vars": ["TOOLCHAIN", "TOOLCHAIN_DIR", "NON_SYSTEM_TOOLS", "ENV"]
+          }
+        ]
+      }
     }
   }
 , "shared result":
@@ -2250,9 +2928,10 @@
     , "run-libs-args-deps": "run-libs-args-deps"
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
-    , "shared artifact": "shared artifact"
+    , "shared action": "shared action"
     , "debug-deps": "debug-deps"
     , "lint": "lint information"
+    , "dwarf package": "dwarf package"
     }
   , "expression":
     { "type": "let*"
@@ -2292,7 +2971,71 @@
       , [ "ldflags-files"
         , {"type": "CALL_EXPRESSION", "name": "ldflags-files-deps"}
         ]
-      , ["lib", {"type": "CALL_EXPRESSION", "name": "shared artifact"}]
+      , [ "lib action result"
+        , {"type": "CALL_EXPRESSION", "name": "shared action"}
+        ]
+      , [ "lib"
+        , { "type": "lookup"
+          , "key": "library"
+          , "map": {"type": "var", "name": "lib action result"}
+          }
+        ]
+      , [ "dwarf objects"
+        , { "type": "lookup"
+          , "key": "dwarf objects"
+          , "map": {"type": "var", "name": "lib action result"}
+          }
+        ]
+      , ["dwarf deps", {"type": "empty_map"}]
+      , [ "dwarf-pkg"
+        , { "type": "if"
+          , "cond":
+            { "type": "and"
+            , "$1":
+              [ {"type": "var", "name": "dwarf objects"}
+              , { "type": "lookup"
+                , "key": "USE_DEBUG_FISSION"
+                , "map":
+                  { "type": "var"
+                  , "name": "DEBUG"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              ]
+            }
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ [ "TOOLCHAIN"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              , [ "TOOLCHAIN_DIR"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN_DIR"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              , [ "NON_SYSTEM_TOOLS"
+                , { "type": "lookup"
+                  , "key": "NON_SYSTEM_TOOLS"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              , [ "ENV"
+                , { "type": "lookup"
+                  , "key": "ENV"
+                  , "map": {"type": "var", "name": "lib action result"}
+                  }
+                ]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "dwarf package"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , [ "debug-srcs"
         , { "type": "if"
           , "cond": {"type": "var", "name": "DEBUG"}
@@ -2416,6 +3159,7 @@
               , "debug-srcs"
               , "debug-hdrs"
               , "lint"
+              , "dwarf-pkg"
               ]
             }
           , { "type": "var"
@@ -2428,7 +3172,11 @@
     }
   }
 , "object artifacts":
-  { "vars":
+  { "doc":
+    [ "Get the relevant object artifacts and pass them together with related"
+    , "information to consumers."
+    ]
+  , "vars":
     [ "CC"
     , "CXX"
     , "CFLAGS"
@@ -2438,6 +3186,7 @@
     , "AR"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -2523,7 +3272,15 @@
           }
         ]
       ]
-    , "body": {"type": "CALL_EXPRESSION", "name": "objects"}
+    , "body":
+      { "type": "map_union"
+      , "$1":
+        [ {"type": "CALL_EXPRESSION", "name": "objects"}
+        , { "type": "env"
+          , "vars": ["TOOLCHAIN", "TOOLCHAIN_DIR", "NON_SYSTEM_TOOLS", "ENV"]
+          }
+        ]
+      }
     }
   }
 , "object result":
@@ -2535,6 +3292,7 @@
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
     , "AR"
+    , "DWP"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
     , "BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"
@@ -2571,6 +3329,7 @@
     , "object artifacts": "object artifacts"
     , "debug-deps": "debug-deps"
     , "lint": "lint information"
+    , "dwarf package": "dwarf package"
     }
   , "expression":
     { "type": "let*"
@@ -2593,7 +3352,71 @@
         , {"type": "CALL_EXPRESSION", "name": "cflags-files-deps"}
         ]
       , ["link-deps", {"type": "CALL_EXPRESSION", "name": "link-deps"}]
-      , ["objects", {"type": "CALL_EXPRESSION", "name": "object artifacts"}]
+      , [ "object artifacts with env"
+        , {"type": "CALL_EXPRESSION", "name": "object artifacts"}
+        ]
+      , [ "objects"
+        , { "type": "lookup"
+          , "key": "objects"
+          , "map": {"type": "var", "name": "object artifacts with env"}
+          }
+        ]
+      , [ "dwarf objects"
+        , { "type": "lookup"
+          , "key": "dwarf objects"
+          , "map": {"type": "var", "name": "object artifacts with env"}
+          }
+        ]
+      , ["dwarf deps", {"type": "empty_map"}]
+      , [ "dwarf-pkg"
+        , { "type": "if"
+          , "cond":
+            { "type": "and"
+            , "$1":
+              [ {"type": "var", "name": "dwarf objects"}
+              , { "type": "lookup"
+                , "key": "USE_DEBUG_FISSION"
+                , "map":
+                  { "type": "var"
+                  , "name": "DEBUG"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              ]
+            }
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ [ "TOOLCHAIN"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN"
+                  , "map": {"type": "var", "name": "object artifacts with env"}
+                  }
+                ]
+              , [ "TOOLCHAIN_DIR"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN_DIR"
+                  , "map": {"type": "var", "name": "object artifacts with env"}
+                  }
+                ]
+              , [ "NON_SYSTEM_TOOLS"
+                , { "type": "lookup"
+                  , "key": "NON_SYSTEM_TOOLS"
+                  , "map": {"type": "var", "name": "object artifacts with env"}
+                  }
+                ]
+              , [ "ENV"
+                , { "type": "lookup"
+                  , "key": "ENV"
+                  , "map": {"type": "var", "name": "object artifacts with env"}
+                  }
+                ]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "dwarf package"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , ["lint-deps fieldnames", ["deps", "private-deps", "components"]]
       , [ "lint"
         , { "type": "if"
@@ -2708,6 +3531,7 @@
               , "debug-srcs"
               , "debug-hdrs"
               , "lint"
+              , "dwarf-pkg"
               ]
             }
           , { "type": "var"
@@ -2720,7 +3544,7 @@
     }
   }
 , "bin artifact":
-  { "doc": ["Produces the binary artifact."]
+  { "doc": ["Provides the linked binary."]
   , "vars":
     [ "CC"
     , "CXX"
@@ -2732,6 +3556,47 @@
     , "ADD_LDFLAGS"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
+    , "name"
+    , "pure C"
+    , "srcs"
+    , "private-hdrs"
+    , "stage"
+    , "compile-deps"
+    , "compile-args"
+    , "link-deps"
+    , "link-args"
+    , "run-libs"
+    , "run-libs-args"
+    , "cflags-files"
+    , "ldflags-files"
+    , "defaults-transition"
+    ]
+  , "imports": {"bin action": "bin action"}
+  , "expression":
+    { "type": "lookup"
+    , "key": "binary"
+    , "map": {"type": "CALL_EXPRESSION", "name": "bin action"}
+    , "default": {"type": "empty_map"}
+    }
+  }
+, "bin action":
+  { "doc":
+    [ "Run the action producing the binary artifact and pass it together with"
+    , "related information to consumers."
+    ]
+  , "vars":
+    [ "CC"
+    , "CXX"
+    , "CFLAGS"
+    , "CXXFLAGS"
+    , "LDFLAGS"
+    , "ADD_CFLAGS"
+    , "ADD_CXXFLAGS"
+    , "ADD_LDFLAGS"
+    , "ENV"
+    , "BUILD_POSITION_INDEPENDENT"
+    , "DEBUG"
     , "name"
     , "pure C"
     , "srcs"
@@ -2756,6 +3621,8 @@
     , "default-LDFLAGS": "default-LDFLAGS"
     , "default-TOOLCHAIN": "default-TOOLCHAIN"
     , "default-NON_SYSTEM_TOOLS": "default-NON_SYSTEM_TOOLS"
+    , "add-fission-compile-flags": "add-fission-compile-flags"
+    , "add-fission-link-flags": "add-fission-link-flags"
     }
   , "expression":
     { "type": "let*"
@@ -2831,7 +3698,23 @@
           }
         ]
       , ["hdrs", {"type": "empty_map"}]
-      , ["objects", {"type": "CALL_EXPRESSION", "name": "objects"}]
+      , ["objects result", {"type": "CALL_EXPRESSION", "name": "objects"}]
+      , [ "objects"
+        , { "type": "lookup"
+          , "key": "objects"
+          , "map":
+            { "type": "var"
+            , "name": "objects result"
+            , "default": {"type": "empty_map"}
+            }
+          }
+        ]
+      , [ "compile flags"
+        , {"type": "CALL_EXPRESSION", "name": "add-fission-compile-flags"}
+        ]
+      , [ "ld flags"
+        , {"type": "CALL_EXPRESSION", "name": "add-fission-link-flags"}
+        ]
       , [ "link-args"
         , { "type": "nub_right"
           , "$1":
@@ -2895,10 +3778,10 @@
               , "-o"
               , {"type": "var", "name": "binpath"}
               ]
-            , {"type": "var", "name": "COMPILE_FLAGS"}
+            , {"type": "var", "name": "compile flags"}
             , {"type": "var", "name": "link-args"}
             , {"type": "var", "name": "run-libs-args"}
-            , {"type": "var", "name": "LDFLAGS"}
+            , {"type": "var", "name": "ld flags"}
             ]
           }
         ]
@@ -2946,7 +3829,30 @@
           }
         ]
       ]
-    , "body": {"type": "var", "name": "binary"}
+    , "body":
+      { "type": "map_union"
+      , "$1":
+        [ { "type": "singleton_map"
+          , "key": "binary"
+          , "value": {"type": "var", "name": "binary"}
+          }
+        , { "type": "singleton_map"
+          , "key": "dwarf objects"
+          , "value":
+            { "type": "lookup"
+            , "key": "dwarf objects"
+            , "map":
+              { "type": "var"
+              , "name": "objects result"
+              , "default": {"type": "empty_map"}
+              }
+            }
+          }
+        , { "type": "env"
+          , "vars": ["TOOLCHAIN", "TOOLCHAIN_DIR", "NON_SYSTEM_TOOLS", "ENV"]
+          }
+        ]
+      }
     }
   }
 , "bin result":
@@ -2983,9 +3889,10 @@
     , "run-libs-args-deps": "run-libs-args-deps"
     , "cflags-files-deps": "cflags-files-deps"
     , "ldflags-files-deps": "ldflags-files-deps"
-    , "binary": "bin artifact"
+    , "bin action": "bin action"
     , "debug-deps": "debug-deps"
     , "lint": "lint information"
+    , "dwarf package": "dwarf package"
     }
   , "expression":
     { "type": "let*"
@@ -3069,13 +3976,108 @@
             }
           }
         ]
+      , [ "bin action result"
+        , {"type": "CALL_EXPRESSION", "name": "bin action"}
+        ]
+      , [ "binary"
+        , { "type": "lookup"
+          , "key": "binary"
+          , "map": {"type": "var", "name": "bin action result"}
+          }
+        ]
+      , [ "dwarf objects"
+        , { "type": "lookup"
+          , "key": "dwarf objects"
+          , "map": {"type": "var", "name": "bin action result"}
+          }
+        ]
+      , [ "dwarf deps"
+        , { "type": "if"
+          , "cond":
+            { "type": "and"
+            , "$1":
+              [ {"type": "var", "name": "dwarf objects"}
+              , { "type": "lookup"
+                , "key": "USE_DEBUG_FISSION"
+                , "map":
+                  { "type": "var"
+                  , "name": "DEBUG"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              ]
+            }
+          , "else": {"type": "empty_map"}
+          , "then":
+            { "type": "let*"
+            , "bindings": [["deps-provider", "dwarf-pkg"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "debug-deps"}
+            }
+          }
+        ]
+      , [ "dwarf-pkg"
+        , { "type": "if"
+          , "cond":
+            { "type": "and"
+            , "$1":
+              [ {"type": "var", "name": "dwarf objects"}
+              , { "type": "lookup"
+                , "key": "USE_DEBUG_FISSION"
+                , "map":
+                  { "type": "var"
+                  , "name": "DEBUG"
+                  , "default": {"type": "empty_map"}
+                  }
+                }
+              ]
+            }
+          , "then":
+            { "type": "let*"
+            , "bindings":
+              [ [ "TOOLCHAIN"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN"
+                  , "map": {"type": "var", "name": "bin action result"}
+                  }
+                ]
+              , [ "TOOLCHAIN_DIR"
+                , { "type": "lookup"
+                  , "key": "TOOLCHAIN_DIR"
+                  , "map": {"type": "var", "name": "bin action result"}
+                  }
+                ]
+              , [ "NON_SYSTEM_TOOLS"
+                , { "type": "lookup"
+                  , "key": "NON_SYSTEM_TOOLS"
+                  , "map": {"type": "var", "name": "bin action result"}
+                  }
+                ]
+              , [ "ENV"
+                , { "type": "lookup"
+                  , "key": "ENV"
+                  , "map": {"type": "var", "name": "bin action result"}
+                  }
+                ]
+              ]
+            , "body": {"type": "CALL_EXPRESSION", "name": "dwarf package"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       ]
     , "body":
       { "type": "RESULT"
-      , "artifacts": {"type": "CALL_EXPRESSION", "name": "binary"}
+      , "artifacts": {"type": "var", "name": "binary"}
       , "provides":
         { "type": "env"
-        , "vars": ["run-libs", "package", "debug-srcs", "debug-hdrs", "lint"]
+        , "vars":
+          [ "run-libs"
+          , "package"
+          , "debug-srcs"
+          , "debug-hdrs"
+          , "lint"
+          , "dwarf-pkg"
+          ]
         }
       }
     }
@@ -3157,6 +4159,18 @@
                       }
                     }
                   ]
+                , [ "dwarf-pkg"
+                  , { "type": "if"
+                    , "cond": {"type": "var", "name": "skip-debug-stage"}
+                    , "then": {"type": "empty_map"}
+                    , "else":
+                      { "type": "DEP_PROVIDES"
+                      , "dep": {"type": "var", "name": "target"}
+                      , "provider": "dwarf-pkg"
+                      , "default": {"type": "empty_map"}
+                      }
+                    }
+                  ]
                 ]
               , "body":
                 { "type": "if"
@@ -3166,9 +4180,14 @@
                   { "type": "let*"
                   , "bindings":
                     [ [ "artifacts"
-                      , { "type": "DEP_ARTIFACTS"
-                        , "dep": {"type": "var", "name": "target"}
-                        , "default": {"type": "empty_map"}
+                      , { "type": "map_union"
+                        , "$1":
+                          [ { "type": "DEP_ARTIFACTS"
+                            , "dep": {"type": "var", "name": "target"}
+                            , "default": {"type": "empty_map"}
+                            }
+                          , {"type": "var", "name": "dwarf-pkg"}
+                          ]
                         }
                       ]
                     , [ "link-deps"

@@ -14,11 +14,14 @@
     , "CXXFLAGS"
     , "LDFLAGS"
     , "ARFLAGS"
+    , "DEBUGFLAGS"
     , "ADD_COMPILE_FLAGS"
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
     , "ADD_LDFLAGS"
+    , "ADD_DEBUGFLAGS"
     , "AR"
+    , "DWP"
     , "PATH"
     , "SYSTEM_TOOLS"
     ]
@@ -42,9 +45,13 @@
     , "CC": ["The C compiler to use"]
     , "CXX": ["The C++ compiler to use"]
     , "AR": ["The archiver tool to use"]
+    , "DWP":
+      [ "The DWARF format packaging tool to use. Required by debug builds that"
+      , "enable debug fission."
+      ]
     , "SYSTEM_TOOLS":
-      [ "List of tools (\"CC\", \"CXX\", or \"AR\") that should be taken from"
-      , "the system instead of from \"toolchain\" (if specified)."
+      [ "List of tools (\"CC\", \"CXX\", \"AR\", or \"DWP\") that should be"
+      , "taken from the system instead of from \"toolchain\" (if specified)."
       ]
     , "CFLAGS":
       [ "Flags for C compilation. Specifying this field overwrites"
@@ -63,6 +70,11 @@
       , "object files. If the \"ARFLAGS\" specified in the defaults target are"
       , "empty, the rules will use [\"cqs\"]."
       ]
+    , "DEBUGFLAGS":
+      [ "Flags to be used for the debug-stage for both C and C++, instead of"
+      , "the resulting CFLAGS and CXXFLAGS, respectively."
+      , "Specifying this field overwrites values from \"base\"."
+      ]
     , "ADD_COMPILE_FLAGS":
       [ "Additional compilation flags for C and C++. Specifying this field"
       , "extends values from \"base\" for both, \"CFLAGS\" and \"CXXFLAGS\"."
@@ -78,6 +90,11 @@
     , "ADD_LDFLAGS":
       [ "Additional linker flags for linking the final CC library. Specifying"
       , "this field extends values from \"base\"."
+      ]
+    , "ADD_DEBUGFLAGS":
+      [ "Additional compilation flags for the debug-stage. Specifying this"
+      , "field extends values from \"base\" for both, \"CFLAGS\" and"
+      , "\"CXXFLAGS\"."
       ]
     , "PATH":
       [ "Path for looking up the compilers. Individual paths are joined"
@@ -102,7 +119,23 @@
     , "HOST_ARCH":
       ["The architecture on which the build actions are carried out."]
     , "TARGET_ARCH": ["The architecture for which to build."]
-    , "DEBUG": ["Compute the debug-stage, needed for local debugging."]
+    , "DEBUG":
+      [ "Map configuring the debug-stage, needed for local debugging."
+      , "If non-empty, debug mode is enabled."
+      , ""
+      , "The key \"USE_DEBUG_FISSION\" expects a flag which enables the debug"
+      , "fission mode, but does not add any flags. Explicitly setting it to a"
+      , "false value is needed to enable regular debug mode."
+      , "The key \"FISSION_CONFIG\" expects a map configuring debug fission."
+      , " - subkey \"USE_SPLIT_DWARF\" expects a flag that, if true, adds the"
+      , "-gsplit-dwarf compile flag."
+      , " - subkey \"DWARF_VERSION\" expects a string that adds the"
+      , "-gdwarf-<value> compile flag."
+      , " - subkey \"USE_GDB_INDEX\" expects a flag that, if true, adds the"
+      , "-Wl,--gdb-index linker flag."
+      , " - subkey \"USE_DEBUG_TYPES_SECTION\" expects a flag that, if true,"
+      , "adds the -fdebug-types-section compile flag."
+      ]
     }
   , "imports":
     { "base-provides": "defaults-base-provides"
@@ -134,7 +167,9 @@
       , ["CXXFLAGS", {"type": "FIELD", "name": "CXXFLAGS"}]
       , ["LDFLAGS", {"type": "FIELD", "name": "LDFLAGS"}]
       , ["ARFLAGS", {"type": "FIELD", "name": "ARFLAGS"}]
+      , ["DEBUGFLAGS", {"type": "FIELD", "name": "DEBUGFLAGS"}]
       , ["AR", {"type": "FIELD", "name": "AR"}]
+      , ["DWP", {"type": "FIELD", "name": "DWP"}]
       , ["PATH", {"type": "FIELD", "name": "PATH"}]
       , ["provider", "CC"]
       , [ "CC"
@@ -184,11 +219,27 @@
           , "else": {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
           }
         ]
+      , ["provider", "DEBUGFLAGS"]
+      , [ "DEBUGFLAGS"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUGFLAGS"}
+          , "then": {"type": "var", "name": "DEBUGFLAGS"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides-++"}
+          }
+        ]
       , ["provider", "AR"]
       , [ "AR"
         , { "type": "if"
           , "cond": {"type": "var", "name": "AR"}
           , "then": {"type": "var", "name": "AR"}
+          , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
+          }
+        ]
+      , ["provider", "DWP"]
+      , [ "DWP"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DWP"}
+          , "then": {"type": "var", "name": "DWP"}
           , "else": {"type": "CALL_EXPRESSION", "name": "base-provides"}
           }
         ]
@@ -276,6 +327,20 @@
                     }
                   ]
                 }
+              , { "type": "if"
+                , "cond": {"type": "FIELD", "name": "DWP"}
+                , "then":
+                  [ { "type": "singleton_map"
+                    , "key": "DWP"
+                    , "value":
+                      { "type": "if"
+                      , "cond": {"type": "FIELD", "name": "toolchain"}
+                      , "then": true
+                      , "else": false
+                      }
+                    }
+                  ]
+                }
               , { "type": "foreach"
                 , "range": {"type": "FIELD", "name": "SYSTEM_TOOLS"}
                 , "var": "tool"
@@ -342,6 +407,40 @@
             ]
           }
         ]
+      , [ "CFLAGS"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUG"}
+          , "then":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond": {"type": "var", "name": "DEBUGFLAGS"}
+                , "then": {"type": "var", "name": "DEBUGFLAGS"}
+                , "else": {"type": "var", "name": "CFLAGS"}
+                }
+              , {"type": "FIELD", "name": "ADD_DEBUGFLAGS"}
+              ]
+            }
+          , "else": {"type": "var", "name": "CFLAGS"}
+          }
+        ]
+      , [ "CXXFLAGS"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "DEBUG"}
+          , "then":
+            { "type": "++"
+            , "$1":
+              [ { "type": "if"
+                , "cond": {"type": "var", "name": "DEBUGFLAGS"}
+                , "then": {"type": "var", "name": "DEBUGFLAGS"}
+                , "else": {"type": "var", "name": "CXXFLAGS"}
+                }
+              , {"type": "FIELD", "name": "ADD_DEBUGFLAGS"}
+              ]
+            }
+          , "else": {"type": "var", "name": "CXXFLAGS"}
+          }
+        ]
       , ["deps-fieldnames", ["base", "deps"]]
       , ["compile-deps", {"type": "CALL_EXPRESSION", "name": "compile-deps"}]
       , [ "compile-args"
@@ -399,6 +498,7 @@
           , "CXXFLAGS"
           , "LDFLAGS"
           , "AR"
+          , "DWP"
           , "ARFLAGS"
           , "PATH"
           , "ENV"
@@ -455,6 +555,7 @@
     , "ADD_CXXFLAGS"
     , "ADD_LDFLAGS"
     , "AR"
+    , "DWP"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
     , "BUILD_OBJECT_ONLY"
@@ -587,9 +688,32 @@
       [ "The archive tool to used for creating the library"
       , "If None, the respective value from [\"CC\", \"defaults\"] will be taken."
       ]
+    , "DWP":
+      [ "The DWARF format packaging tool to use in debug builds that enable"
+      , "debug fission."
+      , "If None, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
     , "ENV": ["The environment for any action generated."]
     , "BUILD_POSITION_INDEPENDENT": ["Build with -fPIC."]
-    , "DEBUG": ["Compute the debug-stage, needed for local debugging."]
+    , "DEBUG":
+      [ "Map configuring the debug-stage, needed for local debugging."
+      , "If non-empty, debug mode is enabled."
+      , ""
+      , "The key \"USE_DEBUG_FISSION\" expects a flag which enables the debug"
+      , "fission mode, but does not add any flags. Explicitly setting it to a"
+      , "false value is needed to enable regular debug mode."
+      , "The key \"FISSION_CONFIG\" expects a map configuring debug fission."
+      , " - subkey \"USE_SPLIT_DWARF\" expects a flag that, if true, adds the"
+      , "-gsplit-dwarf compile flag."
+      , " - subkey \"DWARF_VERSION\" expects a string that adds the"
+      , "-gdwarf-<value> compile flag."
+      , " - subkey \"USE_GDB_INDEX\" expects a flag that, if true, adds the"
+      , "-Wl,--gdb-index linker flag."
+      , " - subkey \"USE_DEBUG_TYPES_SECTION\" expects a flag that, if true,"
+      , "adds the -fdebug-types-section compile flag."
+      , ""
+      , "If no compile flags are otherwise configured, [\"-g\"] will be taken."
+      ]
     , "BUILD_OBJECT_ONLY":
       [ "If true, produce an object library, resulting in object files"
       , "added to the linker line of all depending targets. If this"
@@ -845,6 +969,7 @@
     , "ADD_CFLAGS"
     , "ADD_CXXFLAGS"
     , "ADD_LDFLAGS"
+    , "DWP"
     , "ENV"
     , "BUILD_POSITION_INDEPENDENT"
     , "DEBUG"
@@ -913,9 +1038,32 @@
       [ "The linker flags to add to the default ones"
       , "taken from the [\"CC\", \"defaults\"] target"
       ]
+    , "DWP":
+      [ "The DWARF format packaging tool to use in debug builds that enable"
+      , "debug fission."
+      , "If None, the respective value from [\"CC\", \"defaults\"] will be taken."
+      ]
     , "ENV": ["The environment for any action generated."]
     , "BUILD_POSITION_INDEPENDENT": ["Build with -fPIC."]
-    , "DEBUG": ["Compute the debug-stage, needed for local debugging."]
+    , "DEBUG":
+      [ "Map configuring the debug-stage, needed for local debugging."
+      , "If non-empty, debug mode is enabled."
+      , ""
+      , "The key \"USE_DEBUG_FISSION\" expects a flag which enables the debug"
+      , "fission mode, but does not add any flags. Explicitly setting it to a"
+      , "false value is needed to enable regular debug mode."
+      , "The key \"FISSION_CONFIG\" expects a map configuring debug fission."
+      , " - subkey \"USE_SPLIT_DWARF\" expects a flag that, if true, adds the"
+      , "-gsplit-dwarf compile flag."
+      , " - subkey \"DWARF_VERSION\" expects a string that adds the"
+      , "-gdwarf-<value> compile flag."
+      , " - subkey \"USE_GDB_INDEX\" expects a flag that, if true, adds the"
+      , "-Wl,--gdb-index linker flag."
+      , " - subkey \"USE_DEBUG_TYPES_SECTION\" expects a flag that, if true,"
+      , "adds the -fdebug-types-section compile flag."
+      , ""
+      , "If no compile flags are otherwise configured, [\"-g\"] will be taken."
+      ]
     , "LINT":
       [ "Also provide nodes describing compile actions and header files;"
       , "those can be used by lint rules (doing also the config transition)"
