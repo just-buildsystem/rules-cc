@@ -36,18 +36,16 @@
   { "type": "configure"
   , "target": "bar"
   , "config":
-    { "type": "let*"
-    , "bindings": [["DEBUG", true], ["ADD_CXXFLAGS", ["-g"]]]
-    , "body": {"type": "env", "vars": ["DEBUG", "ADD_CXXFLAGS"]}
+    { "type": "'"
+    , "$1": {"DEBUG": {"USE_DEBUG_FISSION": false}, "ADD_CXXFLAGS": ["-g"]}
     }
   }
 , "main debug":
   { "type": "configure"
   , "target": "main"
   , "config":
-    { "type": "let*"
-    , "bindings": [["DEBUG", true], ["ADD_CXXFLAGS", ["-g"]]]
-    , "body": {"type": "env", "vars": ["DEBUG", "ADD_CXXFLAGS"]}
+    { "type": "'"
+    , "$1": {"DEBUG": {"USE_DEBUG_FISSION": false}, "ADD_CXXFLAGS": ["-g"]}
     }
   }
 , "install_bar_debug":
