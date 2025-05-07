@@ -302,7 +302,7 @@
                 { "type": "++"
                 , "$1":
                   [ [ "set -eu"
-                    , "mkdir scratch"
+                    , "mkdir -p scratch install"
                     , "readonly ROOT=\"$(pwd)\""
                     , "export TMPDIR=\"$(pwd)/scratch\""
                     , "export TOOLCHAIN=\"$(pwd)/toolchain\""

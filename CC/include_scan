@@ -30,6 +30,8 @@ set -eu
 readonly OUT_DIR="$1"
 shift
 
+mkdir -p "${OUT_DIR}/include"
+
 STDOUT="$("$@")" || exit $?
 for FILE in $(echo "$STDOUT" | tr ' ' '\n' | sort | uniq); do
   FILE="$(realpath -s -m --relative-to=. "${FILE}")"
