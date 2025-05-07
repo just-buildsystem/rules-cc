@@ -41,6 +41,7 @@ def include_scan(out_dir: str, cmd: list[str]):
     paths = {os.path.normpath(i) for i in items.split(' ')}
     includes = {p for p in paths if p.startswith('include/')}
 
+    os.makedirs(os.path.join(out_dir, 'include'), exist_ok=True)
     for path in includes:
         out_path = os.path.join(out_dir, path)
         try:

@@ -94,11 +94,13 @@ int main(int argc, const char *argv[]) {
   int retval = 0;
   char *path = NULL;
   char *prefix;
+  char *outdir;
   size_t prefix_len = 0;
+  size_t outdir_len = 0;
   struct IncludeList incl;
 
   if (argc < 3) {
-    fprintf(stderr, "usage: %s PREFIX FILE ARGV...\n", argv[0]);
+    fprintf(stderr, "usage: %s OUT_DIR ARGV...\n", argv[0]);
     fprintf(stderr, "Missing arguments\n");
     exit(EXIT_FAILURE);
   }
@@ -130,8 +132,19 @@ int main(int argc, const char *argv[]) {
   strcat(prefix + prefix_len, "/");
   prefix_len += 1;
   parse_paths(&incl, fd[0], "include/", prefix);
-  free(prefix);
   close(fd[0]);
+
+  /* create output directory "<prefix>/include" */
+  outdir_len = prefix_len + 8 /* strlen("include/") */;
+  outdir = (char *)calloc(outdir_len + 1, sizeof(char));
+  strcat(outdir, prefix);
+  strcat(outdir + prefix_len, "include/");
+  if (helper_mkdir_p(outdir, 0755) != 0) {
+    fprintf(stderr, "Failed to create output directory\n");
+    return 1;
+  }
+  free(prefix);
+  free(outdir);
 
   /* wait for child to finish */
   while (1) {
