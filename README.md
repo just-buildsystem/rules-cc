@@ -85,7 +85,7 @@ A rule to provide defaults. All CC targets take their defaults for CC, CXX, flag
 | `"ARCH"` | The unqualified architecture. Is taken as a default for `"HOST_ARCH"` and `"TARGET_ARCH"` if not set. |
 | `"HOST_ARCH"` | The architecture on which the build actions are carried out. |
 | `"TARGET_ARCH"` | The architecture for which to build. |
-| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag. |
+| `"DEBUG"` | If logically true (typically, a non-empty map), use debug-related options, otherwise not. |
 
 ### Rule `["CC/proto", "defaults"]`
 
@@ -108,7 +108,7 @@ A rule to provide protoc/GRPC defaults. Used to implement `["CC/proto", "default
 | --------------- | ----------- |
 | `"ARCH"` | The unqualified architecture. Is taken as a default for `"HOST_ARCH"` and `"TARGET_ARCH"` if not set. |
 | `"HOST_ARCH"` | The architecture on which the build actions are carried out. |
-| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables debug fission, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag. |
+| `"DEBUG"` | If logically true (typically, a non-empty map), use debug-related options, otherwise not. |
 
 ### Rule `["CC/foreign", "defaults"]`
 
@@ -143,7 +143,7 @@ A binary written in C++
 | ----- | ----------- |
 | `"name"` | The name of the binary |
 | `"stage"` | The logical location of all header and source files, as well as the resulting binary file. Individual directory components are joined with `"/"`. |
-| `"pure C"` | If non-empty, compile as C sources rathter than C++ sources. In particular, CC is used to compile rather than CXX |
+| `"pure C"` | If non-empty, compile as C sources rather than C++ sources. In particular, CC is used to compile rather than CXX |
 | `"private-defines"` | List of defines set for source files local to this target. Each list entry will be prepended by `"-D"`. |
 | `"private-cflags"` | List of compile flags set for source files local to this target. |
 | `"private-ldflags"` | Additional linker flags for linking external libraries. |
@@ -155,7 +155,7 @@ A binary written in C++
 | Config variable | Description |
 | --------------- | ----------- |
 | `"DWP"` | The DWARF format packaging tool to use in debug builds that enable debug fission. If None, the respective value from `["CC", "defaults"]` will be taken. |
-| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag.  If no compile flags are otherwise configured, `["-g"]` will be taken. |
+| `"DEBUG"` | Either a logically false value to disable debugging, or a non-empty map to enable debugging. If debugging is enabled, the following values of the map are used.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag.  If no compile flags are otherwise configured, `["-g"]` will be taken. |
 | `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["CC", "library"]`
@@ -190,7 +190,7 @@ A C++ library
 | `"DWP"` | The DWARF format packaging tool to use in debug builds that enable debug fission. If None, the respective value from `["CC", "defaults"]` will be taken. |
 | `"BUILD_OBJECT_ONLY"` | If true, produce an object library, resulting in object files added to the linker line of all depending targets. If this configuration is set, the `"shared"` option is ignored. This variable is cleared for all dependencies. |
 | `"BUILD_OBJECT_ONLY_DROP_OBJECT_LINKING"` | If true, do not include the objects in the provided `"link-args"`. This allows consuming libraries that pick on the objects themselves to still forward the `"link-args"` of that library, and thus getting correct linking instructions for the resulting library. |
-| `"DEBUG"` | Map configuring the debug-stage, needed for local debugging. If non-empty, debug mode is enabled.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag.  If no compile flags are otherwise configured, `["-g"]` will be taken. |
+| `"DEBUG"` | Either a logically false value to disable debugging, or a non-empty map to enable debugging. If debugging is enabled, the following values of the map are used.  The key `"USE_DEBUG_FISSION"` expects a flag which enables the debug fission mode, but does not add any flags. Explicitly setting it to a false value is needed to enable regular debug mode. The key `"FISSION_CONFIG"` expects a map configuring debug fission.  - subkey `"USE_SPLIT_DWARF"` expects a flag that, if true, adds the -gsplit-dwarf compile flag.  - subkey `"DWARF_VERSION"` expects a string that adds the -gdwarf-<value> compile flag.  - subkey `"USE_GDB_INDEX"` expects a flag that, if true, adds the -Wl,--gdb-index linker flag.  - subkey `"USE_DEBUG_TYPES_SECTION"` expects a flag that, if true, adds the -fdebug-types-section compile flag.  If no compile flags are otherwise configured, `["-g"]` will be taken. |
 | `"LINT"` | Also provide nodes describing compile actions and header files; those can be used by lint rules (doing also the config transition) for additional checks. |
 
 ### Rule `["CC/prebuilt", "library"]`
