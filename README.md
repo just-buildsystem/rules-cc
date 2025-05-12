@@ -588,6 +588,23 @@ Form a compound target out of many test targets.
 | `"stage"` | The logical location this test suite is to be placed. Individual entries will be joined with `"/"`. |
 | `"deps"` | The targets that suite is composed of. |
 
+### Rule `["test", "matrix"]`
+
+Given a group of tests, build them in a variety of configurations. 
+
+ The configuration variable TEST_MATRIX is expected to be a map with each value being a map itself. Sequentially for each key, all possible values of the associated map are tried and staged to the appropriate key. Thus, the tests in `"deps"` are built in an exponential number of configurations. 
+
+ If TEST_MATRIX is unset, `{}` will be assumed, i.e., all the `"deps"` will be built precisely once, in the current configuration. In this way, the `"matrix"` rule can be used instead of the `"suite"` rule to allow user-defined configuration matrices, dispatching over parameters for dependencies (e.g., the toolchain).
+
+| Field | Description |
+| ----- | ----------- |
+| `"stage"` | The logical location this test suite is to be placed. Individual entries will be joined with `"/"`. |
+| `"deps"` | The targets that suite is composed of. |
+
+| Config variable | Description |
+| --------------- | ----------- |
+| `"TEST_MATRIX"` | Map describing the dimensions of the matrix to run the tests for.  Keys are config variables. The value for each key has to be a map mapping the stage name to the corresponding value for that config variable. |
+
 ### Rule `["lint", "targets"]`
 
 Run a given linter on the lint information provided by the given targets.
