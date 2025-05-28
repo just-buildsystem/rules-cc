@@ -157,7 +157,7 @@
   }
 , "cmds":
   { "doc":
-    [ "Execute comands using the shell"
+    [ "Execute commands using the shell"
     , ""
     , "This rule behaves similar to the built-in \"generic\" rule, however"
     , "with the difference that the shell toolchain is honored."
@@ -168,7 +168,7 @@
   , "field_doc":
     { "deps":
       [ "Any  inputs to the argument."
-      , "Both, artifacts and rufiles of the dependecies are staged into"
+      , "Both, artifacts and runfiles of the dependencies are staged into"
       , "the (effective) working directory of the action. Conflicts are"
       , "resolved by giving artifacts priority to runfiles, and within"
       , "each of those priority to ones brought by the latest dependency."
@@ -177,7 +177,7 @@
       [ "The command to be executed."
       , "Individual entries are joined by newline characters; the whole"
       , "script is then prefixed by commands necessary to set up the"
-      , "work environment using the shell tool chain."
+      , "work environment using the shell toolchain."
       ]
     , "defaults": ["The shell toolchain to use."]
     , "outs": ["The expected file outputs"]
