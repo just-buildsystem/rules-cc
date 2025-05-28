@@ -750,7 +750,7 @@
       [ "Information related to packaging the library. This provider is a map,"
       , "specifying \"name\" and \"version\" of the package, as well as"
       , "additional stages \"cflags-files\" and \"ldflags-files\" for files"
-      , "with compile-flags or link-flags, respctively."
+      , "with compile-flags or link-flags, respectively."
       ]
     }
   , "anonymous":
