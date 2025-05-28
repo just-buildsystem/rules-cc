@@ -222,7 +222,11 @@
                   , "$1":
                     [ "lint "
                     , {"type": "var", "name": "name"}
-                    , " failed for "
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "name"}
+                      , "then": " failed for "
+                      , "else": "failed for "
+                      }
                     , {"type": "var", "name": "src"}
                     ]
                   }
