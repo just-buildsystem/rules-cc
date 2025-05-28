@@ -271,7 +271,7 @@ A test written in C++
 
 A rule to provide defaults for the usage of the shell 
 
- All targets using invocations of the shell use the target `["shel", "defaults"]` to determine which shell to use and how to invoke it. The definition of this default target is probably the only meaningful use of this rule.
+ All targets using invocations of the shell use the target `["shell", "defaults"]` to determine which shell to use and how to invoke it. The definition of this default target is probably the only meaningful use of this rule.
 
 | Field | Description |
 | ----- | ----------- |
@@ -283,16 +283,16 @@ A rule to provide defaults for the usage of the shell
 
 ### Rule `["shell", "cmds"]`
 
-Execute comands using the shell 
+Execute commands using the shell 
 
  This rule behaves similar to the built-in `"generic"` rule, however with the difference that the shell toolchain is honored.
 
 | Field | Description |
 | ----- | ----------- |
-| `"cmds"` | The command to be executed. Individual entries are joined by newline characters; the whole script is then prefixed by commands necessary to set up the work environment using the shell tool chain. |
+| `"cmds"` | The command to be executed. Individual entries are joined by newline characters; the whole script is then prefixed by commands necessary to set up the work environment using the shell toolchain. |
 | `"outs"` | The expected file outputs |
 | `"out_dirs"` | The expected output directories |
-| `"deps"` | Any  inputs to the argument. Both, artifacts and rufiles of the dependecies are staged into the (effective) working directory of the action. Conflicts are resolved by giving artifacts priority to runfiles, and within each of those priority to ones brought by the latest dependency. |
+| `"deps"` | Any  inputs to the argument. Both, artifacts and runfiles of the dependencies are staged into the (effective) working directory of the action. Conflicts are resolved by giving artifacts priority to runfiles, and within each of those priority to ones brought by the latest dependency. |
 
 ### Rule `["shell/test", "script"]`
 
@@ -308,7 +308,7 @@ Shell test, given by a test script
 
 | Config variable | Description |
 | --------------- | ----------- |
-| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  The individual test runs will be summarized by the implict dependency on the target `"summarizer"`. By setting this target in the target in the target layer of this rues repository (instead of letting it default to the respective file) the layout of the summary can be changed globally. |
+| `"RUNS_PER_TEST"` | The number of times the test should be run in order to detect flakyness. If set, no test action will be taken from cache.  The individual test runs will be summarized by the implicit dependency on the target `"summarizer"`. By setting this target in the target in the target layer of this rues repository (instead of letting it default to the respective file) the layout of the summary can be changed globally. |
 | `"TEST_ENV"` | Additional environment for executing the test runner. |
 | `"TIMEOUT_SCALE"` | Factor on how to scale the timeout for this test. Defaults to 1.0. |
 | `"TARGET_ARCH"` | The architecture to build the test for.  Will only be honored, if that architecture is available in the ARCH_DISPATCH map. Otherwise, the test will be built for and run on the host architecture. |
