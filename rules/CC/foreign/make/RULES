@@ -55,7 +55,7 @@
       ]
     , "configure": ["Run ./configure if non-empty."]
     , "configure_options":
-      [ "The configure options (the \"--prefix\" option is automatically set."
+      [ "The configure options (the \"--prefix\" option is automatically set)."
       , "Variables can be accessed via \"$(<varname>)\", e.g., \"$(TMPDIR)\""
       , "for variable \"$TMPDIR\"."
       ]
@@ -390,7 +390,7 @@
       ]
     , "configure": ["Run ./configure if non-empty."]
     , "configure_options":
-      ["The configure options (the \"--prefix\" option is automatically set."]
+      ["The configure options (the \"--prefix\" option is automatically set)."]
     , "targets":
       [ "The Make targets to build in the specified order"
       , "(default: [\"install\"])."
