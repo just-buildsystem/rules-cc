@@ -388,7 +388,7 @@ Library produced by Configure and Make build and install.
 | `"version"` | The library version, used for pkg-config files. Individual version components are joined with `"."`. |
 | `"stage"` | The logical location of the public headers and library files. Individual directory components are joined with `"/"`. |
 | `"configure"` | Run ./configure if non-empty. |
-| `"configure_options"` | The configure options (the `"--prefix"` option is automatically set. |
+| `"configure_options"` | The configure options (the `"--prefix"` option is automatically set). |
 | `"targets"` | The Make targets to build in the specified order (default: `["install"]`). |
 | `"prefix"` | The prefix used for the Make target. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"options"` | Make options for the build phase. (e.g., `["-f", "Makefile", "ARCH=x86"]`) |
@@ -424,7 +424,7 @@ Data produced by Configure and Make build and install.
 | ----- | ----------- |
 | `"subdir"` | The subdirectory that contains the configure and Makefile. Individual directory components are joined with `"/"`. |
 | `"configure"` | Run ./configure if non-empty. |
-| `"configure_options"` | The configure options (the `"--prefix"` option is automatically set. Variables can be accessed via `"$(<varname>)"`, e.g., `"$(TMPDIR)"` for variable `"$TMPDIR"`. |
+| `"configure_options"` | The configure options (the `"--prefix"` option is automatically set). Variables can be accessed via `"$(<varname>)"`, e.g., `"$(TMPDIR)"` for variable `"$TMPDIR"`. |
 | `"targets"` | The Make targets to build in the specified order (default: `["install"]`). |
 | `"prefix"` | The prefix used for the Make target. The path will be made absolute and individual directory components are joined with `"/"`. If no prefix is specified, the value from the config variable `"PREFIX"` is taken, with the default value being `"/"`. |
 | `"options"` | Make options for the configuration phase (e.g., `["-f", "Makefile", "ARCH=x86", "LD=$(CC)"]`). Variables can be accessed via `"$(<varname>)"`, e.g., `"$(TMPDIR)"` for variable `"$TMPDIR"`. |
