@@ -165,6 +165,7 @@
     , "for host": ["transitions", "for host"]
     , "map_provider": ["", "field_map_provider"]
     , "sh": ["shell", "sh"]
+    , "sh-PATH": ["shell", "PATH"]
     }
   , "config_transitions":
     { "defaults":
@@ -248,6 +249,27 @@
           , "body": {"type": "CALL_EXPRESSION", "name": "sh"}
           }
         ]
+      , [ "sh-PATH"
+        , { "type": "join"
+          , "separator": ":"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["fieldname", "shell defaults"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "sh-PATH"}
+            }
+          }
+        ]
+      , [ "sh-ENV"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "sh-PATH"}
+          , "then":
+            { "type": "singleton_map"
+            , "key": "PATH"
+            , "value": {"type": "var", "name": "sh-PATH"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , [ "install_dir"
         , { "type": "ACTION"
           , "inputs":
@@ -260,6 +282,16 @@
           , "cmd": [{"type": "var", "name": "sh"}, "-c", ":"]
           , "outs": {"type": "var", "name": "installed_out_files"}
           , "out_dirs": {"type": "var", "name": "installed_out_dirs"}
+          , "env":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "sh-ENV"}
+              , { "type": "var"
+                , "name": "ENV"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            }
           }
         ]
       , [ "out_files"
@@ -516,6 +548,7 @@
     , "for host": ["transitions", "for host"]
     , "map_provider": ["", "field_map_provider"]
     , "sh": ["shell", "sh"]
+    , "sh-PATH": ["shell", "PATH"]
     }
   , "config_transitions":
     { "defaults":
@@ -686,6 +719,27 @@
           , "body": {"type": "CALL_EXPRESSION", "name": "sh"}
           }
         ]
+      , [ "sh-PATH"
+        , { "type": "join"
+          , "separator": ":"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["fieldname", "shell defaults"]]
+            , "body": {"type": "CALL_EXPRESSION", "name": "sh-PATH"}
+            }
+          }
+        ]
+      , [ "sh-ENV"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "sh-PATH"}
+          , "then":
+            { "type": "singleton_map"
+            , "key": "PATH"
+            , "value": {"type": "var", "name": "sh-PATH"}
+            }
+          , "else": {"type": "empty_map"}
+          }
+        ]
       , [ "install_dir"
         , { "type": "ACTION"
           , "inputs":
@@ -698,6 +752,16 @@
           , "cmd": [{"type": "var", "name": "sh"}, "-c", ":"]
           , "outs": {"type": "var", "name": "installed_files"}
           , "out_dirs": {"type": "var", "name": "installed_dirs"}
+          , "env":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "sh-ENV"}
+              , { "type": "var"
+                , "name": "ENV"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            }
           }
         ]
       , [ "hdrs"
