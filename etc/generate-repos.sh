@@ -17,7 +17,7 @@ set -eu
 
 readonly ROOT=$(readlink -f $(dirname $0)/..)
 
-: ${BRANCH:=v1.5.2}
+: ${BRANCH:=v1.6.4-alpha+20260102}
 : ${OUTFILE:=${ROOT}/etc/repos.json}
 
 just-import-git --as just -C ${ROOT}/etc/repos.template.json \
