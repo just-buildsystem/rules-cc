@@ -72,8 +72,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.5.2"
-      , "commit": "bcf1d9a1ed766ee35808f23b48481cbc5168346f"
+      , "branch": "v1.6.4-alpha+20260102"
+      , "commit": "c54a46de7df0c6b26b7d8f4a10d380103da634fb"
       }
     , "bindings":
       { "rules": "just/rules-just"
@@ -94,19 +94,15 @@
   , "just/bazel_remote_apis":
     { "repository":
       { "type": "archive"
-      , "content": "da6d7d589ccd1924ba9840a4e329e438dfa27f86"
-      , "fetch": "https://github.com/bazelbuild/remote-apis/archive/e1fe21be4c9ae76269a5a63215bb3c72ed9ab3f0.tar.gz"
-      , "sha256": "7421abd5352ccf927c2050453a4dbfa1f7b1c7170ec3e8702b6fe2d39b8805fe"
-      , "sha512": "3042690ee4b17a27db92ca867b4225c25f3f16344dce5fe86695d72ddda531e1593a5f0f70a291283451ce1e9f606c2285d222df3787815cd8f4054e1113bc9d"
-      , "subdir": "remote-apis-e1fe21be4c9ae76269a5a63215bb3c72ed9ab3f0"
+      , "content": "b2c8d2624519413a67d354d8e2b1b707e29482b1"
+      , "fetch": "https://github.com/bazelbuild/remote-apis/archive/9ef19c6b5fbf77d6dd9d84d75fbb5a20a6b62ef1.tar.gz"
+      , "sha256": "ccf57539b6347ceb0aa7e93ee43b9fff1aeb496d36cc097da918c4a35ef65839"
+      , "sha512": "6fc84bc0b3f0730651ec9f7fe03e343c02acaabfef80cd3057343b6c6b935820e4fea27e0c8f0f0d86ccd9c3cbf82461e75b66740326113cf647339007fb3c0c"
+      , "subdir": "remote-apis-9ef19c6b5fbf77d6dd9d84d75fbb5a20a6b62ef1"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.bazel_remote_apis"
-    , "bindings":
-      { "rules": "just/rules"
-      , "google_apis": "just/google_apis"
-      , "patches": "just/patches"
-      }
+    , "bindings": {"rules": "just/rules", "google_apis": "just/google_apis"}
     }
   , "just/bzip2":
     { "repository":
@@ -124,11 +120,11 @@
   , "just/cli11":
     { "repository":
       { "type": "archive"
-      , "content": "624cd17664daa964e192c176c98ea2fb919afd3d"
-      , "fetch": "https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.4.2.tar.gz"
-      , "sha256": "f2d893a65c3b1324c50d4e682c0cdc021dd0477ae2c048544f39eed6654b699a"
-      , "sha512": "fdb61c430f5b99a9495fda7f94bfc8d0fb5360c99beeccbcb3b8918713579aac97fa0dcbce296065d9043f141a538c505919c9810fd1d192661e8b48b6a2637a"
-      , "subdir": "CLI11-2.4.2"
+      , "content": "6689a311c4e3f31e0428a6135ed03f2ccac448f8"
+      , "fetch": "https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.5.0.tar.gz"
+      , "sha256": "17e02b4cddc2fa348e5dbdbb582c59a3486fa2b2433e70a0c3bacb871334fd55"
+      , "sha512": "895fb61e4c9974ee8e8d4681fb880a10126a412f24bb147d558d465d78fe784a044c5443edf1ce20fc9936901073073d795b034e0c02bdb3c8aa74c9d6ac811c"
+      , "subdir": "CLI11-2.5.0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.cli11"
@@ -254,11 +250,11 @@
   , "just/fmt":
     { "repository":
       { "type": "zip"
-      , "content": "90ab7bf7db31acb0fc6d79a823275a96daa81c4a"
-      , "fetch": "https://github.com/fmtlib/fmt/releases/download/11.1.3/fmt-11.1.3.zip"
-      , "sha256": "7df2fd3426b18d552840c071c977dc891efe274051d2e7c47e2c83c3918ba6df"
-      , "sha512": "5b9f5b0c81c2e3e7fb0d985556f98c45e15cbd89fe2ad1bf691bf1ba47c11192efcc83dd643f18bd8086689432c9b8fd9f55704f3d322bfa617ac67b08ba9530"
-      , "subdir": "fmt-11.1.3"
+      , "content": "da6ad435963d4578c63c723e61a1e6b136fd61d8"
+      , "fetch": "https://github.com/fmtlib/fmt/releases/download/11.2.0/fmt-11.2.0.zip"
+      , "sha256": "203eb4e8aa0d746c62d8f903df58e0419e3751591bb53ff971096eaa0ebd4ec3"
+      , "sha512": "75586d02284a33c0c101b6e78cbb1d61f169610ae9027ddfc20936751a8c2ac4453f3046e7b05fa167a8f8eedeafde0f4cb0bff4f798c17c80994521f660174d"
+      , "subdir": "fmt-11.2.0"
       }
     , "target_root": "just/import targets"
     , "target_file_name": "TARGETS.fmt"
@@ -310,8 +306,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.5.2"
-      , "commit": "bcf1d9a1ed766ee35808f23b48481cbc5168346f"
+      , "branch": "v1.6.4-alpha+20260102"
+      , "commit": "c54a46de7df0c6b26b7d8f4a10d380103da634fb"
       , "subdir": "etc/patches"
       }
     }
@@ -352,8 +348,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.5.2"
-      , "commit": "bcf1d9a1ed766ee35808f23b48481cbc5168346f"
+      , "branch": "v1.6.4-alpha+20260102"
+      , "commit": "c54a46de7df0c6b26b7d8f4a10d380103da634fb"
       , "subdir": "rules"
       }
     , "target_root": "just/defaults"
@@ -461,8 +457,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.5.2"
-      , "commit": "bcf1d9a1ed766ee35808f23b48481cbc5168346f"
+      , "branch": "v1.6.4-alpha+20260102"
+      , "commit": "c54a46de7df0c6b26b7d8f4a10d380103da634fb"
       , "subdir": "etc/toolchain"
       }
     , "rule_root": "just/rules"
@@ -484,8 +480,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.5.2"
-      , "commit": "bcf1d9a1ed766ee35808f23b48481cbc5168346f"
+      , "branch": "v1.6.4-alpha+20260102"
+      , "commit": "c54a46de7df0c6b26b7d8f4a10d380103da634fb"
       , "subdir": "etc/defaults"
       }
     }
@@ -493,8 +489,8 @@
     { "repository":
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/justbuild"
-      , "branch": "v1.5.2"
-      , "commit": "bcf1d9a1ed766ee35808f23b48481cbc5168346f"
+      , "branch": "v1.6.4-alpha+20260102"
+      , "commit": "c54a46de7df0c6b26b7d8f4a10d380103da634fb"
       , "subdir": "etc/import"
       }
     }
